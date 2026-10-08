@@ -38,6 +38,7 @@ export default function Faq() {
                 <button
                   type="button"
                   className={styles.question}
+                  data-cursor-label="Открыть ответ"
                   aria-expanded={isOpen}
                   aria-controls={`faq-${i}`}
                   onClick={() => setOpen(isOpen ? null : i)}

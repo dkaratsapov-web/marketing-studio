@@ -11,7 +11,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const FINE_POINTER = "(hover: hover) and (pointer: fine)";
 
-/** Мышь с наведением и разрешённая анимация: только тогда включаем кастомный курсор */
+/** Мышь с наведением: строки раскрываются наведением, клик ведёт к брифу */
 function useFinePointer() {
   return useSyncExternalStore(
     (cb) => {
@@ -28,7 +28,6 @@ function useFinePointer() {
 
 export default function Contract() {
   const root = useRef<HTMLElement>(null);
-  const cursor = useRef<HTMLDivElement>(null);
   const lastScroll = useRef(0);
   const [open, setOpen] = useState<number | null>(null);
 
@@ -59,29 +58,6 @@ export default function Contract() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  // Курсор догоняет мышь с инерцией
-  useEffect(() => {
-    if (!fine || !cursor.current) return;
-    const el = cursor.current;
-    const x = gsap.quickTo(el, "x", { duration: 0.45, ease: "power3.out" });
-    const y = gsap.quickTo(el, "y", { duration: 0.45, ease: "power3.out" });
-    const onMove = (e: PointerEvent) => {
-      x(e.clientX);
-      y(e.clientY);
-    };
-    // Нажатие: курсор пружинит
-    const onDown = () => el.setAttribute("data-press", "");
-    const onUp = () => el.removeAttribute("data-press");
-    window.addEventListener("pointermove", onMove, { passive: true });
-    window.addEventListener("pointerdown", onDown);
-    window.addEventListener("pointerup", onUp);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerdown", onDown);
-      window.removeEventListener("pointerup", onUp);
-    };
-  }, [fine]);
 
   // Открываем строку только от движения мыши, а не когда она «наехала» при прокрутке
   const hoverRow = (i: number, at: number) => {
@@ -117,11 +93,8 @@ export default function Contract() {
 
         <ul
           className={styles.table}
-          data-cursor={fine || undefined}
           data-has-open={open !== null || undefined}
-          onPointerEnter={() => cursor.current?.setAttribute("data-on", "")}
           onPointerLeave={() => {
-            cursor.current?.removeAttribute("data-on");
             if (fine) setOpen(null);
           }}
         >
@@ -133,6 +106,7 @@ export default function Contract() {
                 className={styles.row}
                 data-flagship={t.flagship || undefined}
                 data-open={isOpen || undefined}
+                data-cursor-label="Обсудить проект"
                 onPointerMove={(e) => !isOpen && hoverRow(i, e.timeStamp)}
               >
                 <button
@@ -199,43 +173,6 @@ export default function Contract() {
           </p>
         </aside>
       </div>
-
-      {fine ? (
-        <div
-          ref={cursor}
-          className={styles.cursor}
-          data-active={open !== null || undefined}
-          aria-hidden="true"
-        >
-          <span className={styles.cursorBody}>
-            {/* Кольцо с бегущей по кругу надписью */}
-            <svg className={styles.cursorRing} viewBox="0 0 120 120">
-              <defs>
-                <path
-                  id="cursor-circle"
-                  d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0"
-                />
-              </defs>
-              <circle cx="60" cy="60" r="57" className={styles.cursorOrbit} />
-              <text className={styles.cursorLabel}>
-                <textPath href="#cursor-circle" textLength="285">
-                  Обсудить проект • Обсудить проект •
-                </textPath>
-              </text>
-            </svg>
-            {/* Ядро со стрелкой */}
-            <span className={styles.cursorCore}>
-              <svg viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M7 17 17 7M9 7h8v8"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-              </svg>
-            </span>
-          </span>
-        </div>
-      ) : null}
     </section>
   );
 }

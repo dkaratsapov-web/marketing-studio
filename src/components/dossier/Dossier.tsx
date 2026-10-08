@@ -13,13 +13,20 @@ const num = new Intl.NumberFormat("ru-RU");
 
 const fmt = (m: Metric, v: number) => {
   if (m.text) return m.text;
-  const body = m.decimals ? v.toFixed(m.decimals).replace(".", ",") : num.format(Math.round(v));
+  const body = m.decimals
+    ? v.toFixed(m.decimals).replace(".", ",")
+    : num.format(Math.round(v));
   return `${m.prefix ?? ""}${body}${m.suffix ?? ""}`;
 };
 
 function Arrow() {
   return (
-    <svg className="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <svg
+      className="btn__arrow"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+    >
       <path d="M1 8h13M9 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );
@@ -31,7 +38,9 @@ export default function Dossier() {
 
   useGSAP(
     () => {
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reduce = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       const cards = gsap.utils.toArray<HTMLElement>(`.${styles.case}`);
 
       const declassify = (card: HTMLElement) => {
@@ -118,7 +127,12 @@ export default function Dossier() {
   );
 
   return (
-    <section ref={root} id="dossier" className={styles.dossier} data-surface="dark">
+    <section
+      ref={root}
+      id="dossier"
+      className={styles.dossier}
+      data-surface="dark"
+    >
       <div ref={track} className={styles.track}>
         <header className={styles.intro}>
           <p className="label">Архив Корпорации</p>
@@ -129,7 +143,12 @@ export default function Dossier() {
         </header>
 
         {CASES.map((c) => (
-          <article key={c.code} className={styles.case} aria-labelledby={`case-${c.code}`}>
+          <article
+            key={c.code}
+            data-cursor-label="Листайте вниз"
+            className={styles.case}
+            aria-labelledby={`case-${c.code}`}
+          >
             <span className={styles.bigCode} aria-hidden="true">
               {c.code}
             </span>
@@ -157,7 +176,10 @@ export default function Dossier() {
               {c.metrics.map((m, i) => (
                 <div key={i} className={styles.metric}>
                   <dt className={styles.metricLabel}>{m.label}</dt>
-                  <dd className={styles.metricValue} data-metric={JSON.stringify(m)}>
+                  <dd
+                    className={styles.metricValue}
+                    data-metric={JSON.stringify(m)}
+                  >
                     {fmt(m, m.value ?? 0)}
                   </dd>
                 </div>

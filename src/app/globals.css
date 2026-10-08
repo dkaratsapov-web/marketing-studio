@@ -94,6 +94,18 @@ html {
   scrollbar-color: var(--lime) var(--ink-950);
 }
 
+/* Свой курсор включён: системный прячем везде, кроме полей ввода */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+
+html.has-cursor input:not([type="checkbox"]):not([type="radio"]),
+html.has-cursor textarea,
+html.has-cursor select {
+  cursor: text !important;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;

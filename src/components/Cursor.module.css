@@ -1,0 +1,150 @@
+/* Фирменный курсор: точка + кольцо с инерцией, режимы через data-mode, цвет через data-surface */
+.cursor {
+  --c-dot: var(--lime);
+  --c-ring: rgb(255 255 255 / 0.55);
+  --c-fill: rgb(196 245 66 / 0.14);
+  --c-accent: var(--lime);
+  position: fixed;
+  inset: 0 auto auto 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.3s var(--ease-out);
+}
+
+.cursor[data-surface="light"] {
+  --c-dot: var(--ink-950);
+  --c-ring: rgb(5 5 5 / 0.45);
+  --c-fill: rgb(255 77 157 / 0.14);
+  --c-accent: var(--pink-deep);
+}
+
+.cursor[data-visible="false"],
+.cursor[data-mode="text"] {
+  opacity: 0;
+}
+
+.ring,
+.dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+
+/* Точка: обёртку двигает GSAP, масштаб и цвет на внутреннем элементе */
+.dotInner {
+  display: block;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--c-dot);
+  transition:
+    transform 0.3s var(--ease-out),
+    background-color 0.3s var(--ease-out),
+    opacity 0.25s var(--ease-out);
+}
+
+/* Кольцо: размер меняется по режиму, сам элемент двигает GSAP */
+.ringBody {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  aspect-ratio: 1;
+  border: 1px solid var(--c-ring);
+  border-radius: 50%;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.45s var(--ease-stamp),
+    border-color 0.3s var(--ease-out),
+    background-color 0.3s var(--ease-out),
+    transform 0.25s var(--ease-out);
+}
+
+/* Ссылки и кнопки: кольцо раскрывается в полупрозрачный круг, точка уходит */
+.cursor[data-mode="link"] .ringBody {
+  width: 4.25rem;
+  border-color: var(--c-accent);
+  background: var(--c-fill);
+}
+
+.cursor[data-mode="link"] .dotInner,
+.cursor[data-mode="label"] .dotInner {
+  opacity: 0;
+}
+
+/* Значок с надписью */
+.badge,
+.core {
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+}
+
+.badge {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  animation: spin 9s linear infinite;
+}
+
+.orbit {
+  fill: none;
+  stroke: var(--pink);
+  stroke-width: 1;
+  stroke-dasharray: 2 5;
+}
+
+.label {
+  fill: var(--c-accent);
+  font-family: var(--ff-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.core {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--ink-950);
+  box-shadow: 0 0 0 8px rgb(196 245 66 / 0.14);
+}
+
+.core svg {
+  width: 45%;
+  height: 45%;
+}
+
+.cursor[data-mode="label"] .ringBody {
+  width: 7.5rem;
+  border-color: transparent;
+}
+
+.cursor[data-mode="label"] .badge,
+.cursor[data-mode="label"] .core {
+  opacity: 1;
+}
+
+/* Нажатие: пружинит */
+.cursor[data-press] .ringBody {
+  transform: translate(-50%, -50%) scale(0.85);
+}
+
+.cursor[data-press] .dotInner {
+  transform: scale(1.8);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -97,6 +97,7 @@ export default function Departments() {
                     <button
                       type="button"
                       className={styles.trigger}
+                      data-cursor-label="Открыть отдел"
                       aria-expanded={open}
                       aria-controls={`dept-${i}`}
                       onClick={() => go(i)}
