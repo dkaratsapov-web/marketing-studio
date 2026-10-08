@@ -70,8 +70,17 @@ export default function Contract() {
       x(e.clientX);
       y(e.clientY);
     };
+    // Нажатие: курсор пружинит
+    const onDown = () => el.setAttribute("data-press", "");
+    const onUp = () => el.removeAttribute("data-press");
     window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
+    window.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointerup", onUp);
+    };
   }, [fine]);
 
   // Открываем строку только от движения мыши, а не когда она «наехала» при прокрутке
@@ -192,9 +201,38 @@ export default function Contract() {
       </div>
 
       {fine ? (
-        <div ref={cursor} className={styles.cursor} aria-hidden="true">
-          <span className={styles.cursorDot}>
-            <span className={styles.cursorText}>Обсудить</span>
+        <div
+          ref={cursor}
+          className={styles.cursor}
+          data-active={open !== null || undefined}
+          aria-hidden="true"
+        >
+          <span className={styles.cursorBody}>
+            {/* Кольцо с бегущей по кругу надписью */}
+            <svg className={styles.cursorRing} viewBox="0 0 120 120">
+              <defs>
+                <path
+                  id="cursor-circle"
+                  d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0"
+                />
+              </defs>
+              <circle cx="60" cy="60" r="57" className={styles.cursorOrbit} />
+              <text className={styles.cursorLabel}>
+                <textPath href="#cursor-circle" textLength="285">
+                  Обсудить проект • Обсудить проект •
+                </textPath>
+              </text>
+            </svg>
+            {/* Ядро со стрелкой */}
+            <span className={styles.cursorCore}>
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M7 17 17 7M9 7h8v8"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+              </svg>
+            </span>
           </span>
         </div>
       ) : null}

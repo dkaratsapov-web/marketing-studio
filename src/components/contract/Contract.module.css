@@ -247,28 +247,85 @@
   pointer-events: none;
 }
 
-.cursorDot {
+.cursorBody {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 6.5rem;
+  width: 7.5rem;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) scale(0) rotate(-90deg);
+  transition: transform 0.55s var(--ease-stamp);
+}
+
+.cursor[data-on] .cursorBody {
+  transform: translate(-50%, -50%) scale(1) rotate(0deg);
+}
+
+.cursor[data-press] .cursorBody {
+  transform: translate(-50%, -50%) scale(0.86) rotate(0deg);
+  transition-duration: 0.15s;
+}
+
+/* Кольцо с надписью медленно вращается */
+.cursorRing {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  animation: cursorSpin 9s linear infinite;
+}
+
+.cursorOrbit {
+  fill: none;
+  stroke: var(--pink);
+  stroke-width: 1;
+  stroke-dasharray: 2 5;
+}
+
+.cursorLabel {
+  fill: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Ядро: салатовый круг со стрелкой, растёт и поворачивает стрелку, когда строка открыта */
+.cursorCore {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
   aspect-ratio: 1;
   border-radius: 50%;
   background: var(--lime);
   color: var(--ink-950);
-  transform: translate(-50%, -50%) scale(0);
+  box-shadow: 0 0 0 6px rgb(196 245 66 / 0.15);
+  transition:
+    width 0.45s var(--ease-stamp),
+    box-shadow 0.45s var(--ease-out);
+}
+
+.cursorCore svg {
+  width: 45%;
+  height: 45%;
   transition: transform 0.45s var(--ease-stamp);
 }
 
-.cursor[data-on] .cursorDot {
-  transform: translate(-50%, -50%) scale(1);
+.cursor[data-active] .cursorCore {
+  width: 3.5rem;
+  box-shadow: 0 0 0 10px rgb(196 245 66 / 0.12);
 }
 
-.cursorText {
-  font-family: var(--ff-mono);
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.cursor[data-active] .cursorCore svg {
+  transform: rotate(45deg);
+}
+
+@keyframes cursorSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Минимальный бюджет: отдельная плашка под прайсом */
