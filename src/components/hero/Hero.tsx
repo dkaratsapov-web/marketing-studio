@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { DEPARTMENTS } from "@/content/departments";
 import { heroState } from "./heroState";
 import styles from "./Hero.module.css";
 
@@ -20,11 +21,13 @@ function Arrow() {
   );
 }
 
-const DEPARTMENTS = [
-  { code: "ОТД-1", name: "Стратегия", text: "находит, за что вас выбирают" },
-  { code: "ОТД-2", name: "Креатив", text: "делает это заметным" },
-  { code: "ОТД-3", name: "Перформанс", text: "превращает внимание в заявки" },
-  { code: "ОТД-4", name: "Аналитика", text: "считает каждый рубль" },
+// В hero показываем четыре производственных отдела, без приёмной
+const HERO_DEPARTMENTS = DEPARTMENTS.slice(0, 4);
+
+const FACTS = [
+  { value: "С 2019", label: "в digital-маркетинге" },
+  { value: "22 кейса", label: "с измеримым результатом" },
+  { value: "3+ млн ₽", label: "рекламных бюджетов в месяц" },
 ];
 
 export default function Hero() {
@@ -108,7 +111,7 @@ export default function Hero() {
         <div className={styles.flash} aria-hidden="true" />
 
         <div className={`wrap ${styles.content}`}>
-          <p className={`label ${styles.kicker}`}>Маркетинговое агентство полного цикла</p>
+          <p className={`label ${styles.kicker}`}>Маркетинговое агентство Даниила Карацапова</p>
 
           <h1 className={styles.title}>
             <span className={styles.mask}>
@@ -125,8 +128,8 @@ export default function Hero() {
 
           <div className={styles.lead}>
             <p className={styles.leadText}>
-              Стратегия, креатив и перформанс под одной крышей. Работаем с компаниями,
-              которым нужен рост выручки, а не отчёт об охватах.
+              Контекст, таргет, карты и сайт запускаются параллельно, а не по очереди.
+              За каждым каналом отвечает свой специалист, и вы знаете его по имени.
             </p>
             <div className={styles.actions}>
               <a href="#brief" className="btn btn--primary">
@@ -137,18 +140,25 @@ export default function Hero() {
                 Открыть досье
               </a>
             </div>
+            <dl className={styles.facts}>
+              {FACTS.map((f) => (
+                <div key={f.value} className={styles.fact}>
+                  <dt className={styles.factLabel}>{f.label}</dt>
+                  <dd className={styles.factValue}>{f.value}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
           <div className={styles.inside}>
             <p className={styles.insideTitle}>
-              Четыре отдела. Одна цель: <span className={styles.insideAccent}>выручка.</span>
+              Четыре отдела стартуют <span className={styles.insideAccent}>в одну неделю.</span>
             </p>
             <ol className={styles.depts}>
-              {DEPARTMENTS.map((d) => (
-                <li key={d.code} className={styles.dept}>
-                  <span className={`label ${styles.deptCode}`}>{d.code}</span>
-                  <span className={styles.deptName}>{d.name}</span>
-                  <span className={styles.deptText}>{d.text}</span>
+              {HERO_DEPARTMENTS.map((d) => (
+                <li key={d.id} className={styles.dept}>
+                  <span className={styles.deptName}>{d.short}</span>
+                  <span className={styles.deptText}>{d.tagline}</span>
                 </li>
               ))}
             </ol>

@@ -9,8 +9,13 @@ import styles from "./Dossier.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const fmt = (m: Metric, v: number) =>
-  `${m.prefix ?? ""}${v.toFixed(m.decimals ?? 0).replace(".", ",")}${m.suffix ?? ""}`;
+const num = new Intl.NumberFormat("ru-RU");
+
+const fmt = (m: Metric, v: number) => {
+  if (m.text) return m.text;
+  const body = m.decimals ? v.toFixed(m.decimals).replace(".", ",") : num.format(Math.round(v));
+  return `${m.prefix ?? ""}${body}${m.suffix ?? ""}`;
+};
 
 function Arrow() {
   return (
@@ -41,11 +46,12 @@ export default function Dossier() {
         });
         card.querySelectorAll<HTMLElement>("[data-metric]").forEach((el, i) => {
           const m = JSON.parse(el.dataset.metric!) as Metric;
+          if (m.text || m.value === undefined) return;
           const obj = { v: 0 };
           tl.to(
             obj,
             {
-              v: m.value,
+              v: m.value!,
               duration: 1.2,
               ease: "power2.out",
               onUpdate: () => {
@@ -117,7 +123,7 @@ export default function Dossier() {
           <p className="label">Архив Корпорации</p>
           <h2 className={styles.title}>Досье</h2>
           <p className={styles.lead}>
-            Дела, о которых можно рассказать. Остальные под NDA, их покажем на встрече.
+            22 дела с измеримым результатом. Здесь самые показательные.
           </p>
         </header>
 
@@ -134,7 +140,6 @@ export default function Dossier() {
                 <span className={styles.secret}>Секретно</span>
                 <span className={styles.open}>Рассекречено</span>
               </span>
-              {c.example ? <span className={`label ${styles.example}`}>Пример</span> : null}
             </div>
 
             <div className={styles.body}>
@@ -144,6 +149,7 @@ export default function Dossier() {
               <h3 id={`case-${c.code}`} className={styles.caseTitle}>
                 {c.title}
               </h3>
+              <p className={`label ${styles.services}`}>{c.services}</p>
             </div>
 
             <dl className={styles.metrics}>
@@ -151,13 +157,17 @@ export default function Dossier() {
                 <div key={i} className={styles.metric}>
                   <dt className={styles.metricLabel}>{m.label}</dt>
                   <dd className={styles.metricValue} data-metric={JSON.stringify(m)}>
-                    {fmt(m, m.value)}
+                    {fmt(m, m.value ?? 0)}
                   </dd>
                 </div>
               ))}
             </dl>
 
             <div className={styles.notes}>
+              <p className={styles.leadBy}>
+                <span className="label">Вёл дело</span>
+                <span>{c.lead}</span>
+              </p>
               <p>
                 <span className="label">Задача</span>
                 <span className={styles.redact}>{c.task}</span>
@@ -171,7 +181,7 @@ export default function Dossier() {
         ))}
 
         <aside className={styles.next}>
-          <p className="label">Дело 005</p>
+          <p className="label">Дело 023</p>
           <p className={styles.nextTitle}>Ваше дело следующее.</p>
           <a href="#brief" className="btn btn--primary">
             Открыть дело

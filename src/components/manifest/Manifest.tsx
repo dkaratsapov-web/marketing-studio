@@ -13,12 +13,12 @@ type Chunk = { text: string; mark?: "lime" | "pink" };
 // Текст манифеста. Ключевые фразы выделяются маркером при прокрутке.
 const PARAGRAPHS: Chunk[][] = [
   [
-    { text: "Рынку хватает рекламы. Ему не хватает" },
-    { text: "причин выбрать вас.", mark: "lime" },
+    { text: "Рекламы на рынке хватает. Не хватает" },
+    { text: "причин выбрать именно вас.", mark: "lime" },
   ],
   [
-    { text: "Корпорация создаёт эти причины и превращает их в" },
-    { text: "заявки, продажи и долю рынка.", mark: "pink" },
+    { text: "Корпорация находит эти причины, показывает их тем, кто уже ищет, и считает," },
+    { text: "сколько заявок они принесли.", mark: "pink" },
   ],
 ];
 
@@ -115,7 +115,7 @@ export default function Manifest() {
           <div className={styles.footer}>
             <p className={styles.sign}>
               <span className="label">Подписано</span>
-              <span className={styles.signName}>Совет директоров Корпорации</span>
+              <span className={styles.signName}>Даниил Карацапов, основатель Корпорации</span>
             </p>
             <div className={styles.stamp} aria-label="Печать: утверждено">
               <span className={styles.stampTop}>Корпорация</span>

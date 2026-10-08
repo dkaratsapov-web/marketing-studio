@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -9,45 +9,27 @@ import styles from "./Departments.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const DIGITS = Array.from({ length: 10 }, (_, i) => i);
-
-/** Табло лифта: каждая цифра — колонка 0–9, которая прокручивается к нужному значению */
-function FloorBoard({ floor }: { floor: string }) {
-  return (
-    <span className={styles.board} aria-label={`Этаж ${floor}`}>
-      {floor.split("").map((d, i) => (
-        <span key={i} className={styles.digitWindow} aria-hidden="true">
-          <span
-            className={styles.digitReel}
-            style={{ transform: `translateY(${-Number(d) * 10}%)`, transitionDelay: `${i * 70}ms` }}
-          >
-            {DIGITS.map((n) => (
-              <span key={n} className={styles.digit}>
-                {n}
-              </span>
-            ))}
-          </span>
-        </span>
-      ))}
-    </span>
-  );
-}
-
 export default function Departments() {
   const root = useRef<HTMLElement>(null);
+  const list = useRef<HTMLUListElement>(null);
+  const trigger = useRef<ScrollTrigger | null>(null);
   const [active, setActive] = useState(0);
   const current = DEPARTMENTS[active];
+  const count = DEPARTMENTS.length;
 
+  // Секция закреплена, прогресс скролла выбирает отдел: каждому достаётся равная доля пути
   useGSAP(
     () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      gsap.from(`.${styles.row}`, {
-        yPercent: 40,
-        autoAlpha: 0,
-        duration: 1,
-        ease: "power3.out",
-        stagger: 0.09,
-        scrollTrigger: { trigger: `.${styles.list}`, start: "top 80%", once: true },
+      root.current!.dataset.pinned = "true";
+      trigger.current = ScrollTrigger.create({
+        trigger: root.current,
+        start: "top top",
+        end: "bottom bottom",
+        onUpdate: (self) => {
+          const i = Math.min(count - 1, Math.floor(self.progress * count));
+          setActive((prev) => (prev === i ? prev : i));
+        },
       });
       gsap.from(`.${styles.heading}`, {
         yPercent: 30,
@@ -60,64 +42,131 @@ export default function Departments() {
     { scope: root },
   );
 
+  // Активная строка подъезжает под заголовок: сдвигаем ленту на высоту свёрнутых строк выше неё
+  useEffect(() => {
+    const ul = list.current;
+    if (!ul || root.current?.dataset.pinned !== "true") return;
+    const rows = Array.from(ul.children) as HTMLElement[];
+    const offset = rows
+      .slice(0, active)
+      .reduce(
+        (sum, row) =>
+          sum + (row.firstElementChild as HTMLElement).offsetHeight + 1,
+        0,
+      );
+    ul.style.transform = `translateY(${-offset}px)`;
+  }, [active]);
+
+  // Клик в закреплённом режиме прокручивает к нужной доле секции, без закрепления просто открывает
+  const go = (i: number) => {
+    const st = trigger.current;
+    if (!st) return setActive(i);
+    window.scrollTo({
+      top: st.start + ((i + 0.5) / count) * (st.end - st.start),
+      behavior: "smooth",
+    });
+  };
+
   return (
-    <section ref={root} id="departments" className={styles.departments} data-surface="light">
-      <div className={`wrap ${styles.grid}`}>
-        <header className={styles.head}>
-          <p className="label">Табло лобби</p>
-          <h2 className={styles.heading}>Отделы</h2>
-        </header>
+    <section
+      ref={root}
+      id="departments"
+      className={styles.departments}
+      data-surface="light"
+      style={{ "--count": count } as React.CSSProperties}
+    >
+      <div className={styles.stage}>
+        <div className={`wrap ${styles.grid}`}>
+          <header className={styles.head}>
+            <p className="label">Кто за что отвечает</p>
+            <h2 className={styles.heading}>Отделы</h2>
+          </header>
 
-        <ul className={styles.list}>
-          {DEPARTMENTS.map((d, i) => {
-            const open = i === active;
-            return (
-              <li key={d.name} className={styles.row} data-open={open} data-tone={d.tone}>
-                <button
-                  type="button"
-                  className={styles.trigger}
-                  aria-expanded={open}
-                  aria-controls={`dept-${i}`}
-                  onClick={() => setActive(i)}
-                  onPointerEnter={(e) => e.pointerType === "mouse" && setActive(i)}
-                  onFocus={() => setActive(i)}
-                >
-                  <span className={`label ${styles.floor}`}>Этаж {d.floor}</span>
-                  <span className={styles.name}>
-                    <span className={styles.nameText}>{d.name}</span>
-                  </span>
-                </button>
-                <div id={`dept-${i}`} className={styles.panel} role="region" aria-label={d.name}>
-                  <div className={styles.panelInner}>
-                    <ul className={styles.services}>
-                      {d.services.map((s) => (
-                        <li key={s}>{s}</li>
-                      ))}
-                    </ul>
-                    <p className={styles.outcomeMobile}>
-                      <span className="label">На выходе</span>
-                      {d.outcome}
-                    </p>
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-
-        <aside className={styles.elevator} aria-live="polite">
-          <div className={styles.elevatorBox} data-tone={current.tone}>
-            <p className="label">Вы на этаже</p>
-            <FloorBoard floor={current.floor} />
-            <p className={styles.elevatorName}>{current.name}</p>
-            <div className={styles.outcome}>
-              <span className="label">На выходе</span>
-              <p key={current.name} className={styles.outcomeText}>
-                {current.outcome}
-              </p>
-            </div>
+          <div className={styles.viewport}>
+            <ul ref={list} className={styles.list}>
+              {DEPARTMENTS.map((d, i) => {
+                const open = i === active;
+                return (
+                  <li
+                    key={d.name}
+                    className={styles.row}
+                    data-open={open}
+                    data-passed={i < active}
+                    data-tone={d.tone}
+                  >
+                    <button
+                      type="button"
+                      className={styles.trigger}
+                      aria-expanded={open}
+                      aria-controls={`dept-${i}`}
+                      onClick={() => go(i)}
+                    >
+                      <span className={`label ${styles.owner}`}>
+                        Ведёт {d.head.name.split(" ")[0]}
+                      </span>
+                      <span className={styles.name}>
+                        <span className={styles.nameText}>{d.name}</span>
+                      </span>
+                    </button>
+                    <div
+                      id={`dept-${i}`}
+                      className={styles.panel}
+                      role="region"
+                      aria-label={d.name}
+                    >
+                      <div className={styles.panelInner}>
+                        <ul className={styles.services}>
+                          {d.services.map((s) => (
+                            <li key={s}>{s}</li>
+                          ))}
+                        </ul>
+                        <p className={styles.outcomeMobile}>
+                          <span className="label">На выходе</span>
+                          {d.outcome}
+                        </p>
+                        <p className={styles.headMobile}>
+                          <span className="label">Руководитель</span>
+                          {d.head.name}, {d.head.role}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-        </aside>
+
+          <aside className={styles.elevator} aria-live="polite">
+            <div className={styles.elevatorBox} data-tone={current.tone}>
+              {/* Створки: схлопываются и расходятся при смене отдела */}
+              <span key={active} className={styles.doors} aria-hidden="true">
+                <span className={styles.door} />
+                <span className={styles.door} />
+              </span>
+              <p className="label">Ведёт отдел «{current.name}»</p>
+              <div key={current.id} className={styles.person}>
+                <span className={styles.monogram} aria-hidden="true">
+                  {current.head.name[0]}
+                </span>
+                <p className={styles.personText}>
+                  <span className={styles.personName}>{current.head.name}</span>
+                  <span className={styles.personRole}>{current.head.role}</span>
+                </p>
+              </div>
+              <div className={styles.outcome}>
+                <span className="label">На выходе</span>
+                <p key={current.id} className={styles.outcomeText}>
+                  {current.outcome}
+                </p>
+                {current.launch ? (
+                  <p key={`${current.id}-launch`} className={styles.launch}>
+                    {current.launch}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
     </section>
   );
