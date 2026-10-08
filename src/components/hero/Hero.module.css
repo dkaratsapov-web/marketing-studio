@@ -1,7 +1,7 @@
 /* Длинная секция со «сценой» внутри: сцена залипает, пока монолит раскрывается */
 .hero {
   position: relative;
-  height: 260svh;
+  height: 300svh;
 }
 
 .stage {
@@ -45,10 +45,8 @@
   z-index: 3;
   visibility: hidden;
   pointer-events: none;
-  background:
-    radial-gradient(50% 60% at 50% 50%, #fff 40%, transparent 100%),
-    linear-gradient(90deg, rgb(255 77 157 / 0.35), #fff 35%, #fff 65%, rgb(196 245 66 / 0.35)),
-    #fff;
+  /* Чистый белый: ровно фон следующей секции */
+  background: var(--paper);
 }
 
 .content {
@@ -133,23 +131,70 @@
 }
 
 .inside {
-  grid-column: 1 / span 5;
-  grid-row: 4;
+  grid-column: 1 / span 6;
+  grid-row: 2 / 5;
   align-self: end;
   display: grid;
-  gap: 1rem;
+  gap: clamp(1.25rem, 3vh, 2rem);
   visibility: hidden;
 }
 
-.insideText {
-  max-width: 34ch;
+.insideTitle {
+  max-width: 16ch;
   font-family: var(--ff-display);
   font-variation-settings: "SHRP" 100;
-  font-size: var(--step-2);
-  font-weight: 450;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  text-wrap: pretty;
+  font-size: var(--step-3);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.insideAccent {
+  color: var(--lime);
+}
+
+.depts {
+  display: grid;
+  gap: clamp(0.6rem, 1.6vh, 1rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Строка отдела: код, название крупно, действие мелко */
+.dept {
+  display: grid;
+  grid-template-columns: 4.5rem auto;
+  grid-template-rows: auto auto;
+  column-gap: 1rem;
+  align-items: baseline;
+}
+
+.deptCode {
+  grid-row: 1;
+  color: var(--pink);
+}
+
+.dept:nth-child(even) .deptCode {
+  color: var(--lime);
+}
+
+.deptName {
+  grid-row: 1;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-4);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.deptText {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.3;
 }
 
 @keyframes rise {
@@ -182,15 +227,18 @@
 }
 
 @media (max-width: 1100px) {
-  .lead,
-  .inside {
+  .lead {
     grid-column: 1 / span 7;
+  }
+
+  .inside {
+    grid-column: 1 / span 9;
   }
 }
 
 @media (max-width: 720px) {
   .hero {
-    height: 230svh;
+    height: 270svh;
   }
 
   .title {
@@ -218,6 +266,19 @@
 
   .inside {
     position: relative;
+  }
+
+  .dept {
+    grid-template-columns: 3.4rem auto;
+    column-gap: 0.6rem;
+  }
+
+  .deptName {
+    font-size: var(--step-3);
+  }
+
+  .deptText {
+    font-size: var(--step--1);
   }
 
   .leadText {

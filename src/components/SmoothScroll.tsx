@@ -9,6 +9,12 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function SmoothScroll() {
   useEffect(() => {
+    // Сцена hero рассчитана на просмотр с начала: не восстанавливаем прокрутку при перезагрузке
+    if (!window.location.hash) {
+      history.scrollRestoration = "manual";
+      window.scrollTo(0, 0);
+    }
+
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const lenis = new Lenis({

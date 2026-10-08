@@ -1,0 +1,135 @@
+/* Белая секция-документ: залипает, пока текст проявляется по словам */
+.manifest {
+  position: relative;
+  height: 240svh;
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  height: 100svh;
+  min-height: 600px;
+  overflow: hidden;
+}
+
+.inner {
+  display: grid;
+  gap: clamp(2rem, 5vh, 3.5rem);
+  padding-block: calc(4.5rem + env(safe-area-inset-top, 0px)) 2rem;
+}
+
+.doc {
+  color: var(--muted);
+}
+
+.text {
+  display: grid;
+  gap: 0.5em;
+  max-width: 23ch;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(2.3rem, 1.2rem + 4.6vw, 6.4rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.para {
+  text-wrap: balance;
+}
+
+.word {
+  display: inline;
+}
+
+/* Маркер: фон-градиент на самой фразе, прочерчивается слева направо.
+   box-decoration-break: clone рисует плашку на каждой строке при переносе. */
+.mark {
+  --tone: var(--lime);
+  padding-inline: 0.08em;
+  margin-inline: -0.08em;
+  background-image: linear-gradient(var(--tone), var(--tone));
+  background-repeat: no-repeat;
+  background-position: 0 60%;
+  background-size: 100% 100%;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.mark[data-tone="pink"] {
+  --tone: var(--pink);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2rem 3rem;
+}
+
+.sign {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.signName {
+  font-size: var(--step-1);
+  font-weight: 500;
+}
+
+/* Печать: двойная рамка, текст по строкам, лёгкая «краска» через непрозрачность */
+.stamp {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  padding: 0.9rem 1.8rem;
+  border: 4px solid var(--pink-deep);
+  outline: 1px solid var(--pink-deep);
+  outline-offset: 3px;
+  border-radius: 6px;
+  color: var(--pink-deep);
+  font-family: var(--ff-mono);
+  text-transform: uppercase;
+  transform: rotate(-9deg);
+  opacity: 0.92;
+  mix-blend-mode: multiply;
+}
+
+.stampTop,
+.stampBottom {
+  font-size: 0.78rem;
+  letter-spacing: 0.24em;
+}
+
+.stampMain {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(1.8rem, 1.4rem + 1.4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+@media (max-width: 720px) {
+  .manifest {
+    height: 220svh;
+  }
+
+  .text {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .manifest {
+    height: auto;
+  }
+
+  .stage {
+    position: relative;
+    height: auto;
+    padding-block: var(--section-y);
+  }
+}

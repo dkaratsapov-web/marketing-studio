@@ -53,15 +53,16 @@ function setUniforms(mesh: Uniformed, values: Record<string, number | THREE.Vect
 }
 
 /**
- * Сценарий по прогрессу скролла p (0..1):
- *   0.00–0.45  монолит разворачивается фронтально, шов расходится
- *   0.45–0.65  пауза: свет льётся, текст «Внутри»
- *   0.65–1.00  монолит встаёт в центр, камера пролетает в щель
+ * Сценарий по прогрессу скролла p (0..1), синхронно с текстом в Hero.tsx:
+ *   0.00–0.25  заголовок на экране, шов только начинает расходиться
+ *   0.15–0.50  монолит разворачивается фронтально и раскрывается
+ *   0.40–0.72  пауза: свет льётся, текст «Внутри»
+ *   0.72–1.00  монолит встаёт в центр, камера пролетает в щель
  */
 function choreography(p: number) {
-  const open = 0.1 + 0.9 * smoothstep(p, 0.05, 0.45);
-  const dive = easeInOut(clamp((p - 0.62) / 0.38, 0, 1));
-  return { open, dive, turn: easeInOut(clamp(p / 0.5, 0, 1)) };
+  const open = 0.1 + 0.9 * smoothstep(p, 0.15, 0.5);
+  const dive = easeInOut(clamp((p - 0.72) / 0.28, 0, 1));
+  return { open, dive, turn: easeInOut(clamp(p / 0.55, 0, 1)) };
 }
 
 function Monolith({ still }: { still: boolean }) {
@@ -153,7 +154,7 @@ function Monolith({ still }: { still: boolean }) {
     const p = s.progress;
     const { open: baseOpen, dive, turn } = choreography(p);
     // Лёгкое «дыхание» шва в покое
-    const breath = still ? 0 : (Math.sin(t * 1.3) * 0.5 + 0.5) * 0.04 * (1 - smoothstep(p, 0, 0.1));
+    const breath = still ? 0 : (Math.sin(t * 1.3) * 0.5 + 0.5) * 0.04 * (1 - smoothstep(p, 0, 0.15));
     const open = baseOpen + breath;
     const gap = open * 0.42 + dive * 0.55;
 
@@ -163,7 +164,7 @@ function Monolith({ still }: { still: boolean }) {
     const { viewport, camera } = state;
     const narrow = viewport.aspect < 0.9;
     const sideX = narrow ? 0 : Math.min(viewport.width * 0.22, 2.4);
-    const baseX = lerp(sideX, 0, smoothstep(p, 0.55, 0.85));
+    const baseX = lerp(sideX, 0, smoothstep(p, 0.66, 0.9));
     const baseY = narrow ? -0.35 : -0.05;
     const scale = narrow ? 0.78 : 1;
 
