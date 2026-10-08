@@ -3,7 +3,7 @@
   --p: 0;
   --gap: calc((1 - var(--p)) * 50%);
   position: relative;
-  height: clamp(12rem, 34svh, 22rem);
+  height: clamp(4.5rem, 11svh, 7rem);
   overflow: hidden;
 }
 

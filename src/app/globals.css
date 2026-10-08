@@ -295,3 +295,10 @@ canvas {
     scroll-behavior: auto !important;
   }
 }
+
+/* После шва верхний отступ секции короче: подпись шва уже открывает главу */
+@media (prefers-reduced-motion: no-preference) {
+  [data-seam] + section {
+    padding-top: calc(var(--section-y) * 0.55);
+  }
+}
