@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Знак Корпорации II</title>
+<style>
+  @font-face { font-family: "Geologica"; src: url("fonts/geologica-cyr.woff2") format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "Plex Mono"; src: url("fonts/plexmono-med-cyr.woff2") format("woff2"); font-weight: 500; }
+  :root { --ink: #050505; --card: #0c0c0d; --line: rgb(255 255 255 / 0.09); --muted: #a2a2a8; --lime: #c4f542; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--ink); color: #fff; font-family: "Geologica", system-ui, sans-serif; padding: 56px clamp(16px, 4vw, 64px) 80px; }
+  .top { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 24px; border-bottom: 1px solid var(--line); padding-bottom: 28px; }
+  h1 { font-variation-settings: "SHRP" 100; font-size: clamp(2.6rem, 6vw, 5.4rem); font-weight: 800; letter-spacing: -0.055em; line-height: 0.88; }
+  .meta { font-family: "Plex Mono", monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-align: right; line-height: 1.8; }
+  .meta b { color: var(--lime); font-weight: 500; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 600px), 1fr)); gap: 22px; margin-top: 36px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; }
+  .card header { display: flex; align-items: baseline; gap: 12px; padding: 20px 22px 0; }
+  .num { font-family: "Plex Mono", monospace; font-size: 13px; color: var(--lime); }
+  h2 { font-variation-settings: "SHRP" 100; font-size: 24px; font-weight: 700; letter-spacing: -0.03em; }
+  .idea { padding: 6px 22px 18px; color: var(--muted); font-size: 14.5px; line-height: 1.45; max-width: 62ch; }
+  .tiles { display: grid; grid-template-columns: 1.2fr 1fr; }
+  .tile { display: grid; place-items: center; aspect-ratio: 1 / 0.78; }
+  .tile.d { background: #050505; }
+  .tile.l { background: #f4f4f2; }
+  .mark { width: 50%; height: auto; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 22px 24px; min-height: 92px; }
+  .row.d { background: #050505; border-top: 1px solid var(--line); }
+  .row.l { background: #ffffff; }
+  .logo { height: 34px; width: auto; max-width: 70%; }
+  .favs { display: flex; align-items: center; gap: 10px; flex: none; }
+  .fav { width: 32px; height: 32px; }
+  .tab { display: flex; align-items: center; gap: 8px; padding: 7px 12px 7px 10px; border-radius: 9px 9px 0 0; background: #35363a; color: #e8e8ea; font-size: 12px; white-space: nowrap; }
+  .tabicon { width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <h1>Знак Корпорации.<br />Серия II</h1>
+    <p class="meta">Монолитный конструктивизм<br />Контуры: Geologica, ось SHRP 100<br /><b>10 вариантов</b></p>
+  </div>
+  <div class="grid">
+{{CARDS}}
+  </div>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Знак Корпорации</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Geologica:slnt,wght,CRSV,SHRP@0,400..800,0,100&family=IBM+Plex+Mono:wght@400;500&family=Golos+Text:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #050505;
+    --ink-900: #0d0d0e;
+    --paper: #f4f4f2;
+    --white: #ffffff;
+    --lime: #c4f542;
+    --pink: #ff4d9d;
+    --pink-deep: #d1006a;
+    --grey: #8a8a90;
+    --line-d: rgb(255 255 255 / 0.1);
+    --line-l: rgb(5 5 5 / 0.1);
+    --ff-display: "Geologica", system-ui, sans-serif;
+    --ff-mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--ink);
+    color: var(--white);
+    font-family: "Golos Text", system-ui, sans-serif;
+    padding: 48px clamp(16px, 4vw, 56px) 72px;
+  }
+  h1 {
+    font-family: var(--ff-display);
+    font-variation-settings: "SHRP" 100;
+    font-size: clamp(2.4rem, 5vw, 4.4rem);
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    line-height: 0.9;
+  }
+  .intro { margin-top: 14px; max-width: 60ch; color: #b9b9be; line-height: 1.5; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 560px), 1fr));
+    gap: 20px;
+    margin-top: 40px;
+  }
+  .card {
+    border: 1px solid var(--line-d);
+    border-radius: 18px;
+    overflow: hidden;
+    background: var(--ink-900);
+  }
+  .head {
+    display: flex; align-items: baseline; gap: 12px;
+    padding: 18px 20px 0;
+  }
+  .num { font-family: var(--ff-mono); font-size: 13px; color: var(--lime); }
+  .name {
+    font-family: var(--ff-display); font-variation-settings: "SHRP" 100;
+    font-size: 22px; font-weight: 650; letter-spacing: -0.02em;
+  }
+  .idea { padding: 6px 20px 16px; color: #a9a9ae; font-size: 14px; line-height: 1.45; }
+  .tiles { display: grid; grid-template-columns: 1.15fr 1fr; }
+  .tile { display: grid; place-items: center; aspect-ratio: 1 / 0.82; }
+  .tile.dark { background: var(--ink); color: var(--white); --accent: var(--lime); }
+  .tile.light { background: var(--paper); color: var(--ink); --accent: var(--pink-deep); }
+  .tile svg.mark { width: 46%; height: auto; overflow: visible; }
+  .lockups { display: grid; gap: 1px; background: var(--line-d); border-top: 1px solid var(--line-d); }
+  .lock {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 16px 20px;
+  }
+  .lock.dark { background: var(--ink); color: var(--white); --accent: var(--lime); }
+  .lock.light { background: var(--white); color: var(--ink); --accent: var(--pink-deep); }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand svg { height: 26px; width: auto; overflow: visible; }
+  .word {
+    font-family: var(--ff-display); font-variation-settings: "SHRP" 100;
+    font-size: 19px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .tab {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px 6px 10px; border-radius: 8px 8px 0 0;
+    background: #35363a; color: #e8e8ea; font-size: 12px; white-space: nowrap;
+  }
+  .tab svg { width: 16px; height: 16px; flex: none; }
+  .fav { display: flex; align-items: center; gap: 10px; }
+  .fav svg.f32 { width: 32px; height: 32px; }
+  .seamword { display: inline-flex; align-items: stretch; }
+  .seamword i { width: 2px; margin: 0 0.12em; background: var(--accent); font-style: normal; }
+  .stack { display: grid; gap: 2px; line-height: 1; }
+  .sub { font-family: var(--ff-mono); font-size: 10px; letter-spacing: 0.12em; opacity: 0.6; text-transform: uppercase; }
+  .pick { margin-top: 48px; color: #b9b9be; max-width: 70ch; line-height: 1.55; }
+  .pick b { color: var(--white); }
+</style>
+</head>
+<body>
+<h1>Знак Корпорации:<br />10 вариантов</h1>
+<p class="intro">Каждый вариант показан крупно на чёрном и на белом, в связке с надписью и как фавикон во вкладке браузера. На тёмном шов салатовый, на светлом розовый, как на сайте.</p>
+
+<!-- Символы знаков. Ink через currentColor, свечение шва через var(--accent) -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- 01 Монолит -->
+    <symbol id="m1" viewBox="0 0 64 64">
+      <path d="M10 10 L29.5 5 V60 H10 Z" fill="currentColor" />
+      <path d="M34.5 5 L54 10 V60 H34.5 Z" fill="currentColor" />
+      <rect x="31" y="9" width="2" height="47" style="fill:var(--accent)" />
+    </symbol>
+    <!-- 02 Разлом -->
+    <symbol id="m2" viewBox="0 0 64 64">
+      <path d="M30 4 A28 28 0 0 0 30 60 V46 A14 14 0 0 1 30 18 Z" fill="currentColor" transform="translate(-1 -3)" />
+      <path d="M34 4 A28 28 0 0 1 34 60 V46 A14 14 0 0 0 34 18 Z" fill="currentColor" transform="translate(1 3)" />
+      <rect x="31" y="2" width="2" height="60" style="fill:var(--accent)" />
+    </symbol>
+    <!-- 03 К -->
+    <symbol id="m3" viewBox="0 0 64 64">
+      <rect x="8" y="6" width="15" height="52" fill="currentColor" />
+      <path d="M31 32 L45 6 H58 L42 32 L58 58 H45 Z" fill="currentColor" />
+      <rect x="26" y="12" width="2" height="40" style="fill:var(--accent)" />
+    </symbol>
+    <!-- 04 Башни -->
+    <symbol id="m4" viewBox="0 0 64 64">
+      <rect x="4" y="26" width="13" height="34" fill="currentColor" />
+      <path d="M20 8 L30.5 4 V60 H20 Z" fill="currentColor" />
+      <path d="M33.5 4 L44 8 V60 H33.5 Z" fill="currentColor" />
+      <rect x="31.25" y="8" width="1.5" height="48" style="fill:var(--accent)" />
+      <rect x="47" y="18" width="13" height="42" fill="currentColor" />
+    </symbol>
+    <!-- 05 Гриф -->
+    <symbol id="m5" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="2.5" />
+      <circle cx="32" cy="32" r="19.5" fill="none" stroke="currentColor" stroke-width="1" />
+      <path id="ring5" d="M32 8.5 A23.5 23.5 0 1 1 31.99 8.5" fill="none" />
+      <text font-family="IBM Plex Mono, monospace" font-size="5.6" font-weight="500" letter-spacing="1.1" fill="currentColor">
+        <textPath href="#ring5">КОРПОРАЦИЯ · С 2019 · ДЕЛО №023 ·</textPath>
+      </text>
+      <path d="M24 22 L31 20 V44 H24 Z" fill="currentColor" />
+      <path d="M33 20 L40 22 V44 H33 Z" fill="currentColor" />
+      <rect x="31.4" y="22" width="1.2" height="20" style="fill:var(--accent)" />
+    </symbol>
+    <!-- 06 Пропуск -->
+    <symbol id="m6" viewBox="0 0 64 64">
+      <rect x="4" y="8" width="7" height="48" fill="currentColor" />
+      <rect x="14" y="8" width="3" height="48" fill="currentColor" />
+      <rect x="20" y="8" width="9" height="48" fill="currentColor" />
+      <rect x="31" y="4" width="2" height="56" style="fill:var(--accent)" />
+      <rect x="35" y="8" width="9" height="48" fill="currentColor" />
+      <rect x="47" y="8" width="3" height="48" fill="currentColor" />
+      <rect x="53" y="8" width="7" height="48" fill="currentColor" />
+    </symbol>
+    <!-- 07 Скол -->
+    <symbol id="m7" viewBox="0 0 64 64">
+      <path d="M6 6 H52 L6 52 Z" fill="currentColor" />
+      <path d="M58 12 V58 H12 Z" fill="currentColor" />
+      <path d="M55 7 L57 9 L9 57 L7 55 Z" style="fill:var(--accent)" />
+    </symbol>
+    <!-- 08 Скобки -->
+    <symbol id="m8" viewBox="0 0 64 64">
+      <path d="M6 4 H25 V13 H16 V51 H25 V60 H6 Z" fill="currentColor" />
+      <path d="M58 4 H39 V13 H48 V51 H39 V60 H58 Z" fill="currentColor" />
+      <rect x="31" y="16" width="2" height="32" style="fill:var(--accent)" />
+    </symbol>
+    <!-- 09 Ц -->
+    <symbol id="m9" viewBox="0 0 64 64">
+      <path d="M8 4 H21 V40 H40 V4 H53 V52 H8 Z" fill="currentColor" />
+      <rect x="49" y="52" width="4" height="10" style="fill:var(--accent)" />
+      <rect x="29.5" y="10" width="2" height="24" style="fill:var(--accent)" />
+    </symbol>
+    <!-- 10 Створки -->
+    <symbol id="m10" viewBox="0 0 64 64">
+      <linearGradient id="g10" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fff" />
+        <stop offset="1" stop-color="#000" />
+      </linearGradient>
+      <mask id="k10" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="url(#g10)" /></mask>
+      <path d="M31 6 H33 L46 62 H18 Z" style="fill:var(--accent)" mask="url(#k10)" />
+      <path d="M8 4 L28 8 V56 L8 60 Z" fill="currentColor" />
+      <path d="M56 4 L36 8 V56 L56 60 Z" fill="currentColor" />
+    </symbol>
+  </defs>
+</svg>
+
+<div class="grid" id="grid"></div>
+
+<p class="pick"><b>Мой выбор:</b> 01 «Монолит» как основной знак (уже живёт в hero, курсоре и футере, его нужно только уточнить), 07 «Скол» как самый сильный фавикон и аватар, 09 «Ц» как неожиданный ход со строкой Элджея «мы целая корпорация». Скажите номер, и я внедрю знак в шапку, футер, фавикон и превью для соцсетей.</p>
+
+<script>
+  const V = [
+    ["Монолит", "Текущий знак, уточнённый: две плиты с наклонными гранями сходятся к шву. Самый целостный с сайтом: этот же объект крутится в hero."],
+    ["Разлом", "Буква «О» из «Корпорации», расколотая и сдвинутая по шву. Читается как кольцо, логотип и одновременно как первая буква-гласная бренда."],
+    ["К", "Монограмма: ствол буквы К отделён от плеч светящимся швом. Строгая, банковская, хорошо держится в маленьком размере."],
+    ["Башни", "Мегакорпорация как силуэт квартала: центральная башня и есть монолит со швом, по бокам «отделы» разной высоты."],
+    ["Гриф", "Круглая печать «Корпорация · с 2019 · дело №023» с монолитом в центре. Продолжает язык досье, пропуска и печати «Отказано»."],
+    ["Пропуск", "Штрихкод, где одна полоса горит: тот же пропуск из блока «Когда мы откажем». Хорош для мерча и бейджей."],
+    ["Скол", "Квадратный монолит, разрезанный по диагонали, половины чуть разошлись. Самый узнаваемый силуэт в 16 пикселях."],
+    ["Скобки", "Квадратные скобки дела и шов между ними: «в Корпорации ваш проект в работе». Технологично, немного интерфейсно."],
+    ["Ц", "Самая «корпоративная» буква: из «целая корпорация» у Элджея. Хвост Ц светится, как капля света из шва."],
+    ["Створки", "Две створки приоткрыты, из щели на пол падает свет. Вход в Корпорацию, тот же образ, что у отделов."],
+  ];
+  const wordFor = (i) => {
+    if (i === 1) return `<span class="word seamword">Корпо<i></i>рация</span>`;
+    if (i === 4) return `<span class="stack"><span class="word">Корпорация</span><span class="sub">агентство · с 2019</span></span>`;
+    if (i === 7) return `<span class="word">[Корпорация]</span>`;
+    return `<span class="word">Корпорация</span>`;
+  };
+  const use = (i, cls = "mark") => `<svg class="${cls}" viewBox="0 0 64 64" aria-hidden="true"><use href="#m${i + 1}"/></svg>`;
+  document.getElementById("grid").innerHTML = V.map(([name, idea], i) => `
+    <article class="card">
+      <div class="head"><span class="num">${String(i + 1).padStart(2, "0")}</span><span class="name">${name}</span></div>
+      <p class="idea">${idea}</p>
+      <div class="tiles">
+        <div class="tile dark">${use(i)}</div>
+        <div class="tile light">${use(i)}</div>
+      </div>
+      <div class="lockups">
+        <div class="lock dark">
+          <span class="brand">${use(i, "")}${wordFor(i)}</span>
+          <span class="tab" style="--accent: var(--lime)"><span style="color:#fff;display:flex">${use(i, "")}</span>Корпорация</span>
+        </div>
+        <div class="lock light">
+          <span class="brand">${use(i, "")}${wordFor(i)}</span>
+          <span class="fav">
+            <svg class="f32" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#050505"/><g style="color:#fff;--accent:var(--lime)" transform="translate(9 9) scale(.72)"><use href="#m${i + 1}"/></g></svg>
+            <svg class="f32" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#c4f542"/><g style="color:#050505;--accent:#ffffff" transform="translate(9 9) scale(.72)"><use href="#m${i + 1}"/></g></svg>
+          </span>
+        </div>
+      </div>
+    </article>`).join("");
+</script>
+</body>
+</html>
