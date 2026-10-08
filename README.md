@@ -13,8 +13,8 @@ npm run build   # статика в out/
 
 ## Деплой
 
-Каждый пуш в `main` или `claude/exciting-noether-voueh3` собирает статику и публикует её на GitHub Pages
-(`.github/workflows/pages.yml`). Путь репозитория подставляется через `PAGES_BASE_PATH`.
+Пуш в `main` собирает статику и публикует её на GitHub Pages: https://dkaratsapov-web.github.io/marketing-studio/
+Пуш в рабочую ветку `claude/exciting-noether-voueh3` только прогоняет lint и build (`.github/workflows/pages.yml`). Путь репозитория подставляется через `PAGES_BASE_PATH`.
 
 ## Структура
 

@@ -34,7 +34,10 @@ jobs:
         with:
           path: out
 
+  # Публикует только main: окружение github-pages разрешает деплой из неё.
+  # Рабочие ветки проходят lint + build как проверку.
   deploy:
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:
