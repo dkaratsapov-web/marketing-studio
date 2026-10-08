@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "./Logo";
+import { PHONES, TELEGRAM } from "@/content/contacts";
 import styles from "./Header.module.css";
 
 const NAV = [
@@ -10,6 +11,14 @@ const NAV = [
   { href: "#protocol", label: "Протокол" },
   { href: "#contract", label: "Контракт" },
 ];
+
+function TelegramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M21.4 3.6 2.9 10.7c-1.3.5-1.3 1.2-.2 1.6l4.7 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.8-.4l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.4-1.5ZM8.6 13.4l9.3-5.9c.4-.3.8-.1.5.2l-7.8 7-.3 3.3-1.7-4.6Z" />
+    </svg>
+  );
+}
 
 export default function Header() {
   const ref = useRef<HTMLElement>(null);
@@ -85,6 +94,25 @@ export default function Header() {
           ))}
         </nav>
 
+        <div className={styles.phones}>
+          {PHONES.map((p) => (
+            <a key={p.href} href={p.href} className={styles.phone}>
+              {p.display}
+            </a>
+          ))}
+        </div>
+
+        <a
+          href={TELEGRAM.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.tg}
+          aria-label={`Написать в Telegram ${TELEGRAM.handle}`}
+          title={`Telegram ${TELEGRAM.handle}`}
+        >
+          <TelegramIcon />
+        </a>
+
         <a href="#brief" className={`btn btn--primary ${styles.cta}`}>
           Отправить бриф
         </a>
@@ -115,6 +143,22 @@ export default function Header() {
             </a>
           ))}
         </nav>
+        <div className={styles.sheetContacts}>
+          {PHONES.map((p) => (
+            <a key={p.href} href={p.href} className={styles.sheetPhone}>
+              {p.display}
+            </a>
+          ))}
+          <a
+            href={TELEGRAM.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.sheetTg}
+          >
+            <TelegramIcon />
+            Telegram {TELEGRAM.handle}
+          </a>
+        </div>
         <a href="#brief" className="btn btn--primary" onClick={() => setOpen(false)}>
           Отправить бриф
         </a>

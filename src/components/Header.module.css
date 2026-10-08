@@ -30,7 +30,7 @@
 .bar {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: clamp(1rem, 1.8vw, 2rem);
   max-width: var(--max-w);
   min-height: 4.5rem;
   margin-inline: auto;
@@ -64,7 +64,7 @@
 
 .nav {
   display: flex;
-  gap: 2.25rem;
+  gap: clamp(1.25rem, 1.8vw, 2.25rem);
 }
 
 .link {
@@ -91,6 +91,52 @@
 
 .link:hover .linkText {
   transform: translateY(-100%);
+}
+
+/* Телефоны столбиком, чтобы шапка не распухала */
+.phones {
+  display: grid;
+  justify-items: end;
+  gap: 0.1rem;
+  font-family: var(--ff-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.phone {
+  transition: color 0.3s var(--ease-out);
+}
+
+.phone:hover {
+  color: var(--accent);
+}
+
+.tg {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  transition:
+    background-color 0.3s var(--ease-out),
+    color 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out);
+}
+
+.tg svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.tg:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .cta {
@@ -162,6 +208,39 @@
 
 .sheetLink:active {
   color: var(--accent);
+}
+
+.sheetContacts {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.sheetPhone {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.sheetTg {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.sheetTg svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+/* Средние экраны: телефоны уходят, Telegram остаётся */
+@media (max-width: 1180px) {
+  .phones {
+    display: none;
+  }
 }
 
 @media (max-width: 860px) {
