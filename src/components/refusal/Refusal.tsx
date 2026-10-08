@@ -94,7 +94,9 @@ export default function Refusal() {
                     <span className={styles.statement}>{r.case}</span>
                   </button>
                   <div className={styles.reasonWrap}>
-                    <p className={styles.reason}>{r.reason}</p>
+                    <div className={styles.reasonInner}>
+                      <p className={styles.reason}>{r.reason}</p>
+                    </div>
                   </div>
                 </li>
               );
@@ -103,9 +105,9 @@ export default function Refusal() {
         </div>
 
         <div className={styles.passWrap}>
-          {/* key меняется при каждом новом вердикте, чтобы анимация печати и «вздрагивания» проигрывалась заново */}
+          {/* key меняется только при смене вердикта: печать и «вздрагивание» играют один раз, дальше обновляется лишь число причин */}
           <div
-            key={denied ? `d${checked.size}` : "ok"}
+            key={denied ? "denied" : "ok"}
             className={styles.pass}
             data-surface="dark"
             data-denied={denied || undefined}
