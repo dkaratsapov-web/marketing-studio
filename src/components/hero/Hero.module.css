@@ -1,0 +1,218 @@
+/* Длинная секция со «сценой» внутри: сцена залипает, пока монолит раскрывается */
+.hero {
+  position: relative;
+  height: 185svh;
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 70% at 72% 48%, rgb(240 160 60 / 0.07), transparent 70%),
+    radial-gradient(90% 80% at 70% 40%, rgb(70 80 96 / 0.35), transparent 75%),
+    linear-gradient(180deg, var(--graphite-900), var(--graphite-950) 70%);
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  animation: sceneIn 2.4s var(--ease-out) 0.15s both;
+}
+
+/* Плёночное зерно поверх сцены */
+.grain {
+  position: absolute;
+  inset: -50%;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: grain 1.2s steps(6) infinite;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto 1fr auto auto;
+  column-gap: var(--gutter);
+  height: 100%;
+  padding-block: calc(4.5rem + env(safe-area-inset-top, 0px) + clamp(1.5rem, 4vh, 3rem))
+    clamp(2rem, 6vh, 4rem);
+  pointer-events: none;
+}
+
+.content a,
+.content button {
+  pointer-events: auto;
+}
+
+.kicker {
+  grid-column: 1 / -1;
+  animation: fadeUp 1s var(--ease-out) 0.2s both;
+}
+
+.title {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  align-self: end;
+  font-size: var(--step-hero);
+  font-weight: 650;
+  line-height: 0.86;
+  letter-spacing: -0.055em;
+  margin-left: -0.05em;
+  text-wrap: nowrap;
+}
+
+.mask {
+  display: block;
+  overflow: hidden;
+  /* Запас под выносные элементы и верх кириллицы, компенсируем отрицательным отступом */
+  padding-block: 0.12em 0.08em;
+  margin-block: -0.12em -0.08em;
+}
+
+.line {
+  display: block;
+  animation: rise 1.25s var(--ease-out) both;
+  animation-delay: calc(0.35s + var(--i) * 0.12s);
+}
+
+.mask:nth-child(2) .line {
+  padding-left: 0.92em;
+}
+
+.dot {
+  color: var(--accent);
+}
+
+.lead {
+  grid-column: 1 / span 5;
+  grid-row: 4;
+  display: grid;
+  gap: 1.75rem;
+  margin-top: clamp(1.5rem, 4vh, 2.75rem);
+  align-content: start;
+  animation: fadeUp 1s var(--ease-out) 0.9s both;
+}
+
+.leadText {
+  max-width: 36ch;
+  color: var(--muted);
+  font-size: var(--step-1);
+  line-height: 1.45;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.inside {
+  grid-column: 1 / span 5;
+  grid-row: 4;
+  align-self: end;
+  display: grid;
+  gap: 1rem;
+  visibility: hidden;
+}
+
+.insideText {
+  max-width: 34ch;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 450;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: pretty;
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(105%);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+@keyframes sceneIn {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-4%, 3%); }
+  40% { transform: translate(3%, -5%); }
+  60% { transform: translate(-2%, 6%); }
+  80% { transform: translate(5%, -2%); }
+  100% { transform: translate(0, 0); }
+}
+
+@media (max-width: 1100px) {
+  .lead,
+  .inside {
+    grid-column: 1 / span 7;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero {
+    height: 170svh;
+  }
+
+  .title {
+    font-size: clamp(3.1rem, 15.5vw, 6rem);
+    text-wrap: wrap;
+  }
+
+  .mask:nth-child(2) .line {
+    padding-left: 0;
+  }
+
+  .lead,
+  .inside {
+    grid-column: 1 / -1;
+  }
+
+  .leadText {
+    font-size: var(--step-0);
+  }
+
+  .actions .btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain {
+    animation: none;
+  }
+
+  .hero {
+    height: auto;
+  }
+
+  .stage {
+    position: relative;
+  }
+}
