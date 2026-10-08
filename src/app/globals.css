@@ -1,29 +1,29 @@
 /*
-  Layout: штаб-квартира мегакорпорации. Тёмный графит как основная среда,
-  светлые «бетонные» секции как вставки-документы. 12-колоночная сетка,
+  Layout: штаб-квартира мегакорпорации. Чёрный как основная среда, белые секции
+  как вставки-документы, салатовый и розовый как свет. 12-колоночная сетка,
   контент прижат к левому краю, монументальная типографика с острыми углами.
 */
 :root {
-  /* Палитра */
-  --graphite-950: #0a0b0d;
-  --graphite-900: #101215;
-  --graphite-800: #181b20;
-  --graphite-700: #252931;
-  --steel-400: #8b93a0;
-  --chrome-100: #dee2e8;
-  --concrete-200: #e2e4e6;
-  --concrete-400: #b9bec4;
-  --signal: #f0a03c;
-  --signal-deep: #a85f12;
+  /* Палитра: чёрный, белый, салатовый, розовый */
+  --ink-950: #050505;
+  --ink-900: #0b0b0c;
+  --ink-800: #161618;
+  --ink-700: #242427;
+  --grey-400: #8f8f96;
+  --white: #ffffff;
+  --paper: #ffffff;
+  --lime: #c4f542;
+  --pink: #ff4d9d;
+  --pink-deep: #d1006a;
 
   /* Семантика по умолчанию (тёмная поверхность) */
-  --bg: var(--graphite-950);
-  --bg-raised: var(--graphite-800);
-  --fg: var(--chrome-100);
-  --muted: var(--steel-400);
-  --line: rgb(222 226 232 / 0.12);
-  --accent: var(--signal);
-  --accent-ink: var(--graphite-950);
+  --bg: var(--ink-950);
+  --bg-raised: var(--ink-800);
+  --fg: var(--white);
+  --muted: var(--grey-400);
+  --line: rgb(255 255 255 / 0.12);
+  --accent: var(--lime);
+  --accent-ink: var(--ink-950);
 
   /* Шрифты */
   --ff-display: var(--font-display), "Arial Narrow", system-ui, sans-serif;
@@ -52,23 +52,23 @@
 }
 
 [data-surface="dark"] {
-  --bg: var(--graphite-950);
-  --bg-raised: var(--graphite-800);
-  --fg: var(--chrome-100);
-  --muted: var(--steel-400);
-  --line: rgb(222 226 232 / 0.12);
-  --accent: var(--signal);
-  --accent-ink: var(--graphite-950);
+  --bg: var(--ink-950);
+  --bg-raised: var(--ink-800);
+  --fg: var(--white);
+  --muted: var(--grey-400);
+  --line: rgb(255 255 255 / 0.12);
+  --accent: var(--lime);
+  --accent-ink: var(--ink-950);
 }
 
 [data-surface="light"] {
-  --bg: var(--concrete-200);
-  --bg-raised: #eceef0;
-  --fg: var(--graphite-950);
-  --muted: #565d68;
-  --line: rgb(10 11 13 / 0.14);
-  --accent: var(--signal-deep);
-  --accent-ink: #fff;
+  --bg: var(--paper);
+  --bg-raised: #f3f3f4;
+  --fg: var(--ink-950);
+  --muted: #5c5c63;
+  --line: rgb(5 5 5 / 0.12);
+  --accent: var(--pink-deep);
+  --accent-ink: var(--white);
   color-scheme: light;
 }
 
@@ -99,8 +99,8 @@ html.lenis body {
 
 body {
   margin: 0;
-  background: var(--graphite-950);
-  color: var(--chrome-100);
+  background: var(--ink-950);
+  color: var(--white);
   font-family: var(--ff-body);
   font-size: var(--step-0);
   line-height: 1.55;
@@ -146,8 +146,8 @@ canvas {
 }
 
 ::selection {
-  background: var(--signal);
-  color: var(--graphite-950);
+  background: var(--lime);
+  color: var(--ink-950);
 }
 
 :focus-visible {

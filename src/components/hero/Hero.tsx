@@ -57,15 +57,20 @@ export default function Hero() {
         },
       });
 
-      tl.to(`.${styles.line}`, { yPercent: -35, stagger: 0.04, ease: "none", duration: 0.5 }, 0)
-        .to(`.${styles.title}`, { autoAlpha: 0, ease: "none", duration: 0.25 }, 0.2)
-        .to(`.${styles.lead}`, { y: -40, autoAlpha: 0, ease: "none", duration: 0.25 }, 0.05)
+      // Позиции на шкале 0..1 совпадают с прогрессом скролла через hero
+      tl.to(`.${styles.line}`, { yPercent: -35, stagger: 0.03, ease: "none", duration: 0.3 }, 0.02)
+        .to(`.${styles.title}`, { autoAlpha: 0, ease: "none", duration: 0.18 }, 0.12)
+        .to(`.${styles.lead}`, { y: -40, autoAlpha: 0, ease: "none", duration: 0.16 }, 0.02)
         .fromTo(
           `.${styles.inside}`,
           { y: 60, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, ease: "none", duration: 0.25 },
-          0.45,
-        );
+          { y: 0, autoAlpha: 1, ease: "none", duration: 0.12 },
+          0.33,
+        )
+        .to(`.${styles.inside}`, { y: -40, autoAlpha: 0, ease: "none", duration: 0.08 }, 0.6)
+        .to(`.${styles.kicker}`, { autoAlpha: 0, ease: "none", duration: 0.08 }, 0.55)
+        .fromTo(`.${styles.flash}`, { autoAlpha: 0 }, { autoAlpha: 1, ease: "power2.in", duration: 0.16 }, 0.84)
+        .set({}, {}, 1);
     },
     { scope: root },
   );
@@ -78,6 +83,7 @@ export default function Hero() {
           <HeroScene />
         </div>
         <div className={styles.grain} aria-hidden="true" />
+        <div className={styles.flash} aria-hidden="true" />
 
         <div className={`wrap ${styles.content}`}>
           <p className={`label ${styles.kicker}`}>Маркетинговое агентство полного цикла</p>
