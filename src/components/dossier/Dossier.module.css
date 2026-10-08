@@ -142,13 +142,15 @@
   flex-direction: column-reverse;
   gap: 0.35rem;
   min-width: 0;
+  /* Размер цифры считается от ширины колонки, чтобы «34→61%» не наезжало на соседа */
+  container-type: inline-size;
 }
 
 .metricValue {
   margin: 0;
   font-family: var(--ff-display);
   font-variation-settings: "SHRP" 100;
-  font-size: clamp(2.2rem, 1rem + 4.4vw, 5.6rem);
+  font-size: min(5.6rem, 22cqi);
   font-weight: 650;
   line-height: 0.95;
   letter-spacing: -0.05em;
@@ -227,9 +229,7 @@
     gap: 0.6rem;
   }
 
-  .metricValue {
-    font-size: clamp(1.7rem, 8.4vw, 2.4rem);
-  }
+
 
   .notes {
     grid-template-columns: 1fr;
