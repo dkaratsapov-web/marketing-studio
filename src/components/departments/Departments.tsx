@@ -136,7 +136,7 @@ export default function Departments() {
             </ul>
           </div>
 
-          <aside className={styles.elevator} aria-live="polite">
+          <aside className={styles.elevator}>
             <div className={styles.elevatorBox} data-tone={current.tone}>
               {/* Створки: схлопываются и расходятся при смене отдела */}
               <span key={active} className={styles.doors} aria-hidden="true">

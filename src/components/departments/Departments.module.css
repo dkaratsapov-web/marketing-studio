@@ -54,7 +54,7 @@
 /* Список отделов */
 .list {
   margin: 0;
-  transition: transform 0.9s cubic-bezier(0.7, 0, 0.2, 1);
+  transition: transform 0.9s var(--ease-snap);
   padding: 0;
   list-style: none;
   border-bottom: 1px solid var(--line);
@@ -102,12 +102,13 @@
   font-weight: 650;
   line-height: 0.95;
   letter-spacing: -0.05em;
-  color: rgb(5 5 5 / 0.24);
+  /* Неактивные названия: крупный текст, контраст не ниже 3:1 на белом */
+  color: rgb(5 5 5 / 0.46);
   transition: color 0.45s var(--ease-out);
 }
 
 .trigger:hover .name {
-  color: rgb(5 5 5 / 0.5);
+  color: rgb(5 5 5 / 0.7);
 }
 
 .row[data-open="true"] .name {
@@ -215,7 +216,7 @@
 
 .door {
   background: var(--ink-800);
-  animation: doorLeft 0.9s cubic-bezier(0.7, 0, 0.2, 1) both;
+  animation: doorLeft 0.9s var(--ease-snap) both;
   box-shadow: inset -1px 0 0 var(--tone);
 }
 

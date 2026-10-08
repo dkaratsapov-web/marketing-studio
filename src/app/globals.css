@@ -47,6 +47,10 @@
   /* Движение */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  /* Резкий старт и мягкая посадка: механика (лента, створки, полосы) */
+  --ease-snap: cubic-bezier(0.7, 0, 0.2, 1);
+  /* Удар печати с отскоком */
+  --ease-stamp: cubic-bezier(0.3, 1.6, 0.5, 1);
 
   color-scheme: dark;
 }

@@ -1,0 +1,137 @@
+/* Белая секция: заголовок слева, аккордеон справа */
+.faq {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+}
+
+.head {
+  grid-column: 1 / span 4;
+  align-self: start;
+  position: sticky;
+  top: calc(6rem + env(safe-area-inset-top, 0px));
+  display: grid;
+  gap: 1rem;
+}
+
+.heading {
+  font-size: clamp(3rem, 1.4rem + 5vw, 7rem);
+  line-height: 0.88;
+  letter-spacing: -0.055em;
+}
+
+.lead {
+  color: var(--muted);
+  font-size: var(--step-1);
+}
+
+.list {
+  grid-column: 6 / -1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--line);
+}
+
+.item {
+  border-top: 1px solid var(--line);
+}
+
+.question {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  padding-block: clamp(1.1rem, 2.6vh, 1.6rem);
+  border: 0;
+  background: none;
+  text-align: left;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  cursor: pointer;
+}
+
+/* Плюс, который поворачивается в крестик */
+.icon {
+  position: relative;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--ink-950);
+  transition:
+    transform 0.45s var(--ease-out),
+    background-color 0.3s var(--ease-out);
+}
+
+.icon::before,
+.icon::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.9rem;
+  height: 2px;
+  background: var(--white);
+  transform: translate(-50%, -50%);
+}
+
+.icon::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.item[data-open="true"] .icon {
+  background: var(--lime);
+  transform: rotate(45deg);
+}
+
+.item[data-open="true"] .icon::before,
+.item[data-open="true"] .icon::after {
+  background: var(--ink-950);
+}
+
+.question:hover .icon {
+  background: var(--pink);
+}
+
+.answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s var(--ease-out);
+}
+
+.item[data-open="true"] .answer {
+  grid-template-rows: 1fr;
+}
+
+.answerInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.answerInner p {
+  max-width: 60ch;
+  padding-bottom: clamp(1.1rem, 2.6vh, 1.6rem);
+  font-size: var(--step-1);
+  line-height: 1.45;
+}
+
+@media (max-width: 960px) {
+  .head,
+  .list {
+    grid-column: 1 / -1;
+  }
+
+  .head {
+    position: static;
+  }
+}

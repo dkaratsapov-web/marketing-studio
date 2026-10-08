@@ -1,0 +1,110 @@
+/* Футер: контакты сверху, надпись на всю ширину, рассечённая швом как знак */
+.footer {
+  padding-block: clamp(4rem, 10vh, 7rem) calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.top {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+}
+
+.col {
+  grid-column: span 4;
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+}
+
+.big {
+  width: fit-content;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  transition: color 0.3s var(--ease-out);
+}
+
+.big:hover {
+  color: var(--lime);
+}
+
+.nav {
+  grid-column: span 4;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 0.5rem 1.5rem;
+}
+
+.navLink {
+  width: fit-content;
+  color: var(--muted);
+  transition: color 0.3s var(--ease-out);
+}
+
+.navLink:hover {
+  color: var(--fg);
+}
+
+/* Надпись: размер от ширины экрана, чтобы слово занимало строку целиком */
+.wordWrap {
+  margin-top: clamp(3rem, 9vh, 6rem);
+}
+
+.word {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(3rem, 12.6vw, 14rem);
+  font-weight: 700;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+}
+
+.half {
+  display: flex;
+}
+
+.mask {
+  display: inline-block;
+  overflow: hidden;
+  padding-top: 0.12em;
+  margin-top: -0.12em;
+}
+
+.letter {
+  display: inline-block;
+}
+
+.seam {
+  align-self: stretch;
+  width: max(3px, 0.06em);
+  margin-inline: 0.06em;
+  background: linear-gradient(180deg, var(--pink), var(--lime));
+  transform-origin: bottom;
+}
+
+.bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+  margin-top: clamp(1.5rem, 4vh, 2.5rem);
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+@media (max-width: 900px) {
+  .col,
+  .nav {
+    grid-column: 1 / -1;
+  }
+}
