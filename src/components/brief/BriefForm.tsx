@@ -163,7 +163,7 @@ export default function BriefForm({ idPrefix, service }: Props) {
                     autoComplete="tel"
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
-                    placeholder="+7 900 000-00-00 или @ivan"
+                    placeholder="Номер или @ник"
                     aria-invalid={Boolean(contactError)}
                     aria-describedby={`${idPrefix}-contact-error`}
                   />

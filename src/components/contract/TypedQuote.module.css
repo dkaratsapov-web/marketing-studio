@@ -1,0 +1,118 @@
+/* Прямая речь под бюджетом: набирается по буквам, курсор мигает салатовым */
+.quote {
+  display: grid;
+  gap: 1.25rem;
+  margin: clamp(3rem, 8vh, 5rem) 0 0;
+  max-width: 62rem;
+}
+
+.body {
+  margin: 0;
+}
+
+.text {
+  display: grid;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(1.6rem, 1rem + 2.2vw, 3.1rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  text-wrap: pretty;
+}
+
+/* Невидимая копия держит высоту блока, живой набор лежит поверх в той же ячейке */
+.ghost,
+.live {
+  grid-area: 1 / 1;
+}
+
+.ghost {
+  visibility: hidden;
+}
+
+.quote[data-state="idle"] .live {
+  opacity: 0;
+}
+
+.close {
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+}
+
+.quote[data-state="done"] .close {
+  opacity: 1;
+}
+
+.caret {
+  display: inline-block;
+  width: 0.09em;
+  height: 0.9em;
+  margin-inline: 0.06em;
+  vertical-align: -0.08em;
+  background: var(--lime);
+  box-shadow: 0 0 14px rgb(196 245 66 / 0.55);
+  animation: blink 1s steps(1) infinite;
+}
+
+/* Пока идёт набор, курсор горит ровно, как в редакторе */
+.quote[data-state="typing"] .caret {
+  animation: none;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.5s var(--ease-out),
+    transform 0.5s var(--ease-out);
+}
+
+.quote[data-state="done"] .author {
+  opacity: 1;
+  transform: none;
+}
+
+.monogram {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--ink-950);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.name {
+  display: block;
+  font-weight: 600;
+}
+
+.role {
+  display: block;
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    animation: none;
+  }
+
+  .author {
+    transition: none;
+  }
+}

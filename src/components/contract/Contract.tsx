@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { TARIFFS } from "@/content/offer";
 import { openBrief } from "@/components/brief/briefBus";
+import TypedQuote from "./TypedQuote";
 import styles from "./Contract.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -177,6 +178,12 @@ export default function Contract() {
             набирают данных для обучения.
           </p>
         </aside>
+
+        <TypedQuote
+          text="Закинуть 10к и посмотреть, сколько с них будет заявок: к сожалению, так не работает. Поэтому, пожалуйста, давайте не будем тратить наше и Ваше время :)"
+          author="Даниил Карацапов"
+          role="Основатель Корпорации"
+        />
       </div>
     </section>
   );

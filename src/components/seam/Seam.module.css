@@ -1,0 +1,55 @@
+/* Шов-переход: полоса цвета уходящей секции, из центра раскрывается панель новой */
+.seam {
+  --p: 0;
+  --gap: calc((1 - var(--p)) * 50%);
+  position: relative;
+  height: clamp(12rem, 34svh, 22rem);
+  overflow: hidden;
+}
+
+.panel {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  clip-path: inset(0 var(--gap) 0 var(--gap));
+}
+
+.label {
+  font-family: var(--ff-mono);
+  font-size: clamp(0.8rem, 0.7rem + 0.4vw, 1rem);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--accent);
+  opacity: calc(min(1, var(--p) * 3));
+}
+
+/* Светящиеся края шва: салатовый слева, розовый справа, гаснут к концу раскрытия */
+.edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  opacity: calc(min(1, (1 - var(--p)) * 4));
+  pointer-events: none;
+}
+
+.edge[data-side="l"] {
+  left: var(--gap);
+  background: var(--lime);
+  box-shadow: 0 0 18px 2px rgb(196 245 66 / 0.55);
+}
+
+.edge[data-side="r"] {
+  right: var(--gap);
+  background: var(--pink);
+  box-shadow: 0 0 18px 2px rgb(255 77 157 / 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seam {
+    height: 0;
+  }
+}
