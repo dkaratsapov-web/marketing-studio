@@ -1,15 +1,8 @@
 "use client";
 
 import { useId, useState } from "react";
-import { TELEGRAM } from "@/content/contacts";
+import { phoneOk, sendLead } from "@/lib/lead";
 import styles from "./QuickLead.module.css";
-
-// Номер считаем корректным, если в нём 10-11 цифр: +7 900 000-00-00, 8 900..., 900...
-const digits = (v: string) => v.replace(/\D/g, "");
-const phoneOk = (v: string) => {
-  const d = digits(v);
-  return d.length === 10 || (d.length === 11 && /^[78]/.test(d));
-};
 
 /**
  * Короткая заявка «Шаг 00» в шапке «Протокола»: имя и телефон.
@@ -32,22 +25,12 @@ export default function QuickLead() {
     e.preventDefault();
     setTouched(true);
     if (!phoneOk(phone) || !consent) return;
-    const text = [
+    const res = await sendLead([
       "Заявка с сайта Корпорации",
-      name.trim() ? `Имя: ${name.trim()}` : null,
+      name.trim() && `Имя: ${name.trim()}`,
       `Телефон: ${phone.trim()}`,
-    ]
-      .filter(Boolean)
-      .join("\n");
-    let copied = false;
-    try {
-      await navigator.clipboard.writeText(text);
-      copied = true;
-    } catch {
-      copied = false;
-    }
-    window.open(TELEGRAM.href, "_blank", "noopener,noreferrer");
-    setSent({ text, copied });
+    ]);
+    setSent(res);
   };
 
   if (sent) {

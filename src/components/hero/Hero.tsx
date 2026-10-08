@@ -7,19 +7,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { DEPARTMENTS } from "@/content/departments";
 import { heroState } from "./heroState";
+import HeroLead from "./HeroLead";
 import styles from "./Hero.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const HeroScene = dynamic(() => import("./HeroScene"), { ssr: false });
-
-function Arrow() {
-  return (
-    <svg className="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path d="M1 8h13M9 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
 
 // В hero показываем четыре производственных отдела, без приёмной
 const HERO_DEPARTMENTS = DEPARTMENTS.slice(0, 4);
@@ -132,13 +125,7 @@ export default function Hero() {
               За каждым каналом отвечает свой специалист, и вы знаете его по имени.
             </p>
             <div className={styles.actions}>
-              <a href="#brief" className="btn btn--primary">
-                Отправить бриф
-                <Arrow />
-              </a>
-              <a href="#dossier" className="btn">
-                Открыть досье
-              </a>
+              <HeroLead />
             </div>
             <dl className={styles.facts}>
               {FACTS.map((f) => (
