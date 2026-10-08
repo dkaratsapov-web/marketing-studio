@@ -32,18 +32,29 @@
 
 .row {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.8fr) minmax(0, 0.8fr);
-  align-items: center;
-  gap: 1rem 2rem;
-  padding: clamp(1.1rem, 2.6vh, 1.75rem) clamp(0.75rem, 1.5vw, 1.25rem);
   border-top: 1px solid var(--line);
   isolation: isolate;
 }
 
-/* Наведение: лёгкая подсветка строки и салатовая цена. Без полной заливки,
-   чтобы строки не вспыхивали под неподвижным курсором при прокрутке */
-.row::before {
+/* Голова строки: кнопка на всю ширину */
+.rowHead {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.8fr) minmax(0, 0.8fr);
+  align-items: center;
+  gap: 1rem 2rem;
+  width: 100%;
+  padding: clamp(1.1rem, 2.6vh, 1.75rem) clamp(0.75rem, 1.5vw, 1.25rem);
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: opacity 0.4s var(--ease-out);
+}
+
+/* Подсветка открытой строки */
+.rowHead::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -53,30 +64,33 @@
   transition: opacity 0.35s var(--ease-out);
 }
 
-.row:hover::before {
+.row[data-open] .rowHead::before {
   opacity: 1;
 }
 
-.row:hover .amount {
-  color: var(--lime);
+/* Когда одна строка открыта, остальные отходят на второй план */
+.table[data-has-open] .row:not([data-open]) .rowHead {
+  opacity: 0.45;
+}
+
+.what {
+  display: grid;
+  gap: 0.35rem;
 }
 
 .name {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
   font-size: var(--step-2);
+  font-weight: 600;
   line-height: 1.05;
   letter-spacing: -0.03em;
 }
 
 .tools {
-  margin-top: 0.35rem;
   color: var(--muted);
   font-size: var(--step--1);
   line-height: 1.35;
-  transition: color 0.35s var(--ease-out);
-}
-
-.launch {
-  transition: color 0.35s var(--ease-out);
 }
 
 .price {
@@ -86,7 +100,6 @@
 }
 
 .amount {
-  transition: color 0.35s var(--ease-out);
   font-family: var(--ff-display);
   font-variation-settings: "SHRP" 100;
   font-size: var(--step-3);
@@ -94,15 +107,19 @@
   line-height: 1;
   letter-spacing: -0.035em;
   white-space: nowrap;
+  transition: color 0.35s var(--ease-out);
+}
+
+.row[data-open] .amount {
+  color: var(--lime);
 }
 
 .unit {
   color: var(--muted);
   font-size: var(--step--1);
-  transition: color 0.35s var(--ease-out);
 }
 
-/* Флагман: розовая метка слева и цена салатовым */
+/* Флагман: розовая метка и цена салатовым */
 .row[data-flagship] .name::after {
   content: "Флагман";
   display: inline-block;
@@ -120,6 +137,138 @@
 
 .row[data-flagship] .amount {
   color: var(--lime);
+}
+
+/* Карточка «Что входит»: высота раскрывается, сама карточка выкатывается шторкой сверху вниз */
+.details {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.6s var(--ease-snap);
+}
+
+.row[data-open] .details {
+  grid-template-rows: 1fr;
+}
+
+.detailsInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 1.5rem clamp(2rem, 5vw, 5rem);
+  margin: 0 clamp(0.75rem, 1.5vw, 1.25rem) clamp(1.1rem, 2.6vh, 1.75rem);
+  padding: clamp(1.25rem, 2.5vw, 2.25rem);
+  background: var(--ink-800);
+  border-top: 2px solid var(--lime);
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.7s var(--ease-snap);
+}
+
+.row[data-flagship] .card {
+  border-top-color: var(--pink);
+}
+
+.row[data-open] .card {
+  clip-path: inset(0 0 0 0);
+}
+
+.includes,
+.side {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+}
+
+.includeList {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: inc;
+}
+
+/* Пункты выезжают лесенкой после шторки */
+.includeList li {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  align-items: baseline;
+  font-size: var(--step-1);
+  line-height: 1.35;
+  counter-increment: inc;
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.45s var(--ease-out),
+    transform 0.55s var(--ease-out);
+}
+
+.includeList li::before {
+  content: counter(inc, decimal-leading-zero);
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.row[data-open] .includeList li {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(0.18s + var(--k) * 0.06s);
+}
+
+.outcome {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.side .btn {
+  justify-self: start;
+}
+
+/* Кастомный курсор: салатовый круг «Обсудить», догоняет мышь с инерцией */
+.table[data-cursor],
+.table[data-cursor] * {
+  cursor: none;
+}
+
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 70;
+  pointer-events: none;
+}
+
+.cursorDot {
+  display: grid;
+  place-items: center;
+  width: 6.5rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--ink-950);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.45s var(--ease-stamp);
+}
+
+.cursor[data-on] .cursorDot {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.cursorText {
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* Минимальный бюджет: отдельная плашка под прайсом */
@@ -151,8 +300,12 @@
 }
 
 @media (max-width: 760px) {
-  .row {
+  .rowHead {
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .card {
+    grid-template-columns: 1fr;
   }
 
   .what {
