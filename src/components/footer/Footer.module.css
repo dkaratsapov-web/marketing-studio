@@ -75,9 +75,12 @@
 
 .mask {
   display: inline-block;
-  overflow: hidden;
-  padding-top: 0.12em;
-  margin-top: -0.12em;
+  /* Режем только по вертикали: соседние буквы с отрицательным интервалом не подрезаются,
+     запас снизу оставляет место хвосту «Ц» */
+  overflow-x: visible;
+  overflow-y: clip;
+  padding-block: 0.12em 0.14em;
+  margin-block: -0.12em -0.14em;
 }
 
 .letter {

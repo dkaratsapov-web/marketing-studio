@@ -35,7 +35,8 @@ export default function Header() {
       raf = 0;
       const header = ref.current;
       if (!header) return;
-      const probeY = header.getBoundingClientRect().bottom - 8;
+      // Высота шапки без учёта сдвига: когда она спрятана, проверка всё равно смотрит под неё
+      const probeY = header.offsetHeight - 8;
       const el = document
         .elementsFromPoint(window.innerWidth / 2, probeY)
         .find((n) => n instanceof HTMLElement && n.closest("main [data-surface]"));

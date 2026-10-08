@@ -1,5 +1,4 @@
-/* Белая секция в языке «Вопросов» и «Протокола»: заголовок залипает слева,
-   случаи идут строками справа, печать ставится в угол строки */
+/* Белая секция: заголовок сверху, слева переключатели условий, справа пропуск с вердиктом */
 .refusal {
   padding-block: var(--section-y);
 }
@@ -8,119 +7,336 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--gutter);
-  row-gap: 2.5rem;
+  row-gap: clamp(2rem, 5vh, 3.5rem);
+  align-items: center;
 }
 
 .head {
-  grid-column: 1 / span 4;
-  align-self: start;
-  position: sticky;
-  top: calc(6rem + env(safe-area-inset-top, 0px));
+  grid-column: 1 / -1;
   display: grid;
   gap: 1.25rem;
 }
 
 .heading {
-  max-width: 9ch;
-  font-size: clamp(3rem, 1.4rem + 5vw, 7rem);
+  font-size: clamp(3rem, 1.4rem + 5.6vw, 8rem);
   line-height: 0.88;
   letter-spacing: -0.055em;
 }
 
 .lead {
-  max-width: 30ch;
+  max-width: 44ch;
   color: var(--muted);
   font-size: var(--step-1);
   line-height: 1.4;
 }
 
-.list {
-  grid-column: 6 / -1;
+/* Переключатели */
+.check {
+  grid-column: 1 / span 7;
+  display: grid;
+  gap: 1rem;
+}
+
+.conditions {
+  display: grid;
+  gap: 0.75rem;
   margin: 0;
   padding: 0;
   list-style: none;
-  border-bottom: 1px solid var(--line);
 }
 
-/* Строка случая: заголовок, причина, подсказка; справа сверху место под печать */
-.card {
-  position: relative;
+.condition {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  transition:
+    border-color 0.35s var(--ease-out),
+    border-radius 0.45s var(--ease-out),
+    background-color 0.35s var(--ease-out);
+}
+
+/* Включённое условие: капсула раскрывается в карточку с причиной */
+.condition[data-on] {
+  border-color: var(--pink-deep);
+  border-radius: 1.6rem;
+  background: rgb(209 0 106 / 0.04);
+}
+
+.switchRow {
   display: grid;
-  gap: 0.6rem;
-  padding: clamp(1.4rem, 3.2vh, 2.1rem) clamp(7.5rem, 12vw, 10rem) clamp(1.4rem, 3.2vh, 2.1rem) 0;
-  border-top: 1px solid var(--line);
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.85rem 1.25rem 0.85rem 0.9rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
-.case {
-  max-width: 22ch;
-  font-size: var(--step-2);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
+.switch {
+  position: relative;
+  width: 3.1rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: #e3e3e6;
+  transition: background-color 0.35s var(--ease-out);
+}
+
+.knob {
+  position: absolute;
+  top: 0.22rem;
+  left: 0.22rem;
+  width: 1.31rem;
+  height: 1.31rem;
+  border-radius: 50%;
+  background: var(--ink-950);
+  transition:
+    transform 0.4s var(--ease-stamp),
+    background-color 0.35s var(--ease-out);
+}
+
+.condition[data-on] .switch {
+  background: var(--pink-deep);
+}
+
+.condition[data-on] .knob {
+  background: var(--white);
+  transform: translateX(1.35rem);
+}
+
+.statement {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.reasonWrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s var(--ease-snap);
+}
+
+.condition[data-on] .reasonWrap {
+  grid-template-rows: 1fr;
 }
 
 .reason {
-  max-width: 48ch;
+  min-height: 0;
+  overflow: hidden;
+  max-width: 52ch;
+  padding: 0 1.25rem 0 5rem;
+  color: var(--muted);
   font-size: var(--step-0);
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
-.alt {
-  max-width: 48ch;
-  color: var(--muted);
+.condition[data-on] .reason {
+  padding-bottom: 1rem;
+}
+
+/* Пропуск */
+.passWrap {
+  grid-column: 9 / -1;
+  position: relative;
+  justify-self: center;
+  width: min(100%, 22rem);
+}
+
+.pass {
+  position: relative;
+  display: grid;
+  gap: 1.1rem;
+  padding: 2.75rem 1.6rem 1.4rem;
+  border-radius: 1.4rem;
+  background: var(--ink-950);
+  color: var(--white);
+  box-shadow:
+    0 30px 60px -30px rgb(5 5 5 / 0.45),
+    inset 0 0 0 1px rgb(255 255 255 / 0.06);
+  overflow: hidden;
+  transform: rotate(2deg);
+}
+
+/* Отказ: пропуск вздрагивает */
+.pass[data-denied] {
+  animation: shake 0.45s var(--ease-out) 0.12s;
+}
+
+@keyframes shake {
+  20% { transform: rotate(2deg) translateX(-6px); }
+  45% { transform: rotate(2deg) translateX(5px); }
+  70% { transform: rotate(2deg) translateX(-2px); }
+}
+
+/* Прорезь для ленты */
+.slot {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  width: 3.5rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--paper);
+  transform: translateX(-50%);
+}
+
+.passTop {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  --muted: var(--grey-400);
+  --accent: var(--lime);
+}
+
+.passMark {
+  width: 0.8rem;
+  height: auto;
+}
+
+.verdict {
+  position: relative;
+  display: grid;
+  place-items: center start;
+  min-height: 6rem;
+}
+
+.verdictOk {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(2.6rem, 1.8rem + 2vw, 3.6rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  color: var(--lime);
+  transition:
+    opacity 0.3s var(--ease-out),
+    filter 0.3s var(--ease-out);
+}
+
+.pass[data-denied] .verdictOk {
+  opacity: 0.22;
+  filter: blur(1px);
+}
+
+/* Печать: в покое прозрачная и крупная, при отказе падает на пропуск */
+.stamp {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  padding: 0.45rem 0.9rem;
+  border: 3px solid var(--pink);
+  border-radius: 6px;
+  color: var(--pink);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(-24deg) scale(2.2);
+}
+
+.pass[data-denied] .stamp {
+  animation: stampIn 0.45s var(--ease-stamp) forwards;
+}
+
+@keyframes stampIn {
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-12deg) scale(1);
+  }
+}
+
+.passNote {
+  color: rgb(255 255 255 / 0.78);
   font-size: var(--step--1);
   line-height: 1.45;
 }
 
-/* Печать: небольшая, в правом верхнем углу строки; падает, когда строка дочитана */
-.stamp {
-  position: absolute;
-  top: clamp(1.4rem, 3.2vh, 2.1rem);
-  right: 0;
-  padding: 0.3rem 0.65rem;
-  border: 2px solid var(--pink-deep);
-  border-radius: 4px;
-  color: var(--pink-deep);
-  font-family: var(--ff-mono);
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  opacity: 0;
-  transform: rotate(-16deg) scale(1.9);
-  transition:
-    opacity 0.2s ease-out,
-    transform 0.42s var(--ease-stamp);
+.alt {
+  padding: 0.7rem 0.85rem;
+  border-left: 2px solid var(--lime);
+  background: rgb(196 245 66 / 0.08);
+  font-size: var(--step--1);
+  line-height: 1.4;
 }
 
-.card[data-stamped] .stamp {
-  opacity: 0.92;
-  transform: rotate(-7deg) scale(1);
+.passCta {
+  justify-self: start;
+}
+
+.barcode {
+  display: flex;
+  height: 2.4rem;
+  margin-top: 0.25rem;
+}
+
+.barcode span {
+  background: var(--white);
+}
+
+.barcode span[data-gap] {
+  background: transparent;
+}
+
+/* Луч сканера: проходит по пропуску при появлении секции */
+.scan {
+  position: absolute;
+  inset: 0;
+  border-radius: 1.4rem;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(196 245 66 / 0.55) 48%,
+    var(--lime) 50%,
+    transparent 52%
+  );
+  background-size: 100% 260%;
+  background-position: 0 100%;
+  opacity: 0;
+  transform: rotate(2deg);
+}
+
+.passWrap[data-scan] .scan {
+  animation: scan 1.4s var(--ease-in-out) 0.2s;
+}
+
+@keyframes scan {
+  0% { opacity: 1; background-position: 0 100%; }
+  90% { opacity: 1; }
+  100% { opacity: 0; background-position: 0 0; }
 }
 
 @media (max-width: 960px) {
-  .head,
-  .list {
+  .check,
+  .passWrap {
     grid-column: 1 / -1;
-  }
-
-  .head {
-    position: static;
   }
 }
 
 @media (max-width: 600px) {
-  /* На узком экране печать уходит под текст, а не вбок */
-  .card {
-    padding-right: 0;
-    padding-bottom: 3.75rem;
+  .condition,
+  .condition[data-on] {
+    border-radius: 1.2rem;
   }
 
-  .stamp {
-    top: auto;
-    bottom: 1.25rem;
-    right: auto;
-    left: 0;
+  .reason {
+    padding-left: 0.9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pass[data-denied] .stamp {
+    animation: none;
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-12deg);
   }
 }
