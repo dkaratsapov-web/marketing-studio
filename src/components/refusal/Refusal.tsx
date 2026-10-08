@@ -39,7 +39,7 @@ export default function Refusal() {
       className={styles.refusal}
       data-surface="light"
     >
-      <div className="wrap">
+      <div className={`wrap ${styles.layout}`}>
         <header className={styles.head}>
           <h2 className={styles.heading}>Когда мы откажем</h2>
           <p className={styles.lead}>
@@ -48,17 +48,16 @@ export default function Refusal() {
           </p>
         </header>
 
-        <ol className={styles.grid}>
-          {REFUSALS.map((r, i) => (
+        <ul className={styles.list}>
+          {REFUSALS.map((r) => (
             <li key={r.case} className={styles.card}>
-              <p className={`label ${styles.number}`}>Заявление {i + 1}</p>
               <h3 className={styles.case}>{r.case}</h3>
               <p className={styles.reason}>{r.reason}</p>
               {r.alt ? <p className={styles.alt}>{r.alt}</p> : null}
               <span className={styles.stamp}>Отказано</span>
             </li>
           ))}
-        </ol>
+        </ul>
       </div>
     </section>
   );

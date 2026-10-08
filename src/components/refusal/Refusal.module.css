@@ -1,129 +1,126 @@
-/* Белая секция: четыре «заявления», на каждое падает печать «Отказано» */
+/* Белая секция в языке «Вопросов» и «Протокола»: заголовок залипает слева,
+   случаи идут строками справа, печать ставится в угол строки */
 .refusal {
   padding-block: var(--section-y);
 }
 
+.layout {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+}
+
 .head {
+  grid-column: 1 / span 4;
+  align-self: start;
+  position: sticky;
+  top: calc(6rem + env(safe-area-inset-top, 0px));
   display: grid;
   gap: 1.25rem;
-  margin-bottom: clamp(2.5rem, 6vh, 4.5rem);
 }
 
 .heading {
-  max-width: 12ch;
-  font-size: clamp(3rem, 1.4rem + 6vw, 8rem);
+  max-width: 9ch;
+  font-size: clamp(3rem, 1.4rem + 5vw, 7rem);
   line-height: 0.88;
   letter-spacing: -0.055em;
 }
 
 .lead {
-  max-width: 40ch;
+  max-width: 30ch;
   color: var(--muted);
   font-size: var(--step-1);
   line-height: 1.4;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--gutter);
+.list {
+  grid-column: 6 / -1;
   margin: 0;
   padding: 0;
   list-style: none;
+  border-bottom: 1px solid var(--line);
 }
 
+/* Строка случая: заголовок, причина, подсказка; справа сверху место под печать */
 .card {
   position: relative;
   display: grid;
-  align-content: start;
-  gap: 0.9rem;
-  min-height: 15rem;
-  padding: clamp(1.25rem, 2.5vw, 2.25rem);
-  /* Место под печать, чтобы она не ложилась на текст */
-  padding-bottom: clamp(5rem, 4rem + 2vw, 6rem);
-  border: 1px solid var(--line);
-  background: var(--bg-raised);
-  overflow: hidden;
-}
-
-.number {
-  color: var(--muted);
+  gap: 0.6rem;
+  padding: clamp(1.4rem, 3.2vh, 2.1rem) clamp(7.5rem, 12vw, 10rem) clamp(1.4rem, 3.2vh, 2.1rem) 0;
+  border-top: 1px solid var(--line);
 }
 
 .case {
-  max-width: 18ch;
-  font-size: var(--step-3);
-  line-height: 1;
-  letter-spacing: -0.035em;
+  max-width: 22ch;
+  font-size: var(--step-2);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
 }
 
 .reason {
-  max-width: 38ch;
+  max-width: 48ch;
   font-size: var(--step-0);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .alt {
-  max-width: 38ch;
+  max-width: 48ch;
   color: var(--muted);
   font-size: var(--step--1);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
-/* Печать: в покое прозрачная и увеличенная, при data-stamped падает на бумагу */
+/* Печать: небольшая, в правом верхнем углу строки; падает, когда строка дочитана */
 .stamp {
   position: absolute;
-  right: clamp(1rem, 2.5vw, 2rem);
-  bottom: clamp(1rem, 2.5vw, 1.75rem);
-  padding: 0.45rem 1rem;
-  border: 3px solid var(--pink-deep);
-  outline: 1px solid var(--pink-deep);
-  outline-offset: 3px;
-  border-radius: 6px;
+  top: clamp(1.4rem, 3.2vh, 2.1rem);
+  right: 0;
+  padding: 0.3rem 0.65rem;
+  border: 2px solid var(--pink-deep);
+  border-radius: 4px;
   color: var(--pink-deep);
-  font-family: var(--ff-display);
-  font-variation-settings: "SHRP" 100;
-  font-size: clamp(1.2rem, 0.9rem + 1vw, 1.8rem);
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-family: var(--ff-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   mix-blend-mode: multiply;
   pointer-events: none;
   opacity: 0;
-  transform: rotate(-24deg) scale(2.2);
+  transform: rotate(-16deg) scale(1.9);
   transition:
-    opacity 0.25s ease-out,
-    transform 0.45s var(--ease-stamp);
+    opacity 0.2s ease-out,
+    transform 0.42s var(--ease-stamp);
 }
 
 .card[data-stamped] .stamp {
-  opacity: 0.9;
-  transform: rotate(-10deg) scale(1);
+  opacity: 0.92;
+  transform: rotate(-7deg) scale(1);
 }
 
-/* Лёгкий «удар» по карточке в момент печати */
-.card[data-stamped] {
-  animation: thud 0.35s ease-out 0.12s;
-}
+@media (max-width: 960px) {
+  .head,
+  .list {
+    grid-column: 1 / -1;
+  }
 
-@keyframes thud {
-  40% {
-    transform: translateY(3px);
+  .head {
+    position: static;
   }
 }
 
-@media (max-width: 760px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
+@media (max-width: 600px) {
+  /* На узком экране печать уходит под текст, а не вбок */
   .card {
-    min-height: 0;
+    padding-right: 0;
+    padding-bottom: 3.75rem;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .card[data-stamped] {
-    animation: none;
+  .stamp {
+    top: auto;
+    bottom: 1.25rem;
+    right: auto;
+    left: 0;
   }
 }
