@@ -92,7 +92,8 @@ export default function Dossier() {
         ScrollTrigger.create({
           trigger: card,
           containerAnimation: scroll,
-          start: "left 70%",
+          // Рассекречиваем, когда карточка видна почти целиком: её центр доходит до 65% экрана
+          start: "center 65%",
           onEnter: () => declassify(card),
         });
         // Лёгкий параллакс номера дела внутри карточки
