@@ -51,6 +51,44 @@
   color: var(--fg);
 }
 
+/* Строка Элджея над надписью: огромное слово её договаривает */
+.quote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  margin-bottom: clamp(0.75rem, 2vh, 1.5rem);
+}
+
+.quoteText {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.3em;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-3);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: rgb(255 255 255 / 0.62);
+}
+
+.qMask {
+  display: inline-block;
+  overflow-y: clip;
+  padding-block: 0.08em 0.12em;
+  margin-block: -0.08em -0.12em;
+}
+
+.qWord {
+  display: inline-block;
+}
+
+.credit {
+  color: var(--lime);
+}
+
 /* Надпись: размер от ширины экрана, чтобы слово занимало строку целиком */
 .wordWrap {
   margin-top: clamp(3rem, 9vh, 6rem);

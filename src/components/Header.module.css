@@ -45,12 +45,12 @@
 .logoInner {
   display: inline-flex;
   align-items: center;
-  gap: 0.7rem;
 }
 
 .logoInner :global(.logo__mark) {
   width: 0.85rem;
   height: auto;
+  margin-right: 0.7rem;
 }
 
 .logoInner :global(.logo__word) {
@@ -60,6 +60,53 @@
   font-size: 0.95rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+  transition: color 0.3s var(--ease-out);
+}
+
+/* Цитата Элджея: по наведению выкатывается шторкой и договаривается словом «Корпорация» */
+.logoInner :global(.logo__quote) {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 0.9rem;
+  clip-path: inset(0 100% 0 0);
+  transition:
+    max-width 0.7s var(--ease-snap),
+    clip-path 0.7s var(--ease-snap),
+    padding 0.7s var(--ease-snap);
+}
+
+.logo:hover .logoInner :global(.logo__quote),
+.logo:focus-visible .logoInner :global(.logo__quote) {
+  max-width: 22rem;
+  padding-right: 0.45em;
+  clip-path: inset(0 0 0 0);
+}
+
+/* Фраза собралась: название вспыхивает салатовым */
+.logo:hover .logoInner :global(.logo__word),
+.logo:focus-visible .logoInner :global(.logo__word) {
+  color: var(--accent);
+  transition-delay: 0.45s;
+}
+
+.logo:hover .logoInner :global(.logo__mark rect) {
+  animation: seamPulse 0.9s var(--ease-out) 0.4s;
+}
+
+@keyframes seamPulse {
+  40% {
+    fill: var(--white);
+  }
+}
+
+/* На узких экранах фразе не хватит места рядом с меню */
+@media (max-width: 1279px) {
+  .logoInner :global(.logo__quote) {
+    display: none;
+  }
 }
 
 .nav {

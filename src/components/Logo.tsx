@@ -16,10 +16,16 @@ export function LogoMark({ className }: Props) {
   );
 }
 
+/** Строка из песни Элджея «Корпорация»: по наведению на логотип она договаривается до названия */
+export const QUOTE = "У нас столько проектов — мы\u00a0целая";
+
 export function Logo({ className }: Props) {
   return (
     <span className={className}>
       <LogoMark className="logo__mark" />
+      <span className="logo__quote" aria-hidden="true">
+        {QUOTE}
+      </span>
       <span className="logo__word">Корпорация</span>
     </span>
   );

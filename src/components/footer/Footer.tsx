@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { PHONES, TELEGRAM } from "@/content/contacts";
+import { QUOTE } from "@/components/Logo";
 import styles from "./Footer.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -26,29 +27,32 @@ export default function Footer() {
   useGSAP(
     () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      // Буквы надписи поднимаются из-под линии, шов между половинами загорается последним
-      gsap.from(`.${styles.letter}`, {
-        yPercent: 105,
-        duration: 1.1,
-        ease: "power4.out",
-        stagger: 0.04,
+      // Сначала по словам поднимается строка Элджея, затем буквы надписи договаривают её,
+      // шов между половинами загорается последним
+      const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: `.${styles.word}`,
+          trigger: `.${styles.quote}`,
           start: "top 92%",
           once: true,
         },
       });
-      gsap.from(`.${styles.seam}`, {
-        scaleY: 0,
-        duration: 0.9,
-        ease: "power3.inOut",
-        delay: 0.5,
-        scrollTrigger: {
-          trigger: `.${styles.word}`,
-          start: "top 92%",
-          once: true,
-        },
-      });
+      tl.from(`.${styles.qWord}`, {
+        yPercent: 110,
+        duration: 0.8,
+        ease: "power3.out",
+        stagger: 0.06,
+      })
+        .from(`.${styles.credit}`, { autoAlpha: 0, duration: 0.6 }, 0.3)
+        .from(
+          `.${styles.letter}`,
+          { yPercent: 105, duration: 1.1, ease: "power4.out", stagger: 0.04 },
+          0.35,
+        )
+        .from(
+          `.${styles.seam}`,
+          { scaleY: 0, duration: 0.9, ease: "power3.inOut" },
+          0.9,
+        );
     },
     { scope: root },
   );
@@ -87,6 +91,16 @@ export default function Footer() {
       </div>
 
       <div className={`wrap ${styles.wordWrap}`}>
+        <p className={styles.quote}>
+          <span className={styles.quoteText}>
+            {QUOTE.split(" ").map((w, i) => (
+              <span key={i} className={styles.qMask}>
+                <span className={styles.qWord}>{w}</span>
+              </span>
+            ))}
+          </span>
+          <span className={`label ${styles.credit}`}>Элджей, «Корпорация»</span>
+        </p>
         <p className={styles.word}>
           <span className="visually-hidden">{WORD}</span>
           <span className={styles.half} aria-hidden="true">
