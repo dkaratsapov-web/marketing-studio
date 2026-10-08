@@ -65,45 +65,79 @@
   }
 }
 
+/* Подпись: светящийся шов, имя проявляется шторкой, справа знак Корпорации как печать */
 .author {
   display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  opacity: 0;
-  transform: translateY(8px);
-  transition:
-    opacity 0.5s var(--ease-out),
-    transform 0.5s var(--ease-out);
+  align-items: stretch;
+  gap: 1.1rem;
+  margin-top: 0.75rem;
 }
 
-.quote[data-state="done"] .author {
-  opacity: 1;
-  transform: none;
+.seam {
+  width: 2px;
+  background: linear-gradient(180deg, var(--lime), var(--pink));
+  box-shadow: 0 0 14px rgb(196 245 66 / 0.45);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.6s var(--ease-snap);
 }
 
-.monogram {
+.who {
   display: grid;
-  place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 50%;
-  background: var(--lime);
-  color: var(--ink-950);
-  font-family: var(--ff-display);
-  font-variation-settings: "SHRP" 100;
-  font-size: 1.2rem;
-  font-weight: 700;
+  gap: 0.4rem;
+  padding-block: 0.2rem;
 }
 
 .name {
-  display: block;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(1.4rem, 1rem + 1.3vw, 2.2rem);
   font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.8s var(--ease-snap) 0.25s;
 }
 
 .role {
-  display: block;
-  color: var(--muted);
+  font-family: var(--ff-mono);
   font-size: var(--step--1);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.5s var(--ease-out) 0.7s,
+    transform 0.5s var(--ease-out) 0.7s;
+}
+
+.sign {
+  align-self: center;
+  width: auto;
+  height: 2.4rem;
+  margin-left: 0.6rem;
+  color: var(--fg);
+  opacity: 0;
+  transform: scale(1.6) rotate(-8deg);
+  transition:
+    opacity 0.3s var(--ease-out) 1s,
+    transform 0.45s var(--ease-stamp) 1s;
+}
+
+.quote[data-state="done"] .seam {
+  transform: none;
+}
+
+.quote[data-state="done"] .name {
+  clip-path: inset(0 0 0 0);
+}
+
+.quote[data-state="done"] .role,
+.quote[data-state="done"] .sign {
+  opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -111,7 +145,10 @@
     animation: none;
   }
 
-  .author {
+  .seam,
+  .name,
+  .role,
+  .sign {
     transition: none;
   }
 }

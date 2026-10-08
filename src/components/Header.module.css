@@ -48,9 +48,9 @@
 }
 
 .logoInner :global(.logo__mark) {
-  width: 0.85rem;
-  height: auto;
-  margin-right: 0.7rem;
+  width: auto;
+  height: 1.3rem;
+  margin-right: 0.65rem;
 }
 
 .logoInner :global(.logo__word) {
@@ -92,7 +92,7 @@
   transition-delay: 0.45s;
 }
 
-.logo:hover .logoInner :global(.logo__mark rect) {
+.logo:hover .logoInner :global(.logo__floor) {
   animation: seamPulse 0.9s var(--ease-out) 0.4s;
 }
 

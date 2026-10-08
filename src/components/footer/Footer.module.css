@@ -124,6 +124,31 @@
 .letter {
   display: inline-block;
 }
+/* Надпись как логотип «Этажи»: буквы собраны из восьми горизонтальных этажей, шестой горит.
+   Шаг посчитан от метрик Geologica: при line-height 0.8 верх заглавных на 0.05em, высота заглавных 0.7em.
+   Нижний запас нужен хвосту «Ц», который уходит под базовую линию */
+.letter {
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+  background-image: linear-gradient(
+    180deg,
+    transparent 0,
+    transparent 0.0500em, var(--fg) 0.0500em, var(--fg) 0.1036em, transparent 0.1036em,
+    transparent 0.1424em, var(--fg) 0.1424em, var(--fg) 0.1959em, transparent 0.1959em,
+    transparent 0.2347em, var(--fg) 0.2347em, var(--fg) 0.2883em, transparent 0.2883em,
+    transparent 0.3271em, var(--fg) 0.3271em, var(--fg) 0.3806em, transparent 0.3806em,
+    transparent 0.4194em, var(--fg) 0.4194em, var(--fg) 0.4730em, transparent 0.4730em,
+    transparent 0.5118em, var(--lime) 0.5118em, var(--lime) 0.5653em, transparent 0.5653em,
+    transparent 0.6041em, var(--fg) 0.6041em, var(--fg) 0.6577em, transparent 0.6577em,
+    transparent 0.6965em, var(--fg) 0.6965em, var(--fg) 0.7500em, transparent 0.7500em,
+    transparent 0.7888em, var(--fg) 0.7888em, var(--fg) 0.8424em, transparent 0.8424em,
+    transparent 0.8812em, var(--fg) 0.8812em, var(--fg) 0.9347em, transparent 0.9347em
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 
 .seam {
   align-self: stretch;

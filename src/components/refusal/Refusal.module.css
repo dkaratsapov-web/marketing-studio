@@ -201,8 +201,8 @@
 }
 
 .passMark {
-  width: 0.8rem;
-  height: auto;
+  width: auto;
+  height: 1rem;
 }
 
 .verdict {

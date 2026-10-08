@@ -423,16 +423,17 @@ def favicon(fn, bg, c):
 <svg x="2" y="2" width="96" height="96" viewBox="0 0 100 100">{fn(c)}</svg></svg>"""
 
 
-cards = []
-for i, (name, icon, logo, idea) in enumerate(V, 1):
-    cards.append(f"""<article class="card">
-  <header><span class="num">{i:02d}</span><h2>{name}</h2></header>
-  <p class="idea">{idea}</p>
-  <div class="tiles"><div class="tile d">{svg_icon(icon, DARK, 'mark')}</div><div class="tile l">{svg_icon(icon, LIGHT, 'mark')}</div></div>
-  <div class="row d">{svg_logo(logo, DARK)}</div>
-  <div class="row l">{svg_logo(logo, LIGHT)}<span class="favs">{favicon(icon, '#050505', DARK)}{favicon(icon, '#c4f542', {**LIGHT, 'acc': '#050505', 'ink': '#050505', 'bg': '#c4f542'})}<span class="tab">{svg_icon(icon, {**DARK}, 'tabicon')}Корпорация</span></span></div>
-</article>""")
+if __name__ == "__main__":
+    cards = []
+    for i, (name, icon, logo, idea) in enumerate(V, 1):
+        cards.append(f"""<article class="card">
+      <header><span class="num">{i:02d}</span><h2>{name}</h2></header>
+      <p class="idea">{idea}</p>
+      <div class="tiles"><div class="tile d">{svg_icon(icon, DARK, 'mark')}</div><div class="tile l">{svg_icon(icon, LIGHT, 'mark')}</div></div>
+      <div class="row d">{svg_logo(logo, DARK)}</div>
+      <div class="row l">{svg_logo(logo, LIGHT)}<span class="favs">{favicon(icon, '#050505', DARK)}{favicon(icon, '#c4f542', {**LIGHT, 'acc': '#050505', 'ink': '#050505', 'bg': '#c4f542'})}<span class="tab">{svg_icon(icon, {**DARK}, 'tabicon')}Корпорация</span></span></div>
+    </article>""")
 
-html = (HERE / "board2.tpl.html").read_text().replace("{{CARDS}}", "\n".join(cards))
-(HERE / "logo-board-2.html").write_text(html)
-print("ok", len(cards))
+    html = (HERE / "board2.tpl.html").read_text().replace("{{CARDS}}", "\n".join(cards))
+    (HERE / "logo-board-2.html").write_text(html)
+    print("ok", len(cards))

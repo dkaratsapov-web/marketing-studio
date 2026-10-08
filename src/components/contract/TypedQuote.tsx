@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { LogoMark } from "@/components/Logo";
 import styles from "./TypedQuote.module.css";
 
 type Props = { text: string; author: string; role: string };
@@ -77,13 +78,12 @@ export default function TypedQuote({ text, author, role }: Props) {
         </p>
       </blockquote>
       <figcaption className={styles.author}>
-        <span className={styles.monogram} aria-hidden="true">
-          {author.charAt(0)}
-        </span>
-        <span>
+        <span className={styles.seam} aria-hidden="true" />
+        <span className={styles.who}>
           <span className={styles.name}>{author}</span>
           <span className={styles.role}>{role}</span>
         </span>
+        <LogoMark className={styles.sign} />
       </figcaption>
     </figure>
   );
