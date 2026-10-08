@@ -31,7 +31,7 @@ export default function Seam({ from, to, label }: { from: Surface; to: Surface; 
       ScrollTrigger.create({
         trigger: el,
         start: "top 95%",
-        end: "top 30%",
+        end: "top 45%",
         scrub: 0.4,
         onUpdate: (self) => {
           el.style.setProperty("--p", self.progress.toFixed(4));
