@@ -62,10 +62,20 @@ for (const ms of [300, 900, 1600, 2400, 3400]) {
   await shot("intro");
 }
 
-// Прокрутка колесом через hero и чуть дальше
+// Прокрутка колесом через всю страницу
 await page.mouse.move(viewport.width / 2, viewport.height / 2);
-const total = await page.evaluate(() => { const m = document.getElementById("manifest"); return m.offsetTop + m.offsetHeight - innerHeight * 0.6; });
+// START_ID=dossier — начать ревью с нужного блока, пропустив предыдущие
 let scrolled = 0;
+if (process.env.START_ID) {
+  scrolled = await page.evaluate((id) => {
+    const top = document.getElementById(id).getBoundingClientRect().top + scrollY - innerHeight * 0.5;
+    window.scrollTo(0, top);
+    return top;
+  }, process.env.START_ID);
+  await page.waitForTimeout(1500);
+  await shot("jump");
+}
+const total = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight * 1.3);
 while (scrolled < total) {
   await page.mouse.wheel(0, +stepPx);
   scrolled += +stepPx;

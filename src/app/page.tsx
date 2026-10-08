@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Hero from "@/components/hero/Hero";
 import Manifest from "@/components/manifest/Manifest";
+import Dossier from "@/components/dossier/Dossier";
 
 export default function Home() {
   return (
@@ -9,12 +10,13 @@ export default function Home() {
       <main>
         <Hero />
         <Manifest />
-        {/* Временная заглушка: следующий блок появится после согласования манифеста */}
-        <section id="dossier" data-surface="dark" style={{ paddingBlock: "var(--section-y)" }}>
+        <Dossier />
+        {/* Временная заглушка: следующий блок появится после согласования досье */}
+        <section id="departments" data-surface="light" style={{ paddingBlock: "var(--section-y)" }}>
           <div className="wrap" style={{ display: "grid", gap: "1rem" }}>
             <p className="label">Следующий блок</p>
             <p style={{ maxWidth: "40ch", fontSize: "var(--step-2)", lineHeight: 1.25 }}>
-              Досье с кейсами появится здесь после согласования манифеста.
+              Отделы появятся здесь после согласования досье.
             </p>
           </div>
         </section>
