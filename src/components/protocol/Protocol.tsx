@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { PROTOCOL, TRACK_SCALE, type Track } from "@/content/protocol";
+import QuickLead from "./QuickLead";
 import styles from "./Protocol.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -98,6 +99,7 @@ export default function Protocol() {
             Пять шагов от заявки до отчёта. На каждом понятно, кто отвечает и
             что происходит прямо сейчас.
           </p>
+          <QuickLead />
         </header>
 
         <div className={styles.steps}>

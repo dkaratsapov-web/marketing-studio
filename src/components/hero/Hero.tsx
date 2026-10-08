@@ -111,7 +111,7 @@ export default function Hero() {
         <div className={styles.flash} aria-hidden="true" />
 
         <div className={`wrap ${styles.content}`}>
-          <p className={`label ${styles.kicker}`}>Маркетинговое агентство Даниила Карацапова</p>
+          <p className={`label ${styles.kicker}`}>Маркетинговое агентство полного цикла</p>
 
           <h1 className={styles.title}>
             <span className={styles.mask}>
