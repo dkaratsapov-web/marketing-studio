@@ -7,6 +7,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/** Доступ к Lenis из других компонентов: поп-ап ставит прокрутку страницы на паузу */
+export const lenisRef: { current: Lenis | null } = { current: null };
+
 export default function SmoothScroll() {
   useEffect(() => {
     // Сцена hero рассчитана на просмотр с начала: не восстанавливаем прокрутку при перезагрузке
@@ -23,6 +26,7 @@ export default function SmoothScroll() {
       autoRaf: false,
     });
 
+    lenisRef.current = lenis;
     lenis.on("scroll", ScrollTrigger.update);
     const tick = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(tick);
@@ -31,6 +35,7 @@ export default function SmoothScroll() {
     return () => {
       gsap.ticker.remove(tick);
       lenis.destroy();
+      lenisRef.current = null;
     };
   }, []);
 

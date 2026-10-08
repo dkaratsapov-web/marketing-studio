@@ -1,0 +1,164 @@
+/* Поп-ап брифа: затемнение с размытием, панель выезжает шторкой снизу */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: calc(1rem + env(safe-area-inset-top, 0px)) var(--gutter)
+    calc(1rem + env(safe-area-inset-bottom, 0px));
+  background: rgb(5 5 5 / 0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: fadeIn 0.35s var(--ease-out);
+}
+
+.overlay[data-closing] {
+  animation: fadeOut 0.38s var(--ease-out) forwards;
+}
+
+.panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  width: min(100%, 72rem);
+  padding: clamp(1.5rem, 3.5vw, 3rem);
+  border-top: 2px solid var(--lime);
+  background: var(--ink-950);
+  box-shadow: 0 40px 120px -40px rgb(0 0 0 / 0.8);
+  animation: rollUp 0.6s var(--ease-snap);
+}
+
+.overlay[data-closing] .panel {
+  animation: rollDown 0.38s var(--ease-snap) forwards;
+}
+
+/* Шторка: панель поднимается и раскрывается снизу вверх */
+@keyframes rollUp {
+  from {
+    transform: translateY(40px);
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    transform: none;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes rollDown {
+  to {
+    transform: translateY(30px);
+    clip-path: inset(100% 0 0 0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+.close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  transition:
+    background-color 0.3s var(--ease-out),
+    transform 0.4s var(--ease-stamp);
+}
+
+.close span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1rem;
+  height: 1.5px;
+  background: var(--white);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.close span + span {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.close:hover {
+  background: var(--pink);
+  transform: rotate(90deg);
+}
+
+.head {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.6rem + 3.6vw, 5rem);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+}
+
+.lead {
+  max-width: 30ch;
+  color: var(--muted);
+  font-size: var(--step-1);
+  line-height: 1.4;
+}
+
+.direct {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+
+.directLink {
+  width: fit-content;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-1);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  transition: color 0.3s var(--ease-out);
+}
+
+.directLink:hover {
+  color: var(--lime);
+}
+
+/* Форма в поп-апе занимает свою колонку целиком */
+.form > * {
+  grid-column: auto !important;
+}
+
+@media (max-width: 860px) {
+  .overlay {
+    place-items: end stretch;
+    padding: 0;
+  }
+
+  .panel {
+    grid-template-columns: 1fr;
+    width: 100%;
+    max-height: 100dvh;
+    overflow-y: auto;
+    padding-top: 3.5rem;
+  }
+
+  .direct {
+    display: none;
+  }
+}

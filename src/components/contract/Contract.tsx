@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { TARIFFS } from "@/content/offer";
+import { openBrief } from "@/components/brief/briefBus";
 import styles from "./Contract.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -68,7 +69,7 @@ export default function Contract() {
 
   const onRowClick = (i: number) => {
     if (fine) {
-      document.getElementById("brief")?.scrollIntoView({ behavior: "smooth" });
+      openBrief(TARIFFS[i].name);
       return;
     }
     setOpen((cur) => (cur === i ? null : i));
@@ -152,7 +153,11 @@ export default function Contract() {
                       <div className={styles.side}>
                         <p className="label">На выходе</p>
                         <p className={styles.outcome}>{t.outcome}</p>
-                        <a href="#brief" className="btn btn--primary">
+                        <a
+                          href="#brief"
+                          data-service={t.name}
+                          className="btn btn--primary"
+                        >
                           Обсудить
                         </a>
                       </div>

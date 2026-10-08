@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geologica, Golos_Text, IBM_Plex_Mono } from "next/font/google";
 import SmoothScroll from "@/components/SmoothScroll";
 import Cursor from "@/components/Cursor";
+import BriefModal from "@/components/brief/BriefModal";
 import "./globals.css";
 
 const display = Geologica({
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SmoothScroll />
         <Cursor />
         {children}
+        <BriefModal />
       </body>
     </html>
   );

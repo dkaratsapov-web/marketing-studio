@@ -72,6 +72,15 @@
   transition: transform 0.5s var(--ease-out);
 }
 
+.service {
+  margin-top: 0.9rem;
+  font-weight: 600;
+}
+
+.service :global(.label) {
+  margin-right: 0.5rem;
+}
+
 .counter {
   margin-top: 0.9rem;
 }
