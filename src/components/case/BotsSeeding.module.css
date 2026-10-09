@@ -1,0 +1,298 @@
+/* Тёмный блок: ссылка с кодом крупно, путь человека, волны и снимки */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  gap: clamp(2.5rem, 7vh, 4.5rem);
+}
+
+.head {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 1rem;
+  align-items: end;
+}
+
+.head > :global(.label) {
+  grid-column: 1 / -1;
+  color: var(--lime);
+}
+
+.title {
+  grid-column: 1 / span 7;
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.dotMark {
+  color: var(--pink);
+}
+
+.lead {
+  grid-column: 8 / -1;
+  max-width: 46ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Ссылка: моноширинная строка, части кода подсвечиваются маркером */
+.link {
+  display: grid;
+  gap: 1.25rem;
+  margin: 0;
+  padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1.25rem, 3vw, 2.5rem) clamp(3rem, 6vw, 4.5rem);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--bg-raised);
+}
+
+.url {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  row-gap: 3.5rem;
+  font-family: var(--ff-mono);
+  font-size: clamp(1.1rem, 0.6rem + 2.2vw, 2.6rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.base {
+  color: var(--muted);
+}
+
+.code {
+  --mark: 1;
+  --c: var(--lime);
+  position: relative;
+  padding-inline: 0.1em;
+  background: linear-gradient(var(--c), var(--c)) no-repeat 0 100% / calc(var(--mark) * 100%) 100%;
+  color: var(--fg);
+  transition: color 0.2s;
+}
+
+.code[data-kind="file"] {
+  --c: var(--pink);
+}
+
+/* Сноска под частью кода */
+.codeNote {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.6rem);
+  padding-top: 0.6rem;
+  border-top: 2px solid var(--c);
+  color: var(--c);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Путь человека: четыре узла, между ними трубы */
+.path {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.node {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+  padding-right: 2rem;
+}
+
+.nodeNo {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: 0.5rem;
+  border: 2px solid var(--lime);
+  border-radius: 50%;
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 0.8rem;
+}
+
+.node:last-child .nodeNo {
+  background: var(--lime);
+  color: var(--ink-950);
+}
+
+.nodeName {
+  font-size: var(--step-2);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.nodeNote {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.pipe {
+  position: absolute;
+  top: 1.375rem;
+  left: 3.25rem;
+  right: 0.5rem;
+  height: 2px;
+  background: linear-gradient(90deg, var(--lime), rgb(196 245 66 / 0.25));
+  transform-origin: 0 50%;
+}
+
+.bottom {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: start;
+}
+
+.texts {
+  grid-column: 1 / span 5;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.views {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.manager {
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.waves {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.waves ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Волна: полоска растёт от первой к третьей */
+.wave {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.8rem;
+  border-top: 3px solid var(--pink);
+  background: rgb(255 255 255 / 0.04);
+}
+
+.wave:nth-child(2) {
+  border-top-color: var(--lime);
+}
+
+.wave:nth-child(3) {
+  border-top-color: var(--white);
+}
+
+.waveName {
+  font-weight: 600;
+}
+
+.waveNote {
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.35;
+}
+
+.shots {
+  grid-column: 7 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.42fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: end;
+}
+
+.shot {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: zoom-in;
+}
+
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.shot[data-phone] img {
+  border-radius: 14%;
+}
+
+.shot:hover img {
+  transform: translateY(-4px);
+}
+
+.shot:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 4px;
+}
+
+.shotName {
+  margin-top: 0.4rem;
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.shotNote {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+@media (max-width: 960px) {
+  .title,
+  .lead,
+  .texts,
+  .shots {
+    grid-column: 1 / -1;
+  }
+
+  .path {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 2rem;
+  }
+
+  .node:nth-child(2) .pipe {
+    display: none;
+  }
+
+  .codeNote {
+    white-space: normal;
+    width: 12ch;
+  }
+}
