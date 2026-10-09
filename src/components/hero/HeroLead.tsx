@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { phoneOk, sendLead } from "@/lib/lead";
+import { maskPhone, phoneBlur, phoneFocus, phoneOk, sendLead } from "@/lib/lead";
 import styles from "./HeroLead.module.css";
 
 /** Открытая форма в первом экране: только телефон и кнопка консультации */
@@ -45,8 +45,10 @@ export default function HeroLead() {
           inputMode="tel"
           autoComplete="tel"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="+7 900 000-00-00"
+          onChange={(e) => setPhone((prev) => maskPhone(e.target.value, prev))}
+            onFocus={() => setPhone(phoneFocus)}
+            onBlur={() => setPhone(phoneBlur)}
+          placeholder="+7 (900) 000-00-00"
           aria-invalid={Boolean(error)}
           aria-describedby={`${id}-note`}
         />
