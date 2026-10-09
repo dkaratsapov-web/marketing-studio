@@ -284,16 +284,43 @@
   object-position: 50% 0;
 }
 
-/* Телефон в альбомной папке: целиком, на тёмной подложке */
-.cardImg[data-portrait] {
-  background: var(--ink-800);
+/* Подпись папки поверх фрагмента: тёмная плашка снизу, имя крупно, цифра салатовым */
+.cardImg {
+  position: relative;
 }
 
-.cardImg[data-portrait] img {
-  object-fit: contain;
-  padding-block: 4%;
+.cardLabel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 2.4rem 1rem 0.8rem;
+  background: linear-gradient(to top, rgb(5 5 5 / 0.92) 35%, transparent);
+  color: var(--white);
 }
 
+.cardName {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(1.3rem, 0.9rem + 1.2vw, 2.1rem);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.cardFact {
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 
 .finale {
   display: none;

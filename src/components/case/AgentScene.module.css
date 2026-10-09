@@ -1,0 +1,422 @@
+/* Светлый блок: слева про агента, справа его интерфейс (тёмная карточка на белом).
+   Ниже границы агента пломбами и пояснения */
+.section {
+  padding-bottom: var(--section-y);
+}
+
+.stage {
+  padding-block: var(--section-y) clamp(3rem, 8vh, 5rem);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: center;
+}
+
+.copy {
+  grid-column: 1 / span 5;
+  display: grid;
+  gap: 1.1rem;
+}
+
+.title {
+  font-size: clamp(2.4rem, 1.2rem + 3.8vw, 5.4rem);
+  line-height: 0.93;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
+}
+
+.dotMark {
+  color: var(--pink-deep);
+}
+
+.lead {
+  max-width: 46ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.can {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--fg);
+  border-radius: 2px;
+  font-size: var(--step--1);
+}
+
+/* Интерфейс агента */
+.uiWrap {
+  grid-column: 7 / -1;
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.ui {
+  position: relative;
+  display: grid;
+  gap: 0.9rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border-radius: 14px;
+  background: var(--ink-900);
+  color: var(--white);
+  box-shadow: 0 50px 90px -40px rgb(5 5 5 / 0.55);
+  font-size: var(--step--1);
+  overflow: hidden;
+}
+
+.uiHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-1);
+  font-weight: 600;
+}
+
+.uiBadge {
+  padding: 0.2rem 0.5rem;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: 2px;
+  color: var(--grey-400);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
+.card {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 10px;
+  background: var(--ink-800);
+}
+
+.action {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.75rem;
+  min-height: 2.6em;
+  font-size: var(--step-0);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.num {
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 6px;
+  background: var(--pink);
+  color: var(--ink-950);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.caret {
+  display: none;
+}
+
+.rows {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding-left: 2.35rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  line-height: 1.4;
+}
+
+.row dt {
+  color: var(--grey-400);
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-top: 0.15rem;
+}
+
+.row dd {
+  margin: 0;
+  color: rgb(255 255 255 / 0.85);
+}
+
+.row[data-risk] dt {
+  color: #f0b44c;
+}
+
+.cmdLine {
+  margin-left: 2.35rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 0.05);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--lime);
+  overflow-wrap: anywhere;
+}
+
+.cmdLine b {
+  color: var(--white);
+  font-family: var(--ff-body);
+  font-weight: 600;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.no,
+.yes {
+  padding: 0.55rem 0.9rem;
+  border-radius: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.no {
+  color: var(--grey-400);
+}
+
+/* Кнопка «Согласен»: после клика заливается салатовым */
+.yes {
+  --done: 0;
+  position: relative;
+  isolation: isolate;
+  background: var(--pink);
+  color: var(--ink-950);
+}
+
+.yes::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--lime);
+  opacity: var(--done);
+}
+
+.extra {
+  overflow: hidden;
+}
+
+.rule,
+.log {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.85rem 1.1rem;
+  border-radius: 10px;
+  border: 1px dashed rgb(255 255 255 / 0.18);
+  line-height: 1.45;
+}
+
+.extraLabel {
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.logRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.undo {
+  --pulse: 0;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--lime);
+  border-radius: 6px;
+  color: var(--lime);
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 0 0 calc(var(--pulse) * 6px) rgb(196 245 66 / 0.25);
+}
+
+.pointer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: 26px;
+  height: 26px;
+  filter: drop-shadow(0 4px 8px rgb(0 0 0 / 0.5));
+  pointer-events: none;
+}
+
+.uiNote {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+/* Границы и пояснения */
+.bottom {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2rem;
+  padding-top: clamp(2rem, 5vh, 3.5rem);
+}
+
+.limits {
+  grid-column: 1 / span 7;
+  display: grid;
+  gap: 1rem;
+}
+
+.limitsLabel {
+  color: var(--pink-deep);
+}
+
+.limitsLead {
+  max-width: 48ch;
+  font-size: var(--step-1);
+  line-height: 1.4;
+}
+
+.seals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Пломба: круглая печать с числом */
+.seal {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.35rem;
+  aspect-ratio: 1;
+  padding: 0.75rem;
+  border: 2px solid var(--fg);
+  border-radius: 50%;
+  text-align: center;
+  rotate: -4deg;
+  box-shadow: inset 0 0 0 5px var(--bg), inset 0 0 0 6px var(--fg);
+}
+
+.seal:nth-child(2n) {
+  rotate: 3deg;
+  border-color: var(--pink-deep);
+  color: var(--pink-deep);
+  box-shadow: inset 0 0 0 5px var(--bg), inset 0 0 0 6px var(--pink-deep);
+}
+
+.sealValue {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(1.4rem, 0.8rem + 1.6vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.sealLabel {
+  max-width: 11ch;
+  font-family: var(--ff-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.notes {
+  grid-column: 9 / -1;
+  align-self: end;
+  display: grid;
+  gap: 1rem;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.notes p:first-child {
+  color: var(--fg);
+}
+
+/* Закреплённая сцена: всё в одно окно */
+@media (min-width: 961px) and (min-height: 640px) and (prefers-reduced-motion: no-preference) {
+  .stage {
+    display: flex;
+    align-items: center;
+    min-height: 100svh;
+    padding-block: calc(4.5rem + clamp(1rem, 3vh, 2rem)) clamp(1rem, 3vh, 2rem);
+  }
+
+  .stage > .grid {
+    width: 100%;
+  }
+
+  .title {
+    font-size: min(clamp(2.4rem, 1.2rem + 3.8vw, 5.4rem), 8.5svh);
+  }
+
+  @media (max-height: 820px) {
+    .lead {
+      font-size: var(--step--1);
+    }
+  }
+}
+
+@media (max-width: 960px) {
+  .copy,
+  .uiWrap,
+  .limits,
+  .notes {
+    grid-column: 1 / -1;
+  }
+
+  .seals {
+    grid-template-columns: repeat(2, minmax(0, 8.5rem));
+  }
+
+  .rows,
+  .cmdLine {
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.1rem;
+  }
+}

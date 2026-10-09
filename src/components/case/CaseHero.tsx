@@ -69,9 +69,16 @@ export default function CaseHero({ data }: Props) {
         // Финальная раскладка: сетка 3 × 2 под заголовком финала, папки настолько крупные, насколько влезают
         const cardH = () => cards[0].offsetHeight;
         const gridScale = () =>
-          Math.min(1, (W() * 0.8 - gap() * 2) / 3 / cardW(), (H() * 0.58 - gap()) / 2 / cardH());
-        const gridX = (i: number) => W() / 2 + ((i % 3) - 1) * (cardW() * gridScale() + gap());
-        const gridY = (i: number) => H() * 0.66 + (Math.floor(i / 3) - 0.5) * (cardH() * gridScale() + gap());
+          Math.min(
+            1,
+            (W() * 0.8 - gap() * 2) / 3 / cardW(),
+            (H() * 0.58 - gap()) / 2 / cardH(),
+          );
+        const gridX = (i: number) =>
+          W() / 2 + ((i % 3) - 1) * (cardW() * gridScale() + gap());
+        const gridY = (i: number) =>
+          H() * 0.66 +
+          (Math.floor(i / 3) - 0.5) * (cardH() * gridScale() + gap());
 
         // Стопка лежит справа внизу, верхняя папка («Сайт») последняя в DOM-порядке не нужна: задаём zIndex
         gsap.set(cards, {
@@ -222,17 +229,18 @@ export default function CaseHero({ data }: Props) {
               <figcaption className={styles.cardTab}>
                 <span>{String(i + 1).padStart(2, "0")}</span> {p.name}
               </figcaption>
-              <div
-                className={styles.cardImg}
-                data-portrait={p.img.height > p.img.width || undefined}
-              >
+              <div className={styles.cardImg}>
                 <Image
                   src={p.img}
                   alt={p.alt}
                   sizes="(max-width: 960px) 80vw, 40vw"
                   priority={i < 2}
-                  placeholder="empty"
                 />
+                {/* Подпись читается всегда: снимок под ней работает фактурой */}
+                <p className={styles.cardLabel} aria-hidden="true">
+                  <span className={styles.cardName}>{p.name}</span>
+                  <span className={styles.cardFact}>{p.fact}</span>
+                </p>
               </div>
             </div>
           </figure>

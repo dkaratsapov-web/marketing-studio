@@ -32,8 +32,17 @@ export default function CaseBrief({ brief, client }: Props) {
       words.forEach((w, i) => {
         const next = words[(i + 1) % words.length];
         loop
-          .to(w, { yPercent: -105, duration: 0.6, ease: "power3.inOut" }, "+=1.3")
-          .fromTo(next, { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "power3.inOut" }, "<");
+          .to(
+            w,
+            { yPercent: -105, duration: 0.6, ease: "power3.inOut" },
+            "+=1.3",
+          )
+          .fromTo(
+            next,
+            { yPercent: 105 },
+            { yPercent: 0, duration: 0.6, ease: "power3.inOut" },
+            "<",
+          );
       });
       ScrollTrigger.create({
         trigger: section,
@@ -50,7 +59,13 @@ export default function CaseBrief({ brief, client }: Props) {
         start: "top 88%",
         once: true,
         onEnter: (batch) => {
-          gsap.to(batch, { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.09, ease: "power3.out" });
+          gsap.to(batch, {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.7,
+            stagger: 0.09,
+            ease: "power3.out",
+          });
           gsap.to(
             batch.map((r) => r.querySelector(`.${styles.rule}`)),
             { scaleX: 1, duration: 0.9, stagger: 0.09, ease: "power2.inOut" },
@@ -58,7 +73,15 @@ export default function CaseBrief({ brief, client }: Props) {
           gsap.fromTo(
             batch.map((r) => r.querySelector(`.${styles.count}`)),
             { scale: 1.6, autoAlpha: 0, rotation: -8 },
-            { scale: 1, autoAlpha: 1, rotation: -2, duration: 0.45, stagger: 0.09, delay: 0.35, ease: "back.out(2.2)" },
+            {
+              scale: 1,
+              autoAlpha: 1,
+              rotation: -2,
+              duration: 0.45,
+              stagger: 0.09,
+              delay: 0.35,
+              ease: "back.out(2.2)",
+            },
           );
         },
       });
@@ -67,7 +90,12 @@ export default function CaseBrief({ brief, client }: Props) {
   );
 
   return (
-    <section ref={root} className={styles.section} data-surface="light" aria-labelledby="brief-title">
+    <section
+      ref={root}
+      className={styles.section}
+      data-surface="light"
+      aria-labelledby="brief-title"
+    >
       <div className={`wrap ${styles.grid}`}>
         <div className={styles.about}>
           <p className="label">{brief.label}</p>
@@ -97,12 +125,16 @@ export default function CaseBrief({ brief, client }: Props) {
         <div className={styles.inventory}>
           <p className={`label ${styles.invLabel}`}>
             <span>{brief.inventoryLabel}</span>
-            <span>{String(brief.inventory.length).padStart(2, "0")} частей</span>
+            <span>
+              {String(brief.inventory.length).padStart(2, "0")} частей
+            </span>
           </p>
           <ol className={styles.rows}>
             {brief.inventory.map((it, i) => (
               <li key={it.name} className={styles.row}>
-                <span className={styles.num}>{String(i + 1).padStart(2, "0")}</span>
+                <span className={styles.num}>
+                  {String(i + 1).padStart(2, "0")}
+                </span>
                 <span className={styles.name}>
                   {it.name}
                   <span className={styles.note}>{it.note}</span>

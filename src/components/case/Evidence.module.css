@@ -1,0 +1,284 @@
+/* Светлый блок: источники с проводами к таблице «Стыка», ниже три улики с печатями */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  gap: clamp(2.5rem, 6vh, 4.5rem);
+}
+
+.head {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 1rem;
+  align-items: end;
+}
+
+.head > :global(.label) {
+  grid-column: 1 / -1;
+}
+
+.title {
+  grid-column: 1 / span 7;
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.dotMark {
+  color: var(--pink-deep);
+}
+
+.lead {
+  grid-column: 8 / -1;
+  max-width: 46ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Источники и таблица: провода тянутся слева направо */
+.joint {
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.32fr) minmax(0, 1fr);
+  align-items: center;
+}
+
+.sources {
+  display: grid;
+  gap: clamp(1.5rem, 5vh, 3rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.source {
+  display: grid;
+  grid-template-columns: auto minmax(2rem, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 1rem;
+}
+
+.srcName {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-3);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.srcWhat {
+  grid-row: 2;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.04em;
+}
+
+/* Провод: линия с точкой-штекером на конце */
+.wire {
+  grid-row: 1;
+  grid-column: 2;
+  position: relative;
+  height: 2px;
+  background: var(--fg);
+  transform-origin: 0 50%;
+}
+
+.wire::after {
+  content: "";
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  translate: 0 -50%;
+  border-radius: 50%;
+  background: var(--pink-deep);
+}
+
+.source:nth-child(2) .wire::after {
+  background: var(--lime);
+  box-shadow: inset 0 0 0 2px var(--fg);
+}
+
+.shot {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.shotImg {
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 40px 70px -40px rgb(5 5 5 / 0.45);
+}
+
+.shotImg img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.shotNote {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+/* Улики */
+.cluesHead {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: clamp(1.5rem, 4vh, 3rem);
+  border-top: 2px solid var(--fg);
+}
+
+.cluesLabel {
+  color: var(--pink-deep);
+}
+
+.cluesTitle {
+  font-size: var(--step-4);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+}
+
+.cluesLead {
+  max-width: 52ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.clues {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gutter);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clue {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 1.1rem;
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+  border-radius: 2px;
+  background: var(--bg-raised);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.clueNo {
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pink-deep);
+}
+
+/* Что было не так: сначала закрыто плашкой, как в досье */
+.what {
+  position: relative;
+  margin: 0;
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.bar {
+  position: absolute;
+  inset: -0.1em -0.2em;
+  background: var(--ink-950);
+  transform-origin: 100% 50%;
+}
+
+.effect {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+/* Печать «Исправлено»: розовая, с наклоном, умножается на бумагу */
+.stamp {
+  justify-self: end;
+  padding: 0.3rem 0.9rem;
+  border: 3px solid var(--pink-deep);
+  border-radius: 4px;
+  color: var(--pink-deep);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  rotate: -8deg;
+  mix-blend-mode: multiply;
+}
+
+@media (max-width: 960px) {
+  .title,
+  .lead {
+    grid-column: 1 / -1;
+  }
+
+  .joint {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+
+  .sources {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .source {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .srcName {
+    font-size: var(--step-2);
+  }
+
+  /* На телефоне провода идут вниз, к таблице */
+  .wire {
+    grid-row: 3;
+    grid-column: 1;
+    justify-self: start;
+    width: 2px;
+    height: 1.5rem;
+    margin: 0.5rem 0 0 0.4rem;
+    transform-origin: 50% 0;
+  }
+
+  .wire::after {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: -5px;
+    translate: -50% 0;
+  }
+
+  .clues {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    display: none;
+  }
+}

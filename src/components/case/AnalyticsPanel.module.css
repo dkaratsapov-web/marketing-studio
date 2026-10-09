@@ -1,0 +1,237 @@
+/* Тёмный блок: окно аналитики со вкладками. Снимок в рамке, камера наезжает на главное место */
+.section {
+  overflow: hidden;
+}
+
+.stage {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  gap: clamp(1.5rem, 4vh, 3rem);
+}
+
+.head {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 1rem;
+  align-items: end;
+}
+
+.head > :global(.label) {
+  grid-column: 1 / -1;
+  color: var(--lime);
+}
+
+.title {
+  grid-column: 1 / span 6;
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  grid-column: 8 / -1;
+  max-width: 46ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.window {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Вкладки как в настоящей панели: живые (с примером ниже) белые, остальные приглушены */
+.tabs {
+  position: relative;
+  display: flex;
+  gap: clamp(1rem, 2.4vw, 2.5rem);
+  overflow-x: auto;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: none;
+}
+
+.tab {
+  flex: none;
+  color: rgb(255 255 255 / 0.3);
+  font-size: var(--step-0);
+  font-weight: 500;
+  transition: color 0.3s var(--ease-out);
+}
+
+.tab[data-live] {
+  color: var(--muted);
+}
+
+.tab[data-on] {
+  color: var(--fg);
+}
+
+.marker {
+  display: none;
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--lime);
+  box-shadow: 0 0 10px rgb(196 245 66 / 0.7);
+}
+
+.steps {
+  display: grid;
+  gap: 3.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 1.25rem;
+  align-items: start;
+}
+
+/* Рамка-окно: внутри снимок, который двигает камера */
+.frame {
+  grid-column: 1 / span 8;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  background: #f1f2f6;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.1),
+    0 40px 80px -40px rgb(0 0 0 / 0.9);
+}
+
+.img {
+  width: 100%;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.img img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Видоискатель: салатовые уголки по центру, когда камера навелась */
+.focus {
+  position: absolute;
+  inset: 18% 22%;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--lime), var(--lime)) 0 0 / 1.6rem 3px,
+    linear-gradient(var(--lime), var(--lime)) 0 0 / 3px 1.6rem,
+    linear-gradient(var(--lime), var(--lime)) 100% 0 / 1.6rem 3px,
+    linear-gradient(var(--lime), var(--lime)) 100% 0 / 3px 1.6rem,
+    linear-gradient(var(--lime), var(--lime)) 0 100% / 1.6rem 3px,
+    linear-gradient(var(--lime), var(--lime)) 0 100% / 3px 1.6rem,
+    linear-gradient(var(--lime), var(--lime)) 100% 100% / 1.6rem 3px,
+    linear-gradient(var(--lime), var(--lime)) 100% 100% / 3px 1.6rem;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 0 6px rgb(196 245 66 / 0.6));
+}
+
+.copy {
+  grid-column: 9 / -1;
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+.stepTab {
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stepTitle {
+  font-size: var(--step-3);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.stepText {
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.note {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+/* Закреплённая сцена: вкладки сменяют друг друга на месте */
+@media (min-width: 961px) and (min-height: 640px) and (prefers-reduced-motion: no-preference) {
+  .stage {
+    display: flex;
+    align-items: center;
+    min-height: 100svh;
+    padding-block: calc(4.5rem + clamp(1rem, 3vh, 2rem)) clamp(1rem, 3vh, 2rem);
+  }
+
+  .stage > .grid {
+    width: 100%;
+  }
+
+  .title {
+    font-size: min(clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem), 9svh);
+  }
+
+  .marker {
+    display: block;
+  }
+
+  .steps {
+    display: grid;
+  }
+
+  .step {
+    grid-area: 1 / 1;
+  }
+
+  /* До скрипта видна только первая вкладка, остальные проявит таймлайн */
+  .step + .step {
+    visibility: hidden;
+  }
+
+  .frame {
+    aspect-ratio: auto;
+    height: clamp(15rem, 100svh - 4.5rem - 21rem, 38rem);
+  }
+}
+
+@media (max-width: 960px) {
+  .title,
+  .lead,
+  .frame,
+  .copy {
+    grid-column: 1 / -1;
+  }
+
+  .frame {
+    aspect-ratio: 4 / 3;
+  }
+
+  .focus {
+    display: none;
+  }
+}
