@@ -1,0 +1,73 @@
+name: Deploy to VPS (marketing-studio.pro)
+
+# Каждый пуш в main собирает сайт под корень домена и заливает его на VPS.
+# Пока в репозитории нет секретов VPS_HOST / VPS_USER / VPS_SSH_KEY, workflow ничего не делает.
+# Сервер настраивается один раз скриптом deploy/setup-server.sh.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vps-deploy
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.secrets.outputs.enabled }}
+    steps:
+      - id: secrets
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: echo "enabled=$([ -n "$VPS_HOST" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: check
+    if: needs.check.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: vps
+      url: https://marketing-studio.pro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      # Сайт живёт в корне домена, поэтому basePath пустой
+      - run: npm run build
+        env:
+          PAGES_BASE_PATH: ""
+
+      - name: SSH key
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Upload site
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          rsync -az --delete --delay-updates \
+            -e "ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes" \
+            out/ "$VPS_USER@$VPS_HOST:/var/www/marketing-studio/"
+
+      - name: Smoke test
+        run: |
+          sleep 2
+          curl -fsS -o /dev/null -w "https://marketing-studio.pro -> %{http_code}\n" https://marketing-studio.pro/ \
+            || curl -fsS -o /dev/null -w "http://${{ secrets.VPS_HOST }} -> %{http_code}\n" "http://${{ secrets.VPS_HOST }}/"
