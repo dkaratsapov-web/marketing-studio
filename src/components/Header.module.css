@@ -140,6 +140,147 @@
   transform: translateY(-100%);
 }
 
+/* «Отделы» с выпадающим меню страниц отделов */
+.navItem {
+  position: relative;
+  display: inline-flex;
+}
+
+.chevron {
+  width: 0.6rem;
+  height: 0.4rem;
+  margin-left: 0.35rem;
+  vertical-align: 0.15em;
+  transition: transform 0.35s var(--ease-out);
+}
+
+.navItem:is(:hover, :focus-within) .chevron {
+  transform: rotate(180deg);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 1.1rem);
+  left: -1.4rem;
+  z-index: 10;
+  display: grid;
+  gap: 0.75rem;
+  width: 23rem;
+  padding: 1.1rem 0.75rem 0.85rem;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 1.1rem;
+  background: rgb(12 12 13 / 0.96);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.9);
+  color: var(--fg);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition:
+    opacity 0.25s var(--ease-out),
+    transform 0.35s var(--ease-out),
+    visibility 0s linear 0.35s;
+}
+
+/* Невидимый мостик над меню: курсор не теряет наведение, пока идёт от пункта к меню */
+.menu::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1.2rem;
+  height: 1.2rem;
+}
+
+.navItem:is(:hover, :focus-within) .menu {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 0.25s var(--ease-out),
+    transform 0.35s var(--ease-out),
+    visibility 0s;
+}
+
+.menuLabel {
+  padding-inline: 0.6rem;
+}
+
+.menuList {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menuLink {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 1rem;
+  padding: 0.6rem 0.6rem;
+  border-radius: 0.65rem;
+  transition: background-color 0.25s var(--ease-out);
+}
+
+a.menuLink:is(:hover, :focus-visible),
+a.menuLink[aria-current="page"] {
+  background: rgb(196 245 66 / 0.1);
+}
+
+.menuName {
+  grid-column: 1;
+  font-weight: 600;
+  font-size: 0.98rem;
+}
+
+.menuNote {
+  grid-column: 1;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.menuArrow {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  color: var(--lime);
+  transition: transform 0.3s var(--ease-out);
+}
+
+a.menuLink:hover .menuArrow {
+  transform: translateX(4px);
+}
+
+.menuSoon .menuName {
+  color: rgb(255 255 255 / 0.45);
+}
+
+.soonTag {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 999px;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.menuAll {
+  padding: 0.7rem 0.6rem 0.2rem;
+  border-top: 1px solid rgb(255 255 255 / 0.08);
+  color: var(--muted);
+  font-size: 0.85rem;
+  transition: color 0.25s var(--ease-out);
+}
+
+.menuAll:hover {
+  color: var(--fg);
+}
+
 /* Телефоны столбиком, чтобы шапка не распухала */
 .phones {
   display: grid;
@@ -255,6 +396,21 @@
 
 .sheetLink:active {
   color: var(--accent);
+}
+
+.sheetItem {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.sheetSub {
+  justify-self: start;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--lime);
+  border-radius: 999px;
+  color: var(--lime);
+  font-size: var(--step-0);
+  font-weight: 600;
 }
 
 .sheetContacts {

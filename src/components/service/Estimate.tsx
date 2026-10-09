@@ -26,10 +26,12 @@ export default function Estimate({ estimate, head, department }: Props) {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       const tl = gsap.timeline({
         scrollTrigger: {
+          // Печать начинается, как только принтер показался снизу, и заканчивается, пока он ещё в верхней трети:
+          // к моменту, когда блок встаёт по центру, чек уже целиком
           trigger: `.${styles.printer}`,
-          start: "top 78%",
-          end: "bottom 70%",
-          scrub: 0.7,
+          start: "top 95%",
+          end: "top 32%",
+          scrub: 0.5,
         },
       });
       // Верх чека прикреплён к щели, строки проявляются сверху вниз, как при настоящей печати

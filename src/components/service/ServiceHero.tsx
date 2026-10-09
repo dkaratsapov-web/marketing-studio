@@ -180,7 +180,9 @@ export default function ServiceHero({ service, queries }: Props) {
             <dl className={styles.facts}>
               {service.facts.map((f) => (
                 <div key={f.label} className={styles.fact}>
-                  <dt className={styles.factLabel}>{f.label}</dt>
+                  <dt className={styles.factLabel}>
+                    {f.label} <span className={styles.factRef}>{f.ref}</span>
+                  </dt>
                   <dd className={styles.factValue}>{f.value}</dd>
                 </div>
               ))}

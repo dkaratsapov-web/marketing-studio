@@ -3,7 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "./Logo";
 import { PHONES, TELEGRAM } from "@/content/contacts";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import HomeLink from "@/components/HomeLink";
+import { SERVICE_MENU } from "@/content/services";
 import styles from "./Header.module.css";
 
 const NAV = [
@@ -26,6 +29,7 @@ export default function Header() {
   const [surface, setSurface] = useState<"dark" | "light">("dark");
   const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   // Тема шапки повторяет поверхность секции, над которой она висит.
   useEffect(() => {
@@ -87,13 +91,58 @@ export default function Header() {
         </HomeLink>
 
         <nav className={styles.nav} aria-label="Основная навигация">
-          {NAV.map((item) => (
-            <HomeLink key={item.href} hash={item.href} className={styles.link}>
-              <span className={styles.linkText} data-text={item.label}>
-                {item.label}
-              </span>
-            </HomeLink>
-          ))}
+          {NAV.map((item) =>
+            item.href === "#departments" ? (
+              // «Отделы» раскрываются меню страниц отделов: по наведению и по фокусу с клавиатуры
+              <div key={item.href} className={styles.navItem}>
+                <HomeLink hash={item.href} className={styles.link} aria-haspopup="true">
+                  <span className={styles.linkText} data-text={item.label}>
+                    {item.label}
+                  </span>
+                  <svg className={styles.chevron} viewBox="0 0 10 6" aria-hidden="true">
+                    <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.4" />
+                  </svg>
+                </HomeLink>
+                <div className={styles.menu} data-surface="dark">
+                  <p className={`label ${styles.menuLabel}`}>Страницы отделов</p>
+                  <ul className={styles.menuList}>
+                    {SERVICE_MENU.map((s) => (
+                      <li key={s.name}>
+                        {s.href ? (
+                          <Link
+                            href={s.href}
+                            className={styles.menuLink}
+                            aria-current={pathname === s.href ? "page" : undefined}
+                          >
+                            <span className={styles.menuName}>{s.name}</span>
+                            <span className={styles.menuNote}>{s.note}</span>
+                            <span className={styles.menuArrow} aria-hidden="true">
+                              →
+                            </span>
+                          </Link>
+                        ) : (
+                          <span className={`${styles.menuLink} ${styles.menuSoon}`}>
+                            <span className={styles.menuName}>{s.name}</span>
+                            <span className={styles.menuNote}>{s.note}</span>
+                            <span className={styles.soonTag}>скоро</span>
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                  <HomeLink hash="#departments" className={styles.menuAll}>
+                    Все отделы на главной
+                  </HomeLink>
+                </div>
+              </div>
+            ) : (
+              <HomeLink key={item.href} hash={item.href} className={styles.link}>
+                <span className={styles.linkText} data-text={item.label}>
+                  {item.label}
+                </span>
+              </HomeLink>
+            ),
+          )}
         </nav>
 
         <div className={styles.phones}>
@@ -135,14 +184,23 @@ export default function Header() {
       <div id="mobile-nav" className={styles.sheet} hidden={!open}>
         <nav className={styles.sheetNav} aria-label="Мобильная навигация">
           {NAV.map((item) => (
-            <HomeLink
-              key={item.href}
-              hash={item.href}
-              className={styles.sheetLink}
-              onClick={() => setOpen(false)}
-            >
-              {item.label}
-            </HomeLink>
+            <div key={item.href} className={styles.sheetItem}>
+              <HomeLink hash={item.href} className={styles.sheetLink} onClick={() => setOpen(false)}>
+                {item.label}
+              </HomeLink>
+              {item.href === "#departments"
+                ? SERVICE_MENU.filter((s) => s.href).map((s) => (
+                    <Link
+                      key={s.name}
+                      href={s.href!}
+                      className={styles.sheetSub}
+                      onClick={() => setOpen(false)}
+                    >
+                      {s.name} →
+                    </Link>
+                  ))
+                : null}
+            </div>
           ))}
         </nav>
         <div className={styles.sheetContacts}>
