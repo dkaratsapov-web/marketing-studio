@@ -1,0 +1,381 @@
+/* Тёмный блок-тренажёр: слева список запросов как отчёт о поисковых запросах,
+   справа (на телефоне сверху, прилипая) список минус-слов со счётчиком */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  gap: clamp(2rem, 5vh, 3.5rem);
+}
+
+.head {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 1rem;
+  align-items: end;
+}
+
+.head > :global(.label) {
+  grid-column: 1 / -1;
+  color: var(--lime);
+}
+
+.title {
+  grid-column: 1 / span 7;
+  font-size: clamp(2.6rem, 1.2rem + 4.6vw, 6.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.dotMark {
+  color: var(--pink);
+}
+
+.lead {
+  grid-column: 8 / -1;
+  max-width: 46ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  align-items: start;
+}
+
+.list {
+  grid-column: 1 / span 8;
+  grid-row: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.row {
+  border-bottom: 1px solid var(--line);
+}
+
+.query {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  min-height: 3.75rem;
+  padding: 0.9rem 0.75rem;
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--step-1);
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.3s var(--ease-out);
+}
+
+@media (hover: hover) {
+  .query:hover {
+    background: rgb(255 255 255 / 0.04);
+  }
+
+  .query:hover .tag {
+    border-color: rgb(255 255 255 / 0.35);
+    color: var(--fg);
+  }
+}
+
+.query:active {
+  transform: translateY(1px);
+}
+
+.query:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: -2px;
+}
+
+/* Лупа как в строке поиска: кружок и ручка из рамок */
+.loupe {
+  position: relative;
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 1.5px solid var(--muted);
+  border-radius: 50%;
+}
+
+.loupe::after {
+  content: "";
+  position: absolute;
+  right: -0.32rem;
+  bottom: -0.3rem;
+  width: 0.38rem;
+  height: 1.5px;
+  background: var(--muted);
+  rotate: 45deg;
+}
+
+.qText {
+  min-width: 0;
+  transition:
+    color 0.4s var(--ease-out),
+    opacity 0.4s var(--ease-out);
+}
+
+/* Минус-слово: когда запрос отмечен, слово горит розовым, а сам запрос гаснет */
+.word {
+  border-radius: 2px;
+  transition:
+    background-color 0.3s var(--ease-out),
+    color 0.3s var(--ease-out),
+    box-shadow 0.3s var(--ease-out);
+}
+
+.query[data-state="found"] .qText {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: rgb(255 77 157 / 0.6);
+  text-decoration-thickness: 2px;
+}
+
+.query[data-state="found"] .word {
+  background: var(--pink);
+  color: var(--ink-950);
+  box-shadow: 0 0 0 0.15em var(--pink);
+  text-decoration: none;
+}
+
+.tag {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition:
+    border-color 0.3s var(--ease-out),
+    color 0.3s var(--ease-out),
+    background-color 0.3s var(--ease-out);
+}
+
+.query[data-state="found"] .tag {
+  border-color: var(--pink);
+  color: var(--pink);
+}
+
+.query[data-state="kept"] .tag {
+  border-color: var(--lime);
+  background: var(--lime);
+  color: var(--ink-950);
+}
+
+.keep {
+  margin: -0.35rem 0 0;
+  padding: 0 0.75rem 0.9rem calc(0.75rem + 0.85rem + 1rem);
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.04em;
+  animation: keepIn 0.5s var(--ease-out) both;
+}
+
+@keyframes keepIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+/* Панель минус-слов: документ кампании. Прилипает, пока листаешь запросы */
+.panel {
+  grid-column: 9 / -1;
+  grid-row: 1;
+  position: sticky;
+  top: calc(4.5rem + 1.5rem);
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1.1rem, 2vw, 1.6rem);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--bg-raised);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+.panelHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.panelLabel {
+  max-width: 22ch;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.counter {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-weight: 650;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.counterValue {
+  color: var(--pink);
+  font-size: clamp(3rem, 2rem + 3vw, 4.6rem);
+}
+
+.counterTotal {
+  color: var(--muted);
+  font-size: var(--step-2);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 0.5rem;
+  min-height: 5.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  --flash: 0;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--pink);
+  border-radius: 2px;
+  background: rgb(255 77 157 / calc(0.12 + var(--flash) * 0.5));
+  color: var(--pink);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.04em;
+  box-shadow: 0 0 calc(var(--flash) * 18px) rgb(255 77 157 / 0.7);
+}
+
+.empty {
+  align-self: center;
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.panelFoot {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.done {
+  color: var(--fg);
+  font-size: var(--step-0);
+  line-height: 1.5;
+  animation: keepIn 0.6s var(--ease-out) both;
+}
+
+.linkBtn {
+  justify-self: start;
+  padding: 0.35rem 0;
+  border: 0;
+  background: none;
+  color: var(--lime);
+  font: inherit;
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition: text-underline-offset 0.3s var(--ease-out);
+}
+
+.linkBtn:hover {
+  text-underline-offset: 0.45em;
+}
+
+.linkBtn:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
+}
+
+@media (max-width: 960px) {
+  .title,
+  .lead {
+    grid-column: 1 / -1;
+  }
+
+  .list,
+  .panel {
+    grid-column: 1 / -1;
+  }
+
+  .list {
+    grid-row: 2;
+  }
+
+  /* На телефоне список минус-слов прилипает под шапкой: видно, как прилетают чипы */
+  .panel {
+    z-index: 2;
+    top: calc(4rem + env(safe-area-inset-top, 0px));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 0.9rem 1rem;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 12px 24px rgb(5 5 5 / 0.6);
+  }
+
+  .counterValue {
+    font-size: 2.6rem;
+  }
+
+  .chips {
+    min-height: 2.2rem;
+  }
+
+  .panelFoot {
+    padding-top: 0.75rem;
+  }
+
+  .query {
+    gap: 0.75rem;
+    padding-inline: 0.25rem;
+    font-size: var(--step-0);
+  }
+
+  .keep {
+    padding-left: calc(0.25rem + 0.85rem + 0.75rem);
+  }
+}
+
+@media (max-width: 520px) {
+  .query {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .tag {
+    display: none;
+  }
+}

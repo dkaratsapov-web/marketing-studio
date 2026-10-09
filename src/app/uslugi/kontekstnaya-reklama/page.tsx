@@ -4,6 +4,9 @@ import Footer from "@/components/footer/Footer";
 import ServiceHero from "@/components/service/ServiceHero";
 import NotClicks from "@/components/service/NotClicks";
 import Estimate from "@/components/service/Estimate";
+import Campaigns from "@/components/service/Campaigns";
+import MinusWords from "@/components/service/MinusWords";
+import Calendar from "@/components/service/Calendar";
 import Seam from "@/components/seam/Seam";
 import { CONTEXT } from "@/content/services";
 
@@ -24,6 +27,12 @@ export default function ContextPage() {
         <NotClicks report={CONTEXT.report} />
         <Seam from="light" to="dark" label="Смета" />
         <Estimate estimate={CONTEXT.estimate} head={CONTEXT.head.name} department={CONTEXT.department} />
+        <Seam from="dark" to="light" label="Кампании" />
+        <Campaigns campaigns={CONTEXT.campaigns} />
+        <Seam from="light" to="dark" label="Минус-слова" />
+        <MinusWords minus={CONTEXT.minus} />
+        <Seam from="dark" to="light" label="Протокол" />
+        <Calendar calendar={CONTEXT.calendar} />
       </main>
       <Footer />
     </>

@@ -298,8 +298,8 @@ canvas {
 
 /* После шва верхний отступ секции короче: подпись шва уже открывает главу */
 @media (prefers-reduced-motion: no-preference) {
-  /* Досье закреплено на весь экран: его отступы не трогаем */
-  [data-seam] + section:not(#dossier) {
+  /* Досье и другие закреплённые на весь экран блоки: их отступы не трогаем */
+  [data-seam] + section:not(#dossier):not([data-pin]) {
     padding-top: calc(var(--section-y) * 0.55);
   }
 }

@@ -1,0 +1,381 @@
+/* Светлый блок: путь клиента через три кампании. Сверху заголовок, под ним дорожка с точкой,
+   под дорожкой три карточки, станции стоят над их левыми краями */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  gap: clamp(1.5rem, 4vh, 3rem);
+}
+
+.head {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 1rem;
+  align-items: end;
+}
+
+.head > :global(.label) {
+  grid-column: 1 / -1;
+}
+
+.title {
+  grid-column: 1 / span 8;
+  font-size: clamp(2.6rem, 1.2rem + 4.6vw, 6.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.dotMark {
+  color: var(--pink-deep);
+}
+
+.lead {
+  grid-column: 9 / -1;
+  max-width: 40ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Дорожка: только на десктопе, на телефоне её заменяет левая линия у карточек */
+.track {
+  display: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+/* Когда клиент дошёл до станции, верхняя линия карточки прочерчивается розовым */
+.card::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--pink-deep);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.7s var(--ease-snap);
+}
+
+.card[data-on]::before {
+  transform: scaleX(1);
+}
+
+.num {
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pink-deep);
+}
+
+.name {
+  font-size: clamp(2.2rem, 1rem + 3.2vw, 4.4rem);
+  font-weight: 650;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+}
+
+.verb {
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.text {
+  max-width: 38ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+/* Пока клиент не дошёл, карточка приглушена: только когда скрипт ведёт сцену */
+.section[data-ready] .card {
+  opacity: 0.3;
+  transform: translateY(10px);
+  transition:
+    opacity 0.6s var(--ease-out),
+    transform 0.6s var(--ease-out);
+}
+
+.section[data-ready] .card[data-on] {
+  opacity: 1;
+  transform: none;
+}
+
+.finishMobile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  justify-self: start;
+  padding: 0.7rem 1.1rem;
+  border-radius: 2px;
+  background: var(--fg);
+  color: var(--bg);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.finishArrow {
+  color: var(--lime);
+}
+
+.section[data-ready] .finishMobile {
+  opacity: 0.3;
+  transition: opacity 0.6s var(--ease-out);
+}
+
+.section[data-ready] .finishMobile[data-on] {
+  opacity: 1;
+}
+
+@media (min-width: 961px) and (min-height: 640px) {
+  .track {
+    display: block;
+    position: relative;
+    height: clamp(7rem, 19vh, 12rem);
+  }
+
+  .finishMobile {
+    display: none;
+  }
+
+  .svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .base,
+  .line {
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  /* Пунктир: путь, который клиенту ещё предстоит */
+  .base {
+    stroke: rgb(5 5 5 / 0.22);
+    stroke-width: 2;
+    stroke-dasharray: 1 9;
+  }
+
+  .line {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+
+  .station,
+  .gap,
+  .finish,
+  .dot {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .station {
+    width: 18px;
+    height: 18px;
+    translate: -50% -50%;
+    border: 2px solid var(--fg);
+    border-radius: 50%;
+    background: var(--bg);
+    transition:
+      background-color 0.35s var(--ease-out),
+      border-color 0.35s var(--ease-out),
+      box-shadow 0.5s var(--ease-out);
+  }
+
+  .station[data-on] {
+    border-color: var(--pink-deep);
+    background: var(--pink-deep);
+    box-shadow: 0 0 0 7px rgb(209 0 106 / 0.14);
+  }
+
+  .gap {
+    font-family: var(--ff-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+
+  /* Сдвиг подписи на внутреннем элементе: внешний двигает скрипт */
+  .gapText {
+    position: absolute;
+    left: 0;
+    translate: -50% 0;
+  }
+
+  .gap[data-side="below"] .gapText {
+    top: 0.7rem;
+  }
+
+  .gap[data-side="above"] .gapText {
+    bottom: 0.7rem;
+  }
+
+  /* Финиш: тёмная плашка «Заявка», загорается салатовой точкой, когда клиент дошёл */
+  .finish {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    translate: 0 -50%;
+    padding: 0.6rem 1rem;
+    border-radius: 2px;
+    background: var(--fg);
+    color: var(--bg);
+    font-family: var(--ff-display);
+    font-variation-settings: "SHRP" 100;
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    transform-origin: 0 50%;
+    transition:
+      opacity 0.4s var(--ease-out),
+      scale 0.5s var(--ease-stamp);
+  }
+
+  .finish::before {
+    content: "";
+    width: 0.42em;
+    height: 0.42em;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.25);
+    transition:
+      background-color 0.3s var(--ease-out),
+      box-shadow 0.3s var(--ease-out);
+  }
+
+  .section[data-ready] .finish {
+    opacity: 0.35;
+  }
+
+  .section[data-ready] .finish[data-on] {
+    opacity: 1;
+    scale: 1.06;
+  }
+
+  .finish[data-on]::before {
+    background: var(--lime);
+    box-shadow: 0 0 12px rgb(196 245 66 / 0.9);
+  }
+
+  .dot {
+    z-index: 1;
+    width: 16px;
+    height: 16px;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: var(--pink-deep);
+    box-shadow:
+      0 0 0 4px var(--bg),
+      0 0 0 6px rgb(209 0 106 / 0.35);
+    will-change: transform;
+  }
+
+  .dotLabel {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    translate: -50% 0;
+    padding: 0.25rem 0.5rem;
+    border-radius: 2px;
+    background: var(--fg);
+    color: var(--bg);
+    font-family: var(--ff-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+}
+
+/* Закреплённый экран: всё в одно окно, заголовок ограничен высотой */
+@media (min-width: 961px) and (min-height: 640px) and (prefers-reduced-motion: no-preference) {
+  .section {
+    display: flex;
+    align-items: center;
+    min-height: 100svh;
+    padding-block: calc(4.5rem + clamp(1rem, 4vh, 2.5rem)) clamp(1.5rem, 5vh, 3rem);
+  }
+
+  .grid {
+    width: 100%;
+  }
+
+  .title {
+    font-size: min(clamp(2.6rem, 1.2rem + 4.6vw, 6.4rem), 10.5svh);
+  }
+
+  .name {
+    font-size: min(clamp(2.2rem, 1rem + 3.2vw, 4.4rem), 7svh);
+  }
+
+  @media (max-height: 800px) {
+    .text {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 960px) {
+  .title,
+  .lead {
+    grid-column: 1 / -1;
+  }
+
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2.25rem;
+  }
+
+  /* Вертикальная лента вместо дорожки: линия слева, у каждой карточки своя станция */
+  .card {
+    padding: 0 0 0 1.75rem;
+    border-top: 0;
+    border-left: 1px solid var(--line);
+  }
+
+  .card::before {
+    top: 0;
+    bottom: 0;
+    left: -1px;
+    right: auto;
+    width: 3px;
+    height: auto;
+    transform: scaleY(0);
+    transform-origin: 50% 0;
+  }
+
+  .card[data-on]::before {
+    transform: scaleY(1);
+  }
+}

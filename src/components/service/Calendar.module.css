@@ -1,0 +1,331 @@
+/* Светлый блок: диаграмма двух недель. Слева названия этапов, справа 14 дней,
+   поверх дней идёт бегунок «сегодня», в углу листается номер дня */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  gap: clamp(2rem, 5vh, 3.5rem);
+}
+
+.head {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 1rem;
+  align-items: end;
+}
+
+.head > :global(.label) {
+  grid-column: 1 / -1;
+}
+
+.title {
+  grid-column: 1 / span 6;
+  font-size: clamp(2.6rem, 1.2rem + 4.6vw, 6.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.dotMark {
+  color: var(--pink-deep);
+}
+
+.lead {
+  grid-column: 7 / span 4;
+  max-width: 40ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Счётчик дня: огромные цифры, как табло */
+.counter {
+  grid-column: 11 / -1;
+  justify-self: end;
+  display: grid;
+  justify-items: end;
+  gap: 0.3rem;
+}
+
+.counterLabel {
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.counterValue {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(3.4rem, 2rem + 4vw, 6.4rem);
+  font-weight: 650;
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.gantt {
+  --lw: clamp(15rem, 26vw, 24rem);
+  --gap: 1.5rem;
+  --t: 14;
+  position: relative;
+}
+
+/* Шкала: недели и дни. Вторая неделя отделена линией потолще */
+.scale {
+  display: grid;
+  gap: 0.4rem;
+  margin-left: calc(var(--lw) + var(--gap));
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--fg);
+}
+
+.weeks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.weeks span + span {
+  padding-left: 0.5rem;
+  border-left: 2px solid var(--fg);
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+}
+
+.day {
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  text-align: center;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.2s var(--ease-out);
+}
+
+.day[data-now] {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+.tasks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task {
+  display: grid;
+  grid-template-columns: var(--lw) minmax(0, 1fr);
+  column-gap: var(--gap);
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+
+.taskName {
+  display: grid;
+  gap: 0.15rem;
+  padding-block: 0.7rem;
+  font-size: var(--step-0);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.taskMeta {
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.task[data-kind="launch"] .taskName,
+.task[data-kind="report"] .taskName {
+  font-weight: 700;
+}
+
+/* Дорожка дня: сетка из 14 клеток, вертикальные линии рисует фон */
+.track {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  align-items: center;
+  align-self: stretch;
+  min-height: 2.6rem;
+  background-image:
+    linear-gradient(to right, transparent calc(50% - 1px), var(--fg) calc(50% - 1px), var(--fg) 50%, transparent 50%),
+    linear-gradient(to right, var(--line) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    calc(100% / 14) 100%;
+}
+
+.bar {
+  grid-row: 1;
+  height: 0.9rem;
+  margin-inline: 3px;
+  border-radius: 2px;
+  background: var(--fg);
+  transform-origin: 0 50%;
+}
+
+/* Запуск: салатовая полоса с тёмной обводкой, чтобы читалась на белом */
+.task[data-kind="launch"] .bar {
+  height: 1.6rem;
+  background: var(--lime);
+  box-shadow: inset 0 0 0 2px var(--fg);
+}
+
+/* Отчёт: розовая отметка-ромб посередине дня */
+.task[data-kind="report"] .bar {
+  justify-self: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  background: var(--pink-deep);
+  rotate: 45deg;
+  transform-origin: 50% 50%;
+}
+
+/* Пока бегунок не дошёл до этапа, его название приглушено */
+.section[data-ready] .taskName {
+  opacity: 0.35;
+  transition: opacity 0.4s var(--ease-out);
+}
+
+.section[data-ready] .task[data-on] .taskName {
+  opacity: 1;
+}
+
+/* Бегунок «сегодня» поверх дорожек */
+.playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--lw) + var(--gap));
+  right: 0;
+  display: none;
+  pointer-events: none;
+}
+
+.section[data-ready] .playhead {
+  display: block;
+}
+
+.playheadLine {
+  position: absolute;
+  top: -0.4rem;
+  bottom: 0;
+  left: calc(var(--t) / 14 * 100%);
+  width: 2px;
+  margin-left: -1px;
+  background: var(--pink-deep);
+}
+
+.playheadLine::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: var(--pink-deep);
+  box-shadow: 0 0 0 5px rgb(209 0 106 / 0.16);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.legend li::before {
+  content: "";
+  width: 1.4rem;
+  height: 0.7rem;
+  border-radius: 2px;
+  background: var(--fg);
+}
+
+.legend [data-kind="launch"]::before {
+  background: var(--lime);
+  box-shadow: inset 0 0 0 2px var(--fg);
+}
+
+.legend [data-kind="report"]::before {
+  width: 0.7rem;
+  margin-inline: 0.35rem;
+  background: var(--pink-deep);
+  rotate: 45deg;
+}
+
+@media (max-width: 960px) {
+  .title {
+    grid-column: 1 / span 9;
+  }
+
+  .counter {
+    grid-column: 10 / -1;
+    grid-row: 2;
+  }
+
+  .lead {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Телефон: название этапа над дорожкой, дорожка на всю ширину */
+@media (max-width: 700px) {
+  .gantt {
+    --lw: 0px;
+    --gap: 0px;
+  }
+
+  .scale {
+    margin-left: 0;
+  }
+
+  .day {
+    font-size: 0.62rem;
+  }
+
+  .task {
+    grid-template-columns: minmax(0, 1fr);
+    padding-bottom: 0.6rem;
+  }
+
+  .taskName {
+    padding-block: 0.7rem 0.4rem;
+  }
+
+  .track {
+    min-height: 1.8rem;
+  }
+
+  .playheadLine {
+    top: 0;
+  }
+}
