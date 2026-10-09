@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 import { gsap } from "gsap";
@@ -146,6 +147,7 @@ export default function Dossier() {
         {CASES.map((c) => (
           <article
             key={c.code}
+            data-cover={c.cover ? "" : undefined}
             data-cursor-label="Листайте вниз"
             className={styles.case}
             aria-labelledby={`case-${c.code}`}
@@ -178,6 +180,30 @@ export default function Dossier() {
                 </Link>
               ) : null}
             </div>
+
+            {c.cover ? (
+              <Link
+                href={c.href ?? "#"}
+                className={styles.cover}
+                data-cursor-label="Открыть"
+                aria-label={`Полное досье: ${c.client}`}
+              >
+                <Image
+                  className={styles.coverSite}
+                  src={c.cover.site}
+                  alt={c.cover.alt}
+                  sizes="(max-width: 960px) 80vw, 34vw"
+                />
+                {c.cover.phone ? (
+                  <Image
+                    className={styles.coverPhone}
+                    src={c.cover.phone}
+                    alt=""
+                    sizes="12vw"
+                  />
+                ) : null}
+              </Link>
+            ) : null}
 
             <dl className={styles.metrics}>
               {c.metrics.map((m, i) => (

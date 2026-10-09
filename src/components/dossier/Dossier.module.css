@@ -178,6 +178,92 @@
   color: var(--lime);
 }
 
+/* Снимки работы в карточке: справа от заголовка, пока дело секретно — размыты */
+.case[data-cover] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.62fr);
+  column-gap: clamp(1.5rem, 3vw, 3rem);
+}
+
+/* Строки задаём явно: шапка, заголовок со снимком, цифры, заметки */
+.case[data-cover] > .meta {
+  grid-area: 1 / 1 / 2 / -1;
+}
+
+.case[data-cover] > .body {
+  grid-area: 2 / 1;
+}
+
+.case[data-cover] > .metrics {
+  grid-area: 3 / 1 / 4 / -1;
+}
+
+.case[data-cover] > .notes {
+  grid-area: 4 / 1 / 5 / -1;
+}
+
+.cover {
+  grid-area: 2 / 2;
+  position: relative;
+  align-self: center;
+  justify-self: end;
+  width: 100%;
+  max-width: calc(min(34svh, 22rem) * 1.52);
+  margin-bottom: 1.5rem;
+}
+
+.coverSite {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  rotate: 2deg;
+  box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.9);
+  filter: blur(10px) grayscale(1);
+  opacity: 0.5;
+  transition:
+    filter 1s var(--ease-out),
+    opacity 1s var(--ease-out),
+    rotate 0.6s var(--ease-out);
+}
+
+.coverPhone {
+  position: absolute;
+  right: -4%;
+  bottom: -14%;
+  width: 26%;
+  height: auto;
+  rotate: -4deg;
+  filter: blur(10px) grayscale(1) drop-shadow(0 20px 30px rgb(0 0 0 / 0.7));
+  opacity: 0.5;
+  transition:
+    filter 1s var(--ease-out) 0.2s,
+    opacity 1s var(--ease-out) 0.2s,
+    rotate 0.6s var(--ease-out);
+}
+
+.case[data-open] .coverSite {
+  filter: none;
+  opacity: 1;
+}
+
+.case[data-open] .coverPhone {
+  filter: drop-shadow(0 20px 30px rgb(0 0 0 / 0.7));
+  opacity: 1;
+}
+
+.cover:hover .coverSite {
+  rotate: 0deg;
+}
+
+.cover:hover .coverPhone {
+  rotate: 0deg;
+}
+
+.cover:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 6px;
+}
+
 /* У дела есть своя страница: ссылка как штамп на папке */
 .openCase {
   display: inline-flex;
@@ -281,6 +367,38 @@
 
   .next {
     width: 86vw;
+  }
+
+  /* На телефоне карточка высотой в экран: снимок становится узкой полосой над заголовком */
+  .case[data-cover] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr auto auto;
+  }
+
+  .case[data-cover] > .body {
+    grid-area: 3 / 1;
+  }
+
+  .case[data-cover] > .metrics {
+    grid-area: 4 / 1;
+  }
+
+  .case[data-cover] > .notes {
+    grid-area: 5 / 1;
+  }
+
+  .cover {
+    grid-area: 2 / 1;
+    justify-self: start;
+    width: 62%;
+    max-width: none;
+    margin: 0;
+  }
+
+  .coverSite {
+    max-height: 16svh;
+    object-fit: cover;
+    object-position: 0 0;
   }
 }
 

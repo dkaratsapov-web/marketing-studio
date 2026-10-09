@@ -3,6 +3,10 @@
  * Цифры реальные, ROI сознательно не публикуем. У дела 004 вместо результатов рекламы
  * производственные цифры проекта: отчётный период не закрыт (материалы кейса «Сфера»).
  */
+import type { StaticImageData } from "next/image";
+import sferaSite from "@/assets/cases/sfera/glavnaya-desktop.webp";
+import sferaPhone from "@/assets/cases/sfera/glavnaya-phone.webp";
+
 export type Metric = {
   /** Число для отсчёта; знак и единицы задаются через prefix/suffix */
   value?: number;
@@ -25,6 +29,8 @@ export type Case = {
   lead: string;
   /** Страница с полным досье, если она есть */
   href?: string;
+  /** Снимки работы для карточки: экран сайта и, если есть, телефон поверх */
+  cover?: { site: StaticImageData; phone?: StaticImageData; alt: string };
   metrics: Metric[];
 };
 
@@ -39,6 +45,7 @@ export const CASES: Case[] = [
     solution: "Сайт под намерения, Директ, связанный с аналитикой в одну таблицу, ИИ-агент с правилами владельца, контент и боты.",
     lead: "Даниил Карацапов",
     href: "/kejsy/sfera/",
+    cover: { site: sferaSite, phone: sferaPhone, alt: "Сайт «Сферы» на компьютере и на телефоне" },
     metrics: [
       { value: 121, label: "страница сайта под спрос" },
       { value: 251, label: "вопрос в базе ИИ-ассистента" },
