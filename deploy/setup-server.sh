@@ -63,6 +63,8 @@ server {
 
     root ${SITE_DIR};
     index index.html;
+    # Приёмник заявок (появляется после deploy/setup-leads.sh)
+    include snippets/lead-api*.conf;
 
     # Статический экспорт Next.js: страницы лежат как папка/index.html
     location / {

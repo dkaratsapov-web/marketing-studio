@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { PHONES, TELEGRAM } from "@/content/contacts";
 import { lenisRef } from "@/components/SmoothScroll";
+import { rememberUtm } from "@/lib/lead";
 import BriefForm from "./BriefForm";
 import styles from "./BriefModal.module.css";
 
@@ -37,6 +38,9 @@ export default function BriefModal() {
   };
 
   // Перехват всех кнопок заявки и события из кода
+  // Метки рекламы запоминаются сразу при заходе: заявку могут оставить позже, на другом экране
+  useEffect(() => rememberUtm(), []);
+
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       const a = (e.target as Element | null)?.closest<HTMLAnchorElement>(

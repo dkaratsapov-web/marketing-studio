@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { QUIZ } from "@/content/offer";
 import { TELEGRAM } from "@/content/contacts";
+import { submitLead, type LeadResult } from "@/lib/lead";
 import styles from "./Brief.module.css";
 
 type Answers = Record<string, string>;
@@ -16,9 +17,8 @@ type Props = {
 const CONTACT_RE = /^(@[A-Za-z0-9_]{4,32}|\+?[\d\s()-]{10,18})$/;
 
 /**
- * Бриф-квиз. Сайт статический, сервера нет: в конце бриф собирается в текст,
- * копируется в буфер и открывается Telegram. Когда появится бэкенд (бот),
- * достаточно заменить send() на POST.
+ * Бриф-квиз. В конце бриф уходит на сервер, и бот пересылает его в Telegram команды.
+ * Если сервер недоступен, бриф собирается в текст и копируется для отправки вручную.
  */
 export default function BriefForm({ idPrefix, service }: Props) {
   const [step, setStep] = useState(0);
@@ -27,16 +27,17 @@ export default function BriefForm({ idPrefix, service }: Props) {
   const [contact, setContact] = useState("");
   const [consent, setConsent] = useState(false);
   const [touched, setTouched] = useState(false);
-  const [sent, setSent] = useState<null | { text: string; copied: boolean }>(
-    null,
-  );
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState<LeadResult | null>(null);
 
   const total = QUIZ.length + 1;
   const isContactStep = step === QUIZ.length;
   const contactError =
     contact.trim() && !CONTACT_RE.test(contact.trim())
       ? "Укажите телефон или ник в Telegram, например +7 900 000-00-00 или @ivan"
-      : null;
+      : touched && !contact.trim()
+        ? "Оставьте телефон или ник в Telegram, иначе не сможем ответить"
+        : null;
   const consentError =
     touched && !consent ? "Нужно согласие, иначе мы не сможем ответить" : null;
   const lowBudget = answers.budget === QUIZ[3].options[0];
@@ -60,27 +61,39 @@ export default function BriefForm({ idPrefix, service }: Props) {
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!consent || contactError) return;
-    const text = buildText();
-    let copied = false;
-    try {
-      await navigator.clipboard.writeText(text);
-      copied = true;
-    } catch {
-      copied = false;
-    }
-    window.open(TELEGRAM.href, "_blank", "noopener,noreferrer");
-    setSent({ text, copied });
+    if (!consent || !contact.trim() || contactError || busy) return;
+    setBusy(true);
+    const res = await submitLead(
+      {
+        source: "brief",
+        name: name.trim(),
+        contact: contact.trim(),
+        service,
+        answers: Object.fromEntries(QUIZ.map((q) => [q.question, answers[q.id] ?? "не указано"])),
+      },
+      buildText().split("\n"),
+    );
+    setBusy(false);
+    setSent(res);
   };
 
   return (
     <div className={styles.panel}>
-      {sent ? (
+      {sent?.delivered ? (
+        <div className={styles.done} role="status" aria-live="polite">
+          <p className={styles.doneTitle}>Бриф у нас</p>
+          <p className={styles.doneText}>
+            Максим изучит ответы и свяжется с вами в течение часа в рабочее время. На созвоне не
+            придётся объяснять всё с нуля.
+          </p>
+        </div>
+      ) : sent ? (
         <div className={styles.done} role="status" aria-live="polite">
           <p className={styles.doneTitle}>Бриф готов</p>
           <p className={styles.doneText}>
+            Не получилось отправить автоматически.{" "}
             {sent.copied
-              ? "Текст скопирован. Вставьте его в чат Telegram, который открылся в новой вкладке."
+              ? "Текст скопирован, вставьте его в чат Telegram."
               : "Скопируйте текст ниже и отправьте его в Telegram или позвоните нам."}
           </p>
           <pre className={styles.doneBrief}>{sent.text}</pre>
@@ -191,8 +204,8 @@ export default function BriefForm({ idPrefix, service }: Props) {
                 {consentError}
               </span>
               <div className={styles.submitRow}>
-                <button type="submit" className="btn btn--primary">
-                  Отправить бриф в Telegram
+                <button type="submit" className="btn btn--primary" disabled={busy}>
+                  {busy ? "Отправляем…" : "Отправить бриф"}
                 </button>
                 <p className={styles.promise}>
                   Ответим в течение часа в рабочее время

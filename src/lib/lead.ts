@@ -1,5 +1,3 @@
-import { TELEGRAM } from "@/content/contacts";
-
 const PREFIX = "+7 ";
 
 /** Десять цифр номера после +7 из того, что ввёл или вставил человек */
@@ -38,11 +36,48 @@ export const phoneOk = (v: string) => localDigits(v).length === 10;
 export const phoneFocus = (v: string) => v || PREFIX;
 export const phoneBlur = (v: string) => (localDigits(v) ? v : "");
 
+export type Lead = {
+  /** Какая форма: от этого зависит заголовок сообщения в Telegram */
+  source: "hero" | "protocol" | "brief";
+  name?: string;
+  phone?: string;
+  contact?: string;
+  service?: string;
+  answers?: Record<string, string>;
+};
+
+export type LeadResult =
+  | { delivered: true }
+  | { delivered: false; text: string; copied: boolean };
+
+const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "yclid", "gclid"];
+const UTM_STORE = "lead-utm";
+
+/** Метки рекламы из адреса; первые увиденные запоминаются на сессию, чтобы не потеряться при переходах */
+function utm(): Record<string, string> {
+  const params = new URLSearchParams(window.location.search);
+  const fresh = Object.fromEntries(UTM_KEYS.filter((k) => params.get(k)).map((k) => [k, params.get(k) as string]));
+  try {
+    if (Object.keys(fresh).length) {
+      sessionStorage.setItem(UTM_STORE, JSON.stringify(fresh));
+      return fresh;
+    }
+    return JSON.parse(sessionStorage.getItem(UTM_STORE) ?? "{}");
+  } catch {
+    return fresh;
+  }
+}
+
+/** Запоминает метки сразу при заходе на сайт, до первой формы */
+export function rememberUtm() {
+  utm();
+}
+
 /**
- * Отправка заявки без сервера: текст копируется в буфер и открывается Telegram.
- * Когда появится бот, здесь будет POST, а формы останутся как есть.
+ * Запасной путь, если сервер заявок недоступен (например, на тестовой копии сайта):
+ * текст заявки копируется в буфер, а форма показывает кнопку Telegram.
  */
-export async function sendLead(lines: (string | null | false)[]) {
+async function fallback(lines: (string | null | false | undefined)[]) {
   const text = lines.filter(Boolean).join("\n");
   let copied = false;
   try {
@@ -51,6 +86,30 @@ export async function sendLead(lines: (string | null | false)[]) {
   } catch {
     copied = false;
   }
-  window.open(TELEGRAM.href, "_blank", "noopener,noreferrer");
-  return { text, copied };
+  return { delivered: false as const, text, copied };
+}
+
+/** Отправляет заявку на сервер (бот перешлёт её в Telegram); при сбое уходит в запасной путь */
+export async function submitLead(lead: Lead, fallbackLines: (string | null | false | undefined)[]): Promise<LeadResult> {
+  const ctrl = new AbortController();
+  const timer = window.setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const res = await fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...lead,
+        utm: utm(),
+        referrer: document.referrer,
+        page: window.location.href,
+      }),
+      signal: ctrl.signal,
+    });
+    if (res.ok) return { delivered: true };
+  } catch {
+    // сеть или таймаут: ниже запасной путь
+  } finally {
+    window.clearTimeout(timer);
+  }
+  return fallback(fallbackLines);
 }

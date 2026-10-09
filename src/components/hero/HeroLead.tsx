@@ -1,7 +1,8 @@
 "use client";
 
 import { useId, useState } from "react";
-import { maskPhone, phoneBlur, phoneFocus, phoneOk, sendLead } from "@/lib/lead";
+import { TELEGRAM } from "@/content/contacts";
+import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type LeadResult } from "@/lib/lead";
 import styles from "./HeroLead.module.css";
 
 /** Открытая форма в первом экране: только телефон и кнопка консультации */
@@ -9,25 +10,40 @@ export default function HeroLead() {
   const id = useId();
   const [phone, setPhone] = useState("");
   const [touched, setTouched] = useState(false);
-  const [sent, setSent] = useState<null | { text: string; copied: boolean }>(null);
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState<LeadResult | null>(null);
   const error = touched && !phoneOk(phone) ? "Проверьте номер: нужно 10 цифр после +7" : null;
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!phoneOk(phone)) return;
-    setSent(await sendLead(["Консультация с сайта Корпорации", `Телефон: ${phone.trim()}`]));
+    if (!phoneOk(phone) || busy) return;
+    setBusy(true);
+    setSent(
+      await submitLead({ source: "hero", phone }, [
+        "Консультация с сайта Корпорации",
+        `Телефон: ${phone.trim()}`,
+      ]),
+    );
+    setBusy(false);
   };
 
   if (sent) {
     return (
       <div className={styles.done} role="status" aria-live="polite">
         <span className={styles.doneMark} aria-hidden="true" />
-        <p>
-          {sent.copied
-            ? "Номер скопирован, Telegram открыт в новой вкладке. Отправьте сообщение, и Максим перезвонит в течение часа."
-            : `Отправьте номер ${phone.trim()} в Telegram @Daniil_065, и Максим перезвонит в течение часа.`}
-        </p>
+        {sent.delivered ? (
+          <p>Заявка у нас. Максим перезвонит на {phone} в течение часа в рабочее время.</p>
+        ) : (
+          <p>
+            Не получилось отправить автоматически.{" "}
+            {sent.copied ? "Номер скопирован, отправьте его нам " : `Отправьте номер ${phone} нам `}
+            <a href={TELEGRAM.href} target="_blank" rel="noopener noreferrer" className={styles.link}>
+              в Telegram
+            </a>
+            , и Максим перезвонит.
+          </p>
+        )}
       </div>
     );
   }
@@ -52,8 +68,8 @@ export default function HeroLead() {
           aria-invalid={Boolean(error)}
           aria-describedby={`${id}-note`}
         />
-        <button type="submit" className={`btn btn--primary ${styles.submit}`}>
-          Получить консультацию
+        <button type="submit" className={`btn btn--primary ${styles.submit}`} disabled={busy}>
+          {busy ? "Отправляем…" : "Получить консультацию"}
           <svg className="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M1 8h13M9 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" />
           </svg>

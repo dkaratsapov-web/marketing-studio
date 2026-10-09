@@ -1,13 +1,13 @@
 "use client";
 
 import { useId, useState } from "react";
-import { maskPhone, phoneBlur, phoneFocus, phoneOk, sendLead } from "@/lib/lead";
+import { TELEGRAM } from "@/content/contacts";
+import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type LeadResult } from "@/lib/lead";
 import styles from "./QuickLead.module.css";
 
 /**
  * Короткая заявка «Шаг 00» в шапке «Протокола»: имя и телефон.
- * Сервера нет, поэтому заявка, как и бриф, собирается в текст,
- * копируется и открывается Telegram. С ботом send() станет POST-запросом.
+ * Уходит на сервер, бот пересылает её в Telegram; если сервер недоступен, текст копируется.
  */
 export default function QuickLead() {
   const id = useId();
@@ -15,7 +15,8 @@ export default function QuickLead() {
   const [phone, setPhone] = useState("");
   const [consent, setConsent] = useState(false);
   const [touched, setTouched] = useState(false);
-  const [sent, setSent] = useState<null | { text: string; copied: boolean }>(null);
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState<LeadResult | null>(null);
 
   const phoneError =
     touched && !phoneOk(phone) ? "Проверьте номер: нужно 10 цифр после +7" : null;
@@ -24,27 +25,44 @@ export default function QuickLead() {
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!phoneOk(phone) || !consent) return;
-    const res = await sendLead([
+    if (!phoneOk(phone) || !consent || busy) return;
+    setBusy(true);
+    const res = await submitLead({ source: "protocol", name: name.trim(), phone }, [
       "Заявка с сайта Корпорации",
       name.trim() && `Имя: ${name.trim()}`,
       `Телефон: ${phone.trim()}`,
     ]);
+    setBusy(false);
     setSent(res);
   };
+
+  if (sent?.delivered) {
+    return (
+      <div className={styles.lead} role="status" aria-live="polite">
+        <p className={styles.kicker}>
+          <span className={styles.num}>01</span> Заявка у нас
+        </p>
+        <p className={styles.doneText}>
+          Максим перезвонит на {phone} в течение часа в рабочее время. Это и есть первый шаг протокола.
+        </p>
+      </div>
+    );
+  }
 
   if (sent) {
     return (
       <div className={styles.lead} role="status" aria-live="polite">
         <p className={styles.kicker}>
-          <span className={styles.num}>00</span> Заявка готова
+          <span className={styles.num}>00</span> Почти готово
         </p>
         <p className={styles.doneText}>
-          {sent.copied
-            ? "Текст скопирован. Вставьте его в чат Telegram, который открылся в новой вкладке, и Максим перезвонит."
-            : "Отправьте этот текст в Telegram или позвоните нам:"}
+          Не получилось отправить автоматически.{" "}
+          {sent.copied ? "Текст заявки скопирован, вставьте его в чат." : "Отправьте этот текст в чат:"}
         </p>
         {sent.copied ? null : <pre className={styles.doneBrief}>{sent.text}</pre>}
+        <a href={TELEGRAM.href} target="_blank" rel="noopener noreferrer" className={`btn btn--primary ${styles.submit}`}>
+          Открыть Telegram
+        </a>
         <button type="button" className={styles.again} onClick={() => setSent(null)}>
           Изменить данные
         </button>
@@ -102,8 +120,8 @@ export default function QuickLead() {
         {consentError}
       </span>
 
-      <button type="submit" className={`btn btn--primary ${styles.submit}`}>
-        Отправить заявку
+      <button type="submit" className={`btn btn--primary ${styles.submit}`} disabled={busy}>
+        {busy ? "Отправляем…" : "Отправить заявку"}
         <svg className="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M1 8h13M9 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" />
         </svg>
