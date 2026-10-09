@@ -64,8 +64,10 @@
   pointer-events: none;
 }
 
+/* Слой текста пропускает мышь к монолиту, но всё интерактивное, включая форму, ловит клики сам */
 .content a,
-.content button {
+.content button,
+.content form {
   pointer-events: auto;
 }
 
