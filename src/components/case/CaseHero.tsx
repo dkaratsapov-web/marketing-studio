@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import type { SFERA } from "@/content/sfera";
 import { CINEMATIC_MQ } from "@/components/service/SearchScene";
+import Lightbox from "./Lightbox";
 import styles from "./CaseHero.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -25,6 +26,7 @@ const TILT = [-7, 5, -3, 6, -2, 2];
  */
 export default function CaseHero({ data }: Props) {
   const root = useRef<HTMLElement>(null);
+  const [open, setOpen] = useState<number | null>(null);
 
   useGSAP(
     () => {
@@ -217,7 +219,7 @@ export default function CaseHero({ data }: Props) {
         </div>
       </div>
 
-      {/* Стопка папок дела */}
+      {/* Стопка папок дела: экраны целиком, по клику открываются на весь экран */}
       <div className={styles.deck} aria-label="Что внутри дела">
         {hero.parts.map((p, i) => (
           <figure
@@ -225,27 +227,49 @@ export default function CaseHero({ data }: Props) {
             className={styles.card}
             style={{ "--r": `${TILT[i]}deg`, "--i": i } as React.CSSProperties}
           >
-            <div className={styles.cardInner}>
-              <figcaption className={styles.cardTab}>
+            <button
+              type="button"
+              className={styles.cardInner}
+              onClick={() => setOpen(i)}
+              data-cursor-label="Открыть"
+              aria-label={`Открыть снимок: ${p.name}`}
+            >
+              <span className={styles.cardTab}>
                 <span>{String(i + 1).padStart(2, "0")}</span> {p.name}
-              </figcaption>
-              <div className={styles.cardImg}>
+              </span>
+              <span
+                className={styles.cardImg}
+                data-portrait={p.img.height > p.img.width || undefined}
+              >
                 <Image
                   src={p.img}
                   alt={p.alt}
                   sizes="(max-width: 960px) 80vw, 40vw"
                   priority={i < 2}
                 />
-                {/* Подпись читается всегда: снимок под ней работает фактурой */}
-                <p className={styles.cardLabel} aria-hidden="true">
+                <span className={styles.cardLabel} aria-hidden="true">
                   <span className={styles.cardName}>{p.name}</span>
                   <span className={styles.cardFact}>{p.fact}</span>
-                </p>
-              </div>
-            </div>
+                </span>
+              </span>
+            </button>
           </figure>
         ))}
       </div>
+
+      <Lightbox
+        shots={hero.parts.map((p) => ({
+          img: p.img,
+          alt: p.alt,
+          name: p.name,
+          note:
+            p.name === "Сайт" || p.name === "Контент"
+              ? undefined
+              : "Суммы скрыты, остальные цифры на снимке демонстрационные",
+        }))}
+        index={open}
+        onChange={setOpen}
+      />
 
       <p className={styles.finale} aria-hidden="true">
         {hero.finale.split(". ").map((line, i, all) => (

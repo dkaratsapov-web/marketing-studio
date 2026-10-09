@@ -285,19 +285,21 @@
   letter-spacing: 0.04em;
 }
 
-/* Границы и пояснения */
+/* Границы агента: четыре ограничителя со шкалой, ниже пояснения */
 .bottom {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--gutter);
-  row-gap: 2rem;
+  row-gap: 2.5rem;
   padding-top: clamp(2rem, 5vh, 3.5rem);
 }
 
-.limits {
-  grid-column: 1 / span 7;
+.limitsHead {
+  grid-column: 1 / -1;
   display: grid;
-  gap: 1rem;
+  gap: 0.75rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--fg);
 }
 
 .limitsLabel {
@@ -305,65 +307,148 @@
 }
 
 .limitsLead {
-  max-width: 48ch;
-  font-size: var(--step-1);
-  line-height: 1.4;
+  max-width: 40ch;
+  font-size: var(--step-2);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
 }
 
-.seals {
+.limitList {
+  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin: 0.5rem 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* Пломба: круглая печать с числом */
-.seal {
+.limit {
   display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 0.35rem;
-  aspect-ratio: 1;
-  padding: 0.75rem;
-  border: 2px solid var(--fg);
+  align-content: start;
+  gap: 0.6rem;
+  padding: 0.25rem var(--gutter) 0.25rem 0;
+}
+
+.limit + .limit {
+  padding-left: var(--gutter);
+  border-left: 1px solid var(--line);
+}
+
+/* Шкала: тонкая линия, за стопом штриховка «нельзя» */
+.rail {
+  position: relative;
+  height: 2.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.rail::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: var(--line);
+}
+
+.zone {
+  position: absolute;
+  top: 50%;
+  height: 0.9rem;
+  translate: 0 -50%;
+  background: repeating-linear-gradient(-45deg, rgb(209 0 106 / 0.35) 0 2px, transparent 2px 6px);
+}
+
+.rail[data-kind="floor"] .zone {
+  left: 0;
+  width: 20%;
+}
+
+.rail[data-kind="ceiling"] .zone {
+  right: 0;
+  width: 20%;
+}
+
+.stopLine {
+  position: absolute;
+  top: 15%;
+  bottom: 15%;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--pink-deep);
+}
+
+.rail[data-kind="floor"] .stopLine {
+  left: 20%;
+}
+
+.rail[data-kind="ceiling"] .stopLine {
+  left: 80%;
+}
+
+.knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.1rem;
+  height: 1.1rem;
+  translate: -50% -50%;
   border-radius: 50%;
-  text-align: center;
-  rotate: -4deg;
-  box-shadow: inset 0 0 0 5px var(--bg), inset 0 0 0 6px var(--fg);
+  background: var(--fg);
+  box-shadow: 0 0 0 4px var(--bg);
 }
 
-.seal:nth-child(2n) {
-  rotate: 3deg;
-  border-color: var(--pink-deep);
+.rail[data-kind="floor"] .knob {
+  left: 22%;
+}
+
+.rail[data-kind="ceiling"] .knob {
+  left: 78%;
+}
+
+.stopTag {
+  position: absolute;
+  top: -0.35rem;
   color: var(--pink-deep);
-  box-shadow: inset 0 0 0 5px var(--bg), inset 0 0 0 6px var(--pink-deep);
-}
-
-.sealValue {
-  font-family: var(--ff-display);
-  font-variation-settings: "SHRP" 100;
-  font-size: clamp(1.4rem, 0.8rem + 1.6vw, 2.4rem);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.03em;
-}
-
-.sealLabel {
-  max-width: 11ch;
   font-family: var(--ff-mono);
   font-size: 0.66rem;
-  letter-spacing: 0.04em;
-  line-height: 1.3;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
+.rail[data-kind="floor"] .stopTag {
+  left: calc(20% + 0.4rem);
+}
+
+.rail[data-kind="ceiling"] .stopTag {
+  right: calc(20% + 0.4rem);
+}
+
+.limitValue {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(2rem, 1.2rem + 2.2vw, 3.4rem);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+
+.limitLabel {
+  max-width: 26ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.45;
+}
+
 .notes {
-  grid-column: 9 / -1;
-  align-self: end;
+  grid-column: 1 / -1;
   display: grid;
-  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem var(--gutter);
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
   color: var(--muted);
   font-size: var(--step-0);
   line-height: 1.55;
@@ -399,14 +484,22 @@
 
 @media (max-width: 960px) {
   .copy,
-  .uiWrap,
-  .limits,
-  .notes {
+  .uiWrap {
     grid-column: 1 / -1;
   }
 
-  .seals {
-    grid-template-columns: repeat(2, minmax(0, 8.5rem));
+  .limitList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 2rem;
+  }
+
+  .limit:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .notes {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .rows,

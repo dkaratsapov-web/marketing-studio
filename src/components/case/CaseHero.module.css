@@ -41,13 +41,19 @@
   user-select: none;
 }
 
+/* Сетка текста лежит поверх папок: сама клики пропускает, ловят только её дети */
 .grid {
   position: relative;
   z-index: 2;
+  pointer-events: none;
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   grid-template-rows: auto auto 1fr;
   column-gap: var(--gutter);
+}
+
+.grid > * {
+  pointer-events: auto;
 }
 
 .top {
@@ -230,6 +236,16 @@
 }
 
 .cardInner {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: zoom-in;
+  pointer-events: auto;
   animation: deal 0.9s var(--ease-out) both;
   animation-delay: calc(0.5s + (5 - var(--i)) * 0.08s);
 }
@@ -264,6 +280,7 @@
 }
 
 .cardImg {
+  display: block;
   overflow: hidden;
   aspect-ratio: 16 / 10.5;
   border: 6px solid #e9e7df;
@@ -284,9 +301,18 @@
   object-position: 50% 0;
 }
 
-/* Подпись папки поверх фрагмента: тёмная плашка снизу, имя крупно, цифра салатовым */
+/* Подпись папки: тонкая полоса снизу, снимок остаётся виден целиком */
 .cardImg {
   position: relative;
+}
+
+.cardImg[data-portrait] {
+  background: var(--ink-800);
+}
+
+.cardImg[data-portrait] img {
+  object-fit: contain;
+  padding-block: 3% 12%;
 }
 
 .cardLabel {
@@ -299,15 +325,26 @@
   justify-content: space-between;
   gap: 0.75rem;
   margin: 0;
-  padding: 2.4rem 1rem 0.8rem;
-  background: linear-gradient(to top, rgb(5 5 5 / 0.92) 35%, transparent);
+  padding: 0.45rem 0.8rem;
+  background: rgb(5 5 5 / 0.88);
   color: var(--white);
+  transition: background-color 0.3s var(--ease-out);
+}
+
+.cardInner:hover .cardLabel,
+.cardInner:focus-visible .cardLabel {
+  background: var(--ink-950);
+}
+
+.cardInner:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 4px;
 }
 
 .cardName {
   font-family: var(--ff-display);
   font-variation-settings: "SHRP" 100;
-  font-size: clamp(1.3rem, 0.9rem + 1.2vw, 2.1rem);
+  font-size: clamp(1rem, 0.8rem + 0.6vw, 1.4rem);
   font-weight: 650;
   line-height: 1;
   letter-spacing: -0.03em;

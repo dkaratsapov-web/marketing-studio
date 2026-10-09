@@ -167,19 +167,34 @@ export default function AgentScene({ agent }: Props) {
         });
       });
 
-      // Пломбы границ: падают по одной
-      gsap.from(section.querySelectorAll(`.${styles.seal}`), {
-        autoAlpha: 0,
-        scale: 1.4,
-        rotation: -10,
-        duration: 0.45,
-        stagger: 0.1,
-        ease: "back.out(2.2)",
-        scrollTrigger: {
-          trigger: section.querySelector(`.${styles.seals}`),
-          start: "top 85%",
-          once: true,
-        },
+      // Ограничители: бегунок едет к пределу, упирается в розовый стоп и чуть отскакивает
+      const rails = gsap.utils.toArray<HTMLElement>(`.${styles.rail}`);
+      rails.forEach((rail, i) => {
+        const floor = rail.dataset.kind === "floor";
+        const knob = rail.querySelector(`.${styles.knob}`);
+        const stop = rail.querySelector(`.${styles.stopTag}`);
+        gsap.set(knob, { left: "50%" });
+        gsap.set(stop, { autoAlpha: 0 });
+        gsap
+          .timeline({
+            delay: i * 0.15,
+            scrollTrigger: {
+              trigger: section.querySelector(`.${styles.limitList}`),
+              start: "top 80%",
+              once: true,
+            },
+          })
+          .to(knob, {
+            left: floor ? "18%" : "82%",
+            duration: 0.7,
+            ease: "power2.in",
+          })
+          .to(knob, {
+            left: floor ? "22%" : "78%",
+            duration: 0.5,
+            ease: "back.out(3)",
+          })
+          .to(stop, { autoAlpha: 1, duration: 0.25 }, "<");
       });
     },
     { scope: root },
@@ -292,18 +307,29 @@ export default function AgentScene({ agent }: Props) {
       </div>
 
       <div className={`wrap ${styles.bottom}`}>
-        <div className={styles.limits}>
+        <div className={styles.limitsHead}>
           <p className={`label ${styles.limitsLabel}`}>{agent.limitsLabel}</p>
           <p className={styles.limitsLead}>{agent.limitsLead}</p>
-          <ul className={styles.seals}>
-            {agent.limits.map((l) => (
-              <li key={l.label} className={styles.seal}>
-                <span className={styles.sealValue}>{l.value}</span>
-                <span className={styles.sealLabel}>{l.label}</span>
-              </li>
-            ))}
-          </ul>
         </div>
+        <ul className={styles.limitList}>
+          {agent.limits.map((l) => (
+            <li key={l.label} className={styles.limit}>
+              {/* Шкала-ограничитель: за розовым стопом штриховка, бегунок дальше не проходит */}
+              <span
+                className={styles.rail}
+                data-kind={l.kind}
+                aria-hidden="true"
+              >
+                <span className={styles.zone} />
+                <span className={styles.stopLine} />
+                <span className={styles.knob} />
+                <span className={styles.stopTag}>стоп</span>
+              </span>
+              <span className={styles.limitValue}>{l.value}</span>
+              <span className={styles.limitLabel}>{l.label}</span>
+            </li>
+          ))}
+        </ul>
         <div className={styles.notes}>
           <p>{agent.undoNote}</p>
           <p>{agent.analyst}</p>
