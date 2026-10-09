@@ -69,16 +69,6 @@
   gap: 2rem 3rem;
 }
 
-.sign {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.signName {
-  font-size: var(--step-1);
-  font-weight: 500;
-}
-
 /* Печать: двойная рамка, текст по строкам, лёгкая «краска» через непрозрачность */
 .stamp {
   display: grid;

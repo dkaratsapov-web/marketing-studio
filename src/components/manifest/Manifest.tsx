@@ -71,12 +71,6 @@ export default function Manifest() {
       });
 
       tl.fromTo(
-        `.${styles.sign}`,
-        { autoAlpha: 0, y: 20 },
-        { autoAlpha: 1, y: 0, ease: "none", duration: 0.06 },
-        0.72,
-      )
-        .fromTo(
           `.${styles.stamp}`,
           { autoAlpha: 0, scale: 2.4, rotate: -26 },
           { autoAlpha: 1, scale: 1, rotate: -9, ease: "back.out(2.2)", duration: 0.08 },
@@ -113,10 +107,6 @@ export default function Manifest() {
           </div>
 
           <div className={styles.footer}>
-            <p className={styles.sign}>
-              <span className="label">Подписано</span>
-              <span className={styles.signName}>Даниил Карацапов, основатель Корпорации</span>
-            </p>
             <div className={styles.stamp} aria-label="Печать: утверждено">
               <span className={styles.stampTop}>Корпорация</span>
               <span className={styles.stampMain}>Утверждено</span>
