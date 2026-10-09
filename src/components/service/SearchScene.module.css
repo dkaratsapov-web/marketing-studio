@@ -61,10 +61,6 @@
   animation: caretBlink 1s steps(1) infinite;
 }
 
-.scene[data-state="typing"] .caret {
-  animation: none;
-}
-
 @keyframes caretBlink {
   50% {
     opacity: 0;
@@ -93,23 +89,31 @@
 
 .ad {
   position: relative;
-  display: grid;
-  gap: 0.35rem;
   padding: 1rem 1.1rem;
   background: rgb(255 255 255 / 0.04);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
-  transform-origin: 50% 50%;
-  transition:
-    box-shadow 0.45s var(--ease-out),
-    background-color 0.45s var(--ease-out);
 }
 
-/* Объявление «загорается»: рамка и мягкое свечение цвета отдела */
-.scene[data-state="lit"] .ad {
+/* Свечение объявления: отдельный слой, анимируется только его прозрачность (--lit от 0 до 1) */
+.ad::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   background: rgb(196 245 66 / 0.07);
   box-shadow:
     inset 0 0 0 1.5px var(--lime),
-    0 0 40px -12px rgb(196 245 66 / 0.55);
+    0 0 44px -12px rgb(196 245 66 / 0.6);
+  opacity: var(--lit, 0);
+  pointer-events: none;
+}
+
+.adInner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.35rem;
+  transform-origin: 50% 50%;
 }
 
 .adMeta {

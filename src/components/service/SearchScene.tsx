@@ -9,12 +9,111 @@ import styles from "./SearchScene.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
+/** Когда первый экран идёт кинематографичной сценой по скроллу (десктоп), а когда сцена крутится сама */
+export const CINEMATIC_MQ = "(min-width: 961px) and (min-height: 640px)";
+
+type Parts = {
+  query: HTMLElement;
+  results: HTMLElement[];
+  ad: HTMLElement;
+  pointer: HTMLElement;
+  pill: HTMLElement;
+  count: HTMLElement;
+  enter: HTMLElement;
+};
+
+export function sceneParts(el: HTMLElement): Parts {
+  const one = (part: string) => el.querySelector<HTMLElement>(`[data-part="${part}"]`)!;
+  return {
+    query: one("query"),
+    results: [...el.querySelectorAll<HTMLElement>('[data-part="result"]')],
+    ad: one("ad"),
+    pointer: one("pointer"),
+    pill: one("pill"),
+    count: one("count"),
+    enter: one("enter"),
+  };
+}
+
+export function fillAd(el: HTMLElement, item: SearchQuery) {
+  const set = (part: string, text: string) => {
+    el.querySelector<HTMLElement>(`[data-part="${part}"]`)!.textContent = text;
+  };
+  set("ad-title", item.ad.title);
+  set("ad-who", item.ad.who);
+  set("ad-text", item.ad.text);
+  set("case", item.caseCode);
+}
+
+/**
+ * Шаги одного запроса: набор, выдача, подсветка, клик, заявка в счётчик.
+ * Все изменения обратимые (без call), поэтому тот же таймлайн можно и проигрывать по времени,
+ * и прокручивать скроллом в обе стороны. Координаты считаются в системе сцены с поправкой
+ * на её масштаб, так что курсор попадает в объявление, даже когда сцену увеличили.
+ */
+export function addQuerySteps(
+  tl: gsap.core.Timeline,
+  el: HTMLElement,
+  item: SearchQuery,
+  opts: { base?: number; onType?: (text: string) => void; hold?: number } = {},
+) {
+  const p = sceneParts(el);
+  const at = (target: Element, dx: number, dy: number) => {
+    const s = el.getBoundingClientRect();
+    const k = s.width / el.offsetWidth || 1;
+    const r = target.getBoundingClientRect();
+    return { x: (r.left - s.left + r.width * dx) / k, y: (r.top - s.top + r.height * dy) / k };
+  };
+  const typed = { n: 0 };
+  const lead = { v: 0 };
+  const base = opts.base ?? 0;
+
+  tl.set(p.results, { autoAlpha: 0, y: 14 })
+    .set(el, { "--lit": 0 })
+    .set(p.pointer, { autoAlpha: 0, x: () => el.offsetWidth * 0.82, y: () => el.offsetHeight * 0.92 })
+    .to(typed, {
+      n: item.query.length,
+      duration: item.query.length * 0.045,
+      ease: "none",
+      onUpdate: () => {
+        const text = item.query.slice(0, Math.round(typed.n));
+        p.query.textContent = text;
+        // Как в настоящем поле: длинный запрос сдвигается, курсор остаётся на виду
+        p.query.parentElement!.scrollLeft = p.query.parentElement!.scrollWidth;
+        opts.onType?.(text);
+      },
+    })
+    .to(p.enter, { scale: 0.92, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, "+=0.15")
+    .to(p.results, { autoAlpha: 1, y: 0, duration: 0.55, stagger: 0.07, ease: "power3.out" })
+    .to(el, { "--lit": 1, duration: 0.45, ease: "power2.out" }, "-=0.2")
+    .to(p.pointer, { autoAlpha: 1, duration: 0.2 }, "+=0.3")
+    .to(p.pointer, { x: () => at(p.ad, 0.62, 0.55).x, y: () => at(p.ad, 0.62, 0.55).y, duration: 0.75, ease: "power3.inOut" }, "<")
+    .to(p.pointer, { scale: 0.82, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" })
+    .to(p.ad, { scale: 0.985, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, "<")
+    .set(p.pill, { xPercent: -50, yPercent: -50, x: () => at(p.ad, 0.62, 0.55).x, y: () => at(p.ad, 0.62, 0.55).y, autoAlpha: 0, scale: 0.7 })
+    .to(p.pill, { autoAlpha: 1, scale: 1, duration: 0.25, ease: "back.out(2)" })
+    .to(p.pill, { x: () => at(p.count, 0.5, 0.5).x, y: () => at(p.count, 0.5, 0.5).y, duration: 0.75, ease: "power3.in" }, "+=0.15")
+    .to(p.pill, { autoAlpha: 0, scale: 0.6, duration: 0.15 })
+    .to(lead, {
+      v: 1,
+      duration: 0.01,
+      onUpdate: () => {
+        p.count.textContent = String(base + Math.round(lead.v));
+      },
+    }, "<")
+    .fromTo(p.count, { scale: 1.3 }, { scale: 1, duration: 0.45, ease: "back.out(2.4)", immediateRender: false }, "<")
+    .to(p.pointer, { autoAlpha: 0, duration: 0.25 }, "<");
+  if (opts.hold) tl.to({}, { duration: opts.hold });
+  return tl;
+}
+
 type Props = { queries: SearchQuery[] };
 
 /**
- * Живая сцена первого экрана «Контекста»: человек вводит запрос, собирается выдача,
- * наше объявление стоит первым и подсвечено, по нему кликают, и «+1 заявка» уходит в счётчик.
- * Это иллюстрация механики, а не данные: примеры запросов взяты из наших дел.
+ * Живая сцена «Контекста»: человек вводит запрос, собирается выдача, наше объявление первое
+ * и горит, по нему кликают, и «+1 заявка» уходит в счётчик. Это иллюстрация механики, а не данные:
+ * примеры запросов взяты из наших дел. На десктопе сценой управляет скролл первого экрана
+ * (ServiceHero), здесь же она крутится сама: на телефоне и на невысоких экранах.
  */
 export default function SearchScene({ queries }: Props) {
   const root = useRef<HTMLDivElement>(null);
@@ -23,141 +122,69 @@ export default function SearchScene({ queries }: Props) {
     () => {
       const el = root.current;
       if (!el) return;
-      const q = <T extends Element>(s: string) => el.querySelector<T>(s)!;
-      const query = q<HTMLSpanElement>(`.${styles.query}`);
-      const results = el.querySelectorAll<HTMLElement>(`.${styles.result}`);
-      const ad = q<HTMLElement>(`.${styles.ad}`);
-      const adTitle = q<HTMLElement>(`.${styles.adTitle}`);
-      const adWho = q<HTMLElement>(`.${styles.adWho}`);
-      const adText = q<HTMLElement>(`.${styles.adText}`);
-      const caseCode = q<HTMLElement>(`.${styles.caseCode}`);
-      const pointer = q<HTMLElement>(`.${styles.pointer}`);
-      const pill = q<HTMLElement>(`.${styles.pill}`);
-      const count = q<HTMLElement>(`.${styles.countValue}`);
-      const enter = q<HTMLElement>(`.${styles.enter}`);
-
-      const fill = (item: SearchQuery) => {
-        adTitle.textContent = item.ad.title;
-        adWho.textContent = item.ad.who;
-        adText.textContent = item.ad.text;
-        caseCode.textContent = item.caseCode;
-      };
+      fillAd(el, queries[0]);
 
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         // Статичный кадр: запрос набран, выдача собрана, объявление подсвечено
-        const item = queries[0];
-        query.textContent = item.query;
-        query.parentElement!.scrollLeft = query.parentElement!.scrollWidth;
-        fill(item);
-        el.dataset.state = "lit";
-        count.textContent = "1";
+        const p = sceneParts(el);
+        p.query.textContent = queries[0].query;
+        p.query.parentElement!.scrollLeft = p.query.parentElement!.scrollWidth;
+        gsap.set(el, { "--lit": 1 });
+        p.count.textContent = "1";
         return;
       }
 
-      // Где на сцене центр объявления и счётчика: для курсора и летящей заявки
-      const at = (target: Element, dx = 0.5, dy = 0.5) => {
-        const s = el.getBoundingClientRect();
-        const r = target.getBoundingClientRect();
-        return { x: r.left - s.left + r.width * dx, y: r.top - s.top + r.height * dy };
-      };
-
-      let leads = 0;
-      const master = gsap.timeline({ repeat: -1, paused: true });
-
-      queries.forEach((item) => {
-        const tl = gsap.timeline();
-        const typed = { n: 0 };
-
-        tl.call(() => {
-          fill(item);
-          query.textContent = "";
-          el.dataset.state = "typing";
-        })
-          .set(results, { autoAlpha: 0, y: 14 })
-          .set(pointer, { autoAlpha: 0, x: () => el.clientWidth * 0.82, y: () => el.clientHeight * 0.92 })
-          // Запрос печатается с ровным темпом живого набора
-          .to(typed, {
-            n: item.query.length,
-            duration: item.query.length * 0.045,
-            ease: "none",
-            onUpdate: () => {
-              query.textContent = item.query.slice(0, Math.round(typed.n));
-              // Как в настоящем поле: длинный запрос сдвигается, курсор остаётся на виду
-              query.parentElement!.scrollLeft = query.parentElement!.scrollWidth;
-            },
-          })
-          .to(enter, { scale: 0.92, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, "+=0.15")
-          .call(() => {
-            el.dataset.state = "results";
-          })
-          // Выдача собирается сверху вниз, наше объявление первое
-          .to(results, { autoAlpha: 1, y: 0, duration: 0.55, stagger: 0.07, ease: "power3.out" })
-          .call(() => {
-            el.dataset.state = "lit";
-          }, undefined, "-=0.1")
-          // Курсор идёт к объявлению и кликает
-          .to(pointer, { autoAlpha: 1, duration: 0.2 }, "+=0.35")
-          .to(pointer, { x: () => at(ad, 0.62, 0.55).x, y: () => at(ad, 0.62, 0.55).y, duration: 0.75, ease: "power3.inOut" }, "<")
-          .to(pointer, { scale: 0.82, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" })
-          .to(ad, { scale: 0.985, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, "<")
-          // Заявка летит из объявления в счётчик
-          .set(pill, { xPercent: -50, yPercent: -50, x: () => at(ad, 0.62, 0.55).x, y: () => at(ad, 0.62, 0.55).y, autoAlpha: 0, scale: 0.7 })
-          .to(pill, { autoAlpha: 1, scale: 1, duration: 0.25, ease: "back.out(2)" })
-          .to(pill, {
-            x: () => at(count, 0.5, 0.5).x,
-            y: () => at(count, 0.5, 0.5).y,
-            duration: 0.75,
-            ease: "power3.in",
-          }, "+=0.15")
-          .to(pill, { autoAlpha: 0, scale: 0.6, duration: 0.15 })
-          .call(() => {
-            leads += 1;
-            count.textContent = String(leads);
-          }, undefined, "<")
-          .fromTo(count, { scale: 1.25 }, { scale: 1, duration: 0.45, ease: "back.out(2.4)" }, "<")
-          .to(pointer, { autoAlpha: 0, duration: 0.25 }, "<")
-          // Пауза на результат и уход выдачи
-          .to(results, { autoAlpha: 0, y: -10, duration: 0.35, stagger: 0.04, ease: "power2.in" }, "+=1.3");
-
-        master.add(tl);
-      });
-
-      // Цикл крутится, только пока сцена на экране
-      ScrollTrigger.create({
-        trigger: el,
-        start: "top bottom",
-        end: "bottom top",
-        onToggle: (self) => (self.isActive ? master.play() : master.pause()),
+      const mm = gsap.matchMedia();
+      mm.add(`not all and ${CINEMATIC_MQ}`, () => {
+        const master = gsap.timeline({ repeat: -1, paused: true });
+        queries.forEach((item, i) => {
+          const tl = gsap.timeline();
+          tl.call(() => fillAd(el, item));
+          addQuerySteps(tl, el, item, { base: i, hold: 1.3 });
+          tl.to(sceneParts(el).results, { autoAlpha: 0, y: -10, duration: 0.35, stagger: 0.04, ease: "power2.in" });
+          master.add(tl);
+        });
+        // Цикл крутится, только пока сцена на экране
+        ScrollTrigger.create({
+          trigger: el,
+          start: "top bottom",
+          end: "bottom top",
+          onToggle: (self) => (self.isActive ? master.play() : master.pause()),
+        });
       });
     },
     { scope: root, dependencies: [queries] },
   );
 
   return (
-    <div ref={root} className={styles.scene} data-state="idle" aria-hidden="true">
+    <div ref={root} className={styles.scene} data-scene aria-hidden="true">
       <div className={styles.bar}>
         <svg className={styles.loupe} viewBox="0 0 20 20" fill="none">
           <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.6" />
           <path d="m13 13 4.5 4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
         </svg>
         <span className={styles.queryWrap}>
-          <span className={styles.query} />
+          <span className={styles.query} data-part="query" />
           <span className={styles.caret} />
         </span>
-        <span className={styles.enter}>Найти</span>
+        <span className={styles.enter} data-part="enter">
+          Найти
+        </span>
       </div>
 
       <div className={styles.results}>
-        <article className={`${styles.result} ${styles.ad}`}>
-          <p className={styles.adMeta}>
-            <span className={styles.adBadge}>Реклама</span>
-            <span className={styles.adWho} />
-          </p>
-          <p className={styles.adTitle} />
-          <p className={styles.adText} />
+        <article className={`${styles.result} ${styles.ad}`} data-part="result">
+          <div data-part="ad" className={styles.adInner}>
+            <p className={styles.adMeta}>
+              <span className={styles.adBadge}>Реклама</span>
+              <span className={styles.adWho} data-part="ad-who" />
+            </p>
+            <p className={styles.adTitle} data-part="ad-title" />
+            <p className={styles.adText} data-part="ad-text" />
+          </div>
         </article>
         {[0.92, 0.78, 0.86].map((w, i) => (
-          <div key={i} className={`${styles.result} ${styles.organic}`}>
+          <div key={i} className={`${styles.result} ${styles.organic}`} data-part="result">
             <span style={{ width: `${w * 60}%` }} />
             <span style={{ width: `${w * 100}%` }} />
             <span style={{ width: `${w * 72}%` }} />
@@ -167,16 +194,20 @@ export default function SearchScene({ queries }: Props) {
 
       <div className={styles.footer}>
         <p className={styles.caption}>
-          Пример из дела <span className={styles.caseCode} />
+          Пример из дела <span className={styles.caseCode} data-part="case" />
         </p>
         <p className={styles.count}>
           <span className={styles.countLabel}>Заявки</span>
-          <span className={styles.countValue}>0</span>
+          <span className={styles.countValue} data-part="count">
+            0
+          </span>
         </p>
       </div>
 
-      <span className={styles.pill}>+1 заявка</span>
-      <svg className={styles.pointer} viewBox="0 0 24 24">
+      <span className={styles.pill} data-part="pill">
+        +1 заявка
+      </span>
+      <svg className={styles.pointer} data-part="pointer" viewBox="0 0 24 24">
         <path d="M5 3l14 8-6.2 1.6L10 19z" fill="#fff" stroke="#050505" strokeWidth="1.3" strokeLinejoin="round" />
       </svg>
     </div>
