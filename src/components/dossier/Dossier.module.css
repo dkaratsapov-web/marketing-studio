@@ -178,6 +178,39 @@
   color: var(--lime);
 }
 
+/* У дела есть своя страница: ссылка как штамп на папке */
+.openCase {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  justify-self: start;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--lime);
+  border-radius: 2px;
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition:
+    background-color 0.3s var(--ease-out),
+    color 0.3s var(--ease-out);
+}
+
+.openCase:hover {
+  background: var(--lime);
+  color: var(--ink-950);
+}
+
+.openCase:hover :global(.btn__arrow) {
+  transform: translateX(0.25em);
+}
+
+.openCase:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
+}
+
 .notes {
   display: grid;
   grid-template-columns: minmax(0, 0.6fr) repeat(2, minmax(0, 1fr));

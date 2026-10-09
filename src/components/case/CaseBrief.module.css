@@ -1,0 +1,210 @@
+/* Светлый блок: слева клиент, справа опись дела как карточка архива */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 3.5rem;
+  align-items: start;
+}
+
+.about {
+  grid-column: 1 / span 6;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.title {
+  display: grid;
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+}
+
+.who {
+  margin-bottom: 0.6rem;
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.verb {
+  display: block;
+}
+
+/* Перебор объектов: одно слово видно, остальные под маской */
+.rotor {
+  display: grid;
+  overflow: hidden;
+  padding-block: 0.08em 0.14em;
+  margin-block: -0.08em -0.14em;
+}
+
+.word {
+  grid-area: 1 / 1;
+  color: var(--pink-deep);
+}
+
+/* Без скрипта и без анимации видно только первое слово */
+.word + .word {
+  visibility: hidden;
+}
+
+/* Скрипт расставил слова по местам (у них появился style): показываем все */
+.rotor:has(.word[style]) .word + .word {
+  visibility: visible;
+}
+
+.text {
+  max-width: 44ch;
+  color: var(--muted);
+  font-size: var(--step-1);
+  line-height: 1.5;
+}
+
+.facts {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.facts div {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.facts dd {
+  margin: 0;
+  font-size: var(--step-0);
+  line-height: 1.45;
+}
+
+/* Опись: карточка архива на сером листе */
+.inventory {
+  grid-column: 8 / -1;
+  padding: clamp(1.25rem, 2.4vw, 2rem);
+  border-radius: 2px;
+  background: var(--bg-raised);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.invLabel {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--fg);
+  color: var(--fg);
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.25rem 1rem;
+  padding-block: 0.9rem;
+}
+
+.num {
+  padding-top: 0.2rem;
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  color: var(--pink-deep);
+}
+
+.name {
+  display: grid;
+  gap: 0.2rem;
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.note {
+  color: var(--muted);
+  font-size: var(--step--1);
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+/* Счётчик как штамп: рамка, моноширинный шрифт, лёгкий наклон */
+.count {
+  margin-top: 0.15rem;
+  padding: 0.25rem 0.5rem;
+  border: 1.5px solid var(--fg);
+  border-radius: 2px;
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  rotate: -2deg;
+}
+
+.row:nth-child(1) .count {
+  border-color: var(--pink-deep);
+  color: var(--pink-deep);
+}
+
+.rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--line);
+  transform-origin: 0 50%;
+}
+
+@media (max-width: 1100px) {
+  .about {
+    grid-column: 1 / span 6;
+  }
+
+  .inventory {
+    grid-column: 7 / -1;
+  }
+}
+
+@media (max-width: 960px) {
+  .about,
+  .inventory {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 520px) {
+  .row {
+    grid-template-columns: 1.8rem minmax(0, 1fr);
+  }
+
+  .count {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .facts div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+  }
+}

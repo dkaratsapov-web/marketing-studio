@@ -1,0 +1,423 @@
+/* Тёмный блок: слева легенда кластеров, справа доска с точками-страницами.
+   Ниже пара страниц на примере склада */
+.section {
+  padding-bottom: var(--section-y);
+}
+
+.stage {
+  padding-block: var(--section-y) clamp(3rem, 8vh, 5rem);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: center;
+}
+
+.copy {
+  grid-column: 1 / span 5;
+  display: grid;
+  gap: 1.1rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 42ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Цвета кластеров: пара — салатовый и розовый, дальше белый, контуры и серый */
+.dot[data-c="0"],
+.item[data-c="0"] .swatch {
+  --c: var(--lime);
+}
+
+.dot[data-c="1"],
+.item[data-c="1"] .swatch {
+  --c: var(--pink);
+}
+
+.dot[data-c="2"],
+.item[data-c="2"] .swatch {
+  --c: var(--white);
+}
+
+.dot[data-c="3"],
+.item[data-c="3"] .swatch {
+  --c: transparent;
+  --ring: var(--lime);
+}
+
+.dot[data-c="4"],
+.item[data-c="4"] .swatch {
+  --c: #5f5f66;
+}
+
+.dot[data-c="5"],
+.item[data-c="5"] .swatch {
+  --c: transparent;
+  --ring: rgb(255 255 255 / 0.45);
+}
+
+.legend {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 0.8rem 2.4rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-block: 0.45rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.swatch {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: inset 0 0 0 1.5px var(--ring, transparent);
+  translate: 0 0.05rem;
+}
+
+.itemCount {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-1);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.itemName {
+  display: grid;
+  gap: 0.1rem;
+  font-size: var(--step-0);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.itemNote {
+  color: var(--muted);
+  font-size: var(--step--1);
+  font-weight: 400;
+}
+
+/* Доска: тёмный лист с сеткой точек */
+.board {
+  grid-column: 7 / -1;
+  display: grid;
+  gap: 1.25rem;
+  margin: 0;
+  padding: clamp(1.1rem, 2.2vw, 2rem);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.03) 1px, transparent 1px) 0 0 / 100% 2rem,
+    var(--bg-raised);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+.boardHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.total {
+  display: grid;
+  justify-items: end;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(2.6rem, 1.6rem + 3vw, 4.6rem);
+  font-weight: 650;
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.totalLabel {
+  margin-top: 0.4rem;
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dots {
+  --gap: clamp(6px, 0.9vw, 14px);
+  --cell: calc((100cqw - 11 * var(--gap)) / 12);
+  position: relative;
+  container-type: inline-size;
+}
+
+.dotGrid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--gap);
+}
+
+.dot {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: inset 0 0 0 2px var(--ring, transparent);
+}
+
+/* Первые два ряда: пары. Связка идёт от центра точки в первом ряду к центру во втором */
+.links {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--cell) / 2);
+  height: calc(var(--cell) + var(--gap));
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gap);
+  pointer-events: none;
+}
+
+.link {
+  justify-self: center;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(var(--lime), var(--pink));
+  transform-origin: 50% 0;
+}
+
+.pairNote {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--fg);
+  font-size: var(--step--1);
+  font-family: var(--ff-mono);
+  letter-spacing: 0.04em;
+}
+
+.pairIcon {
+  color: var(--lime);
+  font-size: 1.1rem;
+}
+
+/* Пара на примере склада */
+.pair {
+  display: grid;
+  gap: 2rem;
+}
+
+.pairLabel {
+  color: var(--lime);
+}
+
+.shots {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+}
+
+.shot {
+  display: grid;
+  gap: 1.1rem;
+  margin: 0;
+}
+
+.shotImg {
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 40px 80px -40px rgb(0 0 0 / 0.9);
+}
+
+.shotImg img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.shotCap {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.shotWho {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.shotName {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+}
+
+.key {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--lime);
+  border-radius: 2px;
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+}
+
+.shot[data-side="right"] .key {
+  border-color: var(--pink);
+  color: var(--pink);
+}
+
+/* Мостик между снимками: двусторонняя стрелка с подписью */
+.bridge {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  translate: -50% -50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: clamp(7rem, 11vw, 10rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--ink-950);
+  box-shadow: 0 0 0 8px var(--bg);
+  text-align: center;
+}
+
+.bridge span {
+  max-width: 9ch;
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.bridge::before,
+.bridge::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-top: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+}
+
+.bridge::before {
+  left: 0.9rem;
+  rotate: -45deg;
+  translate: 0 -50%;
+}
+
+.bridge::after {
+  right: 0.9rem;
+  rotate: 135deg;
+  translate: 0 -50%;
+}
+
+.pairText {
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem clamp(1.5rem, 4vw, 4rem);
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.6;
+}
+
+.pairText p:first-child {
+  color: var(--fg);
+}
+
+/* Закреплённая сцена: доска и легенда целиком в одном окне */
+@media (min-width: 961px) and (min-height: 640px) and (prefers-reduced-motion: no-preference) {
+  .stage {
+    display: flex;
+    align-items: center;
+    min-height: 100svh;
+    padding-block: calc(4.5rem + clamp(1rem, 3vh, 2rem)) clamp(1rem, 3vh, 2rem);
+  }
+
+  .stage > .grid {
+    width: 100%;
+  }
+
+  .title {
+    font-size: min(clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem), 10svh);
+  }
+
+  .board {
+    max-width: calc((100svh - 9rem) * 1.02);
+    justify-self: end;
+    width: 100%;
+  }
+
+  @media (max-height: 820px) {
+    .itemNote {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 960px) {
+  .copy,
+  .board {
+    grid-column: 1 / -1;
+  }
+
+  .shots,
+  .pairText {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bridge {
+    position: relative;
+    top: auto;
+    left: auto;
+    translate: none;
+    justify-self: center;
+    order: 1;
+    width: 6.5rem;
+    margin-block: -0.5rem;
+  }
+
+  .shot[data-side="right"] {
+    order: 2;
+  }
+}

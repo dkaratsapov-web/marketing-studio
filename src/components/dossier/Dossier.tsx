@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -170,6 +171,12 @@ export default function Dossier() {
                 {c.title}
               </h3>
               <p className={`label ${styles.services}`}>{c.services}</p>
+              {c.href ? (
+                <Link href={c.href} className={styles.openCase} data-cursor-label="Открыть">
+                  Полное досье
+                  <Arrow />
+                </Link>
+              ) : null}
             </div>
 
             <dl className={styles.metrics}>
