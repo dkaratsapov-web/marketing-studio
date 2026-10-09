@@ -12,7 +12,7 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--gutter);
-  row-gap: 1rem;
+  row-gap: 1.25rem;
   align-items: end;
 }
 
@@ -22,7 +22,7 @@
 }
 
 .title {
-  grid-column: 1 / span 7;
+  grid-column: 1 / span 9;
   font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
   line-height: 0.92;
   letter-spacing: -0.055em;
@@ -34,7 +34,7 @@
 }
 
 .lead {
-  grid-column: 8 / -1;
+  grid-column: 1 / span 6;
   max-width: 46ch;
   color: var(--muted);
   font-size: var(--step-0);
@@ -71,10 +71,13 @@
   --mark: 1;
   --c: var(--lime);
   position: relative;
+}
+
+/* Маркер только под самим кодом, подпись остаётся читаемой */
+.codeText {
   padding-inline: 0.1em;
   background: linear-gradient(var(--c), var(--c)) no-repeat 0 100% / calc(var(--mark) * 100%) 100%;
   color: var(--fg);
-  transition: color 0.2s;
 }
 
 .code[data-kind="file"] {
@@ -291,8 +294,27 @@
     display: none;
   }
 
+  /* На телефоне ссылка разбирается в столбик: часть кода и её подпись под ней, ничего не наезжает */
+  .url {
+    flex-direction: column;
+    align-items: flex-start;
+    row-gap: 0.4rem;
+    font-size: 1.2rem;
+  }
+
+  .sep {
+    display: none;
+  }
+
+  .code {
+    display: grid;
+    justify-items: start;
+    gap: 0.35rem;
+  }
+
   .codeNote {
+    position: static;
+    padding-top: 0.35rem;
     white-space: normal;
-    width: 12ch;
   }
 }

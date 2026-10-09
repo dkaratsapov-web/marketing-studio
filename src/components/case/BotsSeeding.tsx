@@ -33,9 +33,8 @@ export default function BotsSeeding({ bots }: Props) {
         .timeline({
           scrollTrigger: {
             trigger: section.querySelector(`.${styles.link}`),
-            start: "top 80%",
-            end: "top 35%",
-            scrub: 0.6,
+            start: "top 78%",
+            once: true,
           },
         })
         .fromTo(
@@ -54,9 +53,8 @@ export default function BotsSeeding({ bots }: Props) {
         .timeline({
           scrollTrigger: {
             trigger: section.querySelector(`.${styles.path}`),
-            start: "top 80%",
-            end: "bottom 55%",
-            scrub: 0.6,
+            start: "top 78%",
+            once: true,
           },
         })
         .fromTo(
@@ -98,7 +96,6 @@ export default function BotsSeeding({ bots }: Props) {
     >
       <div className={`wrap ${styles.grid}`}>
         <header className={styles.head}>
-          <p className="label">{bots.label}</p>
           <h2 id="bots-title" className={styles.title}>
             {bots.title}
             <span className={styles.dotMark}>.</span>
@@ -111,12 +108,12 @@ export default function BotsSeeding({ bots }: Props) {
           <p className={styles.url}>
             <span className={styles.base}>{link.base}</span>
             <span className={styles.code} data-kind="channel">
-              {link.channel}
+              <span className={styles.codeText}>{link.channel}</span>
               <span className={styles.codeNote}>{bots.linkNotes.channel}</span>
             </span>
-            <span className={styles.base}>_</span>
+            <span className={`${styles.base} ${styles.sep}`}>_</span>
             <span className={styles.code} data-kind="file">
-              {link.file}
+              <span className={styles.codeText}>{link.file}</span>
               <span className={styles.codeNote}>{bots.linkNotes.file}</span>
             </span>
           </p>

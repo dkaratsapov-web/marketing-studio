@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -47,6 +47,12 @@ export default function AnalyticsPanel({ panel }: Props) {
     { scope: root },
   );
 
+  // Высота окна постоянная, но на всякий случай после смены вкладки пересчитываем закреплённые сцены ниже
+  useEffect(() => {
+    const id = requestAnimationFrame(() => ScrollTrigger.refresh());
+    return () => cancelAnimationFrame(id);
+  }, [active]);
+
   // Стрелки на клавиатуре переключают вкладки, как положено у tablist
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
@@ -67,7 +73,6 @@ export default function AnalyticsPanel({ panel }: Props) {
     >
       <div className={`wrap ${styles.grid}`}>
         <header className={styles.head}>
-          <p className="label">{panel.label}</p>
           <h2 id="panel-title" className={styles.title}>
             {panel.title}
             <span className={styles.dotMark}>.</span>

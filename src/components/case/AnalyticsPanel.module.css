@@ -12,7 +12,7 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--gutter);
-  row-gap: 1rem;
+  row-gap: 1.25rem;
   align-items: end;
 }
 
@@ -22,7 +22,7 @@
 }
 
 .title {
-  grid-column: 1 / span 6;
+  grid-column: 1 / span 9;
   font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
   line-height: 0.92;
   letter-spacing: -0.055em;
@@ -33,7 +33,7 @@
 }
 
 .lead {
-  grid-column: 8 / -1;
+  grid-column: 1 / span 6;
   max-width: 46ch;
   color: var(--muted);
   font-size: var(--step-0);
@@ -138,10 +138,18 @@
   outline-offset: 4px;
 }
 
+/* Окно одной высоты для всех вкладок: смена вкладки не двигает страницу ниже,
+   иначе закреплённые сцены после этого блока теряют точку старта */
+.shot {
+  aspect-ratio: 1600 / 1193;
+}
+
 .shot img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
+  object-position: 50% 0;
 }
 
 @keyframes swap {

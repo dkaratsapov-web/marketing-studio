@@ -36,9 +36,8 @@ export default function VisitorTools({ tools }: Props) {
         .timeline({
           scrollTrigger: {
             trigger: section.querySelector(`.${styles.plan}`),
-            start: "top 75%",
-            end: "center 45%",
-            scrub: 0.6,
+            start: "top 78%",
+            once: true,
           },
         })
         .fromTo(
@@ -64,9 +63,8 @@ export default function VisitorTools({ tools }: Props) {
         .timeline({
           scrollTrigger: {
             trigger: section.querySelector(`.${styles.flow}`),
-            start: "top 80%",
-            end: "bottom 55%",
-            scrub: 0.6,
+            start: "top 78%",
+            once: true,
           },
         })
         .fromTo(
@@ -102,7 +100,6 @@ export default function VisitorTools({ tools }: Props) {
     >
       <div className={`wrap ${styles.grid}`}>
         <header className={styles.head}>
-          <p className="label">{tools.label}</p>
           <h2 id="tools-title" className={styles.title}>
             {tools.title}
             <span className={styles.dotMark}>.</span>
@@ -112,7 +109,6 @@ export default function VisitorTools({ tools }: Props) {
         {/* Калькулятор */}
         <div className={styles.calc}>
           <div className={styles.calcCopy}>
-            <p className={styles.toolNo}>01</p>
             <h3 className={styles.toolName}>{calc.name}</h3>
             <p className={styles.toolText}>{calc.text}</p>
             <p className={styles.idea}>{calc.idea}</p>
@@ -158,7 +154,6 @@ export default function VisitorTools({ tools }: Props) {
         {/* Чат-ассистент */}
         <div className={styles.chat}>
           <div className={styles.chatCopy}>
-            <p className={styles.toolNo}>02</p>
             <h3 className={styles.toolName}>{chat.name}</h3>
             <p className={styles.bigCount}>
               {chat.count}
@@ -187,7 +182,6 @@ export default function VisitorTools({ tools }: Props) {
         {/* Лид-магниты */}
         <div className={styles.magnets}>
           <div className={styles.magnetsHead}>
-            <p className={styles.toolNo}>03</p>
             <h3 className={styles.toolName}>{tools.magnetsLabel}</h3>
           </div>
           <ul className={styles.files}>

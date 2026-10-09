@@ -14,7 +14,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 type Props = { content: (typeof SFERA)["content"] };
 
 /**
- * Контент-конвейер. Карточка материала едет по ленте стадий в такт прокрутке:
+ * Контент-конвейер. Карточка материала проезжает ленту стадий, когда лента показалась на экране:
  * план, текст, согласование (кнопка «Согласовать — в эфир» нажимается), согласовано, в эфире.
  * Стадия, на которой стоит карточка, подсвечена. На телефоне лента идёт сверху вниз.
  */
@@ -70,13 +70,13 @@ export default function ContentLine({ content }: Props) {
         defaults: { ease: "power2.inOut" },
         scrollTrigger: {
           trigger: belt,
-          start: "top 75%",
-          end: "bottom 30%",
-          scrub: 0.6,
+          start: "top 78%",
+          once: true,
         },
       });
-      tl.to(pos, { s: 1, duration: 1, onUpdate: update })
-        .to(pos, { s: 2, duration: 1, onUpdate: update })
+      // Карточка проезжает ленту за пару секунд, как только лента показалась: без привязки к скорости скролла
+      tl.to(pos, { s: 1, duration: 0.55, onUpdate: update })
+        .to(pos, { s: 2, duration: 0.55, onUpdate: update }, "+=0.1")
         // На согласовании кнопка нажимается и загорается
         .fromTo(
           approve,
@@ -84,7 +84,7 @@ export default function ContentLine({ content }: Props) {
           { "--done": 1, scale: 0.96, duration: 0.3 },
         )
         .to(approve, { scale: 1, duration: 0.2 })
-        .to(pos, { s: last, duration: 2, onUpdate: update });
+        .to(pos, { s: last, duration: 0.9, onUpdate: update }, "+=0.1");
     },
     { scope: root },
   );
@@ -98,7 +98,6 @@ export default function ContentLine({ content }: Props) {
     >
       <div className={`wrap ${styles.grid}`}>
         <header className={styles.head}>
-          <p className="label">{content.label}</p>
           <h2 id="content-title" className={styles.title}>
             {content.title}
             <span className={styles.dotMark}>.</span>

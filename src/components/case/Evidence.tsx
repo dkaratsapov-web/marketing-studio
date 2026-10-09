@@ -34,9 +34,8 @@ export default function Evidence({ evidence }: Props) {
       const wires = gsap.timeline({
         scrollTrigger: {
           trigger: section.querySelector(`.${styles.joint}`),
-          start: "top 75%",
-          end: "top 25%",
-          scrub: 0.6,
+          start: "top 78%",
+          once: true,
         },
       });
       wires
@@ -106,7 +105,6 @@ export default function Evidence({ evidence }: Props) {
     >
       <div className={`wrap ${styles.grid}`}>
         <header className={styles.head}>
-          <p className="label">{evidence.label}</p>
           <h2 id="evidence-title" className={styles.title}>
             {evidence.title}
             <span className={styles.dotMark}>.</span>

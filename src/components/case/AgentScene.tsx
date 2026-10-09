@@ -5,7 +5,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import type { SFERA } from "@/content/sfera";
-import { CINEMATIC_MQ } from "@/components/service/SearchScene";
 import styles from "./AgentScene.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -16,8 +15,7 @@ type Props = { agent: (typeof SFERA)["agent"] };
  * ИИ-агент по Директу. Справа живой интерфейс агента в стиле сайта: предложение печатается,
  * проявляются «цифра», «принцип», «риск», команда; курсор жмёт «Согласен и применить»,
  * ответ уходит в «Правила агента», а правка появляется в журнале с кнопкой «Вернуть как было».
- * На десктопе сценой управляет скролл (экран закреплён), на телефоне она проигрывается сама,
- * когда доходит до экрана. Слева границы агента, как пломбы.
+ * Сцена проигрывается сама, когда интерфейс доходит до экрана. Слева границы агента, как пломбы.
  */
 export default function AgentScene({ agent }: Props) {
   const root = useRef<HTMLElement>(null);
@@ -142,29 +140,16 @@ export default function AgentScene({ agent }: Props) {
         return tl;
       };
 
-      const mm = gsap.matchMedia();
-      mm.add(CINEMATIC_MQ, () => {
-        const tl = build();
-        tl.to({}, { duration: 0.4 });
-        ScrollTrigger.create({
-          trigger: section.querySelector(`.${styles.stage}`),
-          start: "top top",
-          end: "+=180%",
-          pin: true,
-          scrub: 0.7,
-          animation: tl,
-          invalidateOnRefresh: true,
-        });
-      });
-      mm.add(`not all and ${CINEMATIC_MQ}`, () => {
-        const tl = build();
-        tl.pause();
-        ScrollTrigger.create({
-          trigger: ui,
-          start: "top 70%",
-          once: true,
-          onEnter: () => tl.play(),
-        });
+      // Сцена проигрывается сама, когда интерфейс агента показался: без закрепления экрана,
+      // поэтому при быстром скролле она не застревает пустой
+      // Чуть быстрее «реального» темпа: сцена должна закончиться, пока человек на неё смотрит
+      const tl = build().timeScale(1.5);
+      tl.pause();
+      ScrollTrigger.create({
+        trigger: ui,
+        start: "top 75%",
+        once: true,
+        onEnter: () => tl.play(),
       });
 
       // Ограничители: бегунок едет к пределу, упирается в розовый стоп и чуть отскакивает

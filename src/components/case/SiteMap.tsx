@@ -176,7 +176,6 @@ export default function SiteMap({ map }: Props) {
       <div className={styles.stage}>
         <div className={`wrap ${styles.grid}`}>
           <div className={styles.copy}>
-            <p className="label">{map.label}</p>
             <h2 id="map-title" className={styles.title}>
               {map.title}
               <span className={styles.dotMark}>.</span>

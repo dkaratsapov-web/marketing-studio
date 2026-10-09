@@ -107,7 +107,6 @@ export default function CaseFinale({ data }: Props) {
       >
         <div className={`wrap ${styles.serviceGrid}`}>
           <header className={styles.serviceHead}>
-            <p className="label">{service.label}</p>
             <h2 id="service-title" className={styles.title}>
               {service.title}
               <span className={styles.dotPink}>.</span>
@@ -135,7 +134,6 @@ export default function CaseFinale({ data }: Props) {
       >
         <div className={`wrap ${styles.principlesGrid}`}>
           <header className={styles.principlesHead}>
-            <p className="label">{principles.label}</p>
             <h2 id="principles-title" className={styles.title}>
               {principles.title}
               <span className={styles.dotLime}>.</span>
@@ -167,7 +165,6 @@ export default function CaseFinale({ data }: Props) {
       >
         <div className={`wrap ${styles.resultsGrid}`}>
           <div className={styles.sheet}>
-            <p className="label">{results.label}</p>
             <h2 id="results-title" className={styles.title}>
               {results.title}
               <span className={styles.dotPink}>.</span>

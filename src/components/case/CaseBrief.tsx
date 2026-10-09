@@ -98,7 +98,6 @@ export default function CaseBrief({ brief, client }: Props) {
     >
       <div className={`wrap ${styles.grid}`}>
         <div className={styles.about}>
-          <p className="label">{brief.label}</p>
           <h2 id="brief-title" className={styles.title}>
             <span className={styles.who}>{client}</span>
             <span className={styles.verb}>проектирует</span>

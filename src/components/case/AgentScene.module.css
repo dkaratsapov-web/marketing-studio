@@ -458,30 +458,6 @@
   color: var(--fg);
 }
 
-/* Закреплённая сцена: всё в одно окно */
-@media (min-width: 961px) and (min-height: 640px) and (prefers-reduced-motion: no-preference) {
-  .stage {
-    display: flex;
-    align-items: center;
-    min-height: 100svh;
-    padding-block: calc(4.5rem + clamp(1rem, 3vh, 2rem)) clamp(1rem, 3vh, 2rem);
-  }
-
-  .stage > .grid {
-    width: 100%;
-  }
-
-  .title {
-    font-size: min(clamp(2.4rem, 1.2rem + 3.8vw, 5.4rem), 8.5svh);
-  }
-
-  @media (max-height: 820px) {
-    .lead {
-      font-size: var(--step--1);
-    }
-  }
-}
-
 @media (max-width: 960px) {
   .copy,
   .uiWrap {
