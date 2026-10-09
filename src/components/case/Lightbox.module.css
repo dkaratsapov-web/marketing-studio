@@ -2,7 +2,7 @@
 .dialog {
   width: min(96vw, 1500px);
   max-width: none;
-  max-height: 94svh;
+  max-height: 100svh;
   padding: 0;
   border: 0;
   background: transparent;
@@ -90,29 +90,19 @@
   outline-offset: 3px;
 }
 
-/* Высокие снимки (админка) прокручиваются внутри окна */
+/* Снимок целиком в один экран: вписывается и по ширине, и по высоте, без прокрутки */
 .scroller {
-  max-height: calc(94svh - 5.5rem);
-  overflow: auto;
-  border-radius: 10px;
-  overscroll-behavior: contain;
-}
-
-.img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.scroller[data-portrait] {
   display: grid;
   justify-items: center;
 }
 
-.scroller[data-portrait] .img {
+.img {
+  display: block;
   width: auto;
+  height: auto;
   max-width: 100%;
-  max-height: calc(94svh - 5.5rem);
+  max-height: calc(100svh - 7.5rem);
+  border-radius: 10px;
 }
 
 .note {

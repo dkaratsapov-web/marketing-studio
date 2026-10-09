@@ -100,6 +100,17 @@ html.has-cursor * {
   cursor: none !important;
 }
 
+/* Открытый <dialog> лежит в верхнем слое браузера, выше любого z-index, и свой курсор оказывается под ним.
+   Внутри окна возвращаем системный курсор */
+html.has-cursor dialog[open],
+html.has-cursor dialog[open] * {
+  cursor: auto !important;
+}
+
+html.has-cursor dialog[open] button {
+  cursor: pointer !important;
+}
+
 html.has-cursor input:not([type="checkbox"]):not([type="radio"]),
 html.has-cursor textarea,
 html.has-cursor select {
