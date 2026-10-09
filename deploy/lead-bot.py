@@ -2,31 +2,49 @@
 """Приёмник заявок с сайта Корпорации.
 
 Слушает POST /api/lead на 127.0.0.1 (снаружи к нему ходит только nginx), проверяет заявку
-и пересылает её в Telegram-чаты из CHAT_IDS. Каждая заявка дописывается в LEAD_LOG
-(JSON Lines) как резервная копия: данные хранятся на сервере в России.
+и рассылает её по настроенным каналам: письмом (SMTP, например Яндекс Почта) и/или в Telegram.
+Каждая заявка дописывается в LEAD_LOG (JSON Lines) как резервная копия: данные хранятся на сервере в России.
 
 Только стандартная библиотека Python, никаких зависимостей.
-Настройки: переменные окружения BOT_TOKEN, CHAT_IDS (через запятую), LEAD_LOG, PORT.
+Настройки (переменные окружения):
+  почта:    SMTP_HOST, SMTP_PORT (465), SMTP_USER, SMTP_PASS, MAIL_TO (через запятую)
+  Telegram: BOT_TOKEN, CHAT_IDS (через запятую), TG_API (адрес Bot API или ретранслятора), RELAY_KEY
+  общее:    LEAD_LOG, PORT
 """
 import html
 import json
 import os
 import re
+import smtplib
 import socket
+import ssl
 import sys
 import threading
 import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
+from email.message import EmailMessage
+from email.utils import formataddr
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-TOKEN = os.environ["BOT_TOKEN"]
-CHATS = [c.strip() for c in os.environ["CHAT_IDS"].split(",") if c.strip()]
+def _list(name: str) -> list[str]:
+    return [v.strip() for v in os.environ.get(name, "").split(",") if v.strip()]
+
+
+TOKEN = os.environ.get("BOT_TOKEN", "")
+CHATS = _list("CHAT_IDS") if TOKEN else []
+SMTP_HOST = os.environ.get("SMTP_HOST", "")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "465"))
+SMTP_USER = os.environ.get("SMTP_USER", "")
+SMTP_PASS = os.environ.get("SMTP_PASS", "")
+MAIL_TO = _list("MAIL_TO") if SMTP_HOST else []
 LOG = os.environ.get("LEAD_LOG", "/var/lib/marketing-studio/leads.jsonl")
 PORT = int(os.environ.get("PORT", "8787"))
 # Адрес Bot API можно подменить для проверки без настоящего Telegram
-TG_API = os.environ.get("TG_API", "https://api.telegram.org")
+TG_API = os.environ.get("TG_API", "https://api.telegram.org").rstrip("/")
+# Ключ ретранслятора (deploy/relay/worker.js), если Telegram API недоступен напрямую
+RELAY_KEY = os.environ.get("RELAY_KEY", "")
 MSK = timezone(timedelta(hours=3))
 
 SOURCES = {
@@ -124,11 +142,26 @@ def telegram(chat: str, message: str) -> None:
     req = urllib.request.Request(
         f"{TG_API}/bot{TOKEN}/sendMessage",
         data=body,
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json", **({"X-Relay-Key": RELAY_KEY} if RELAY_KEY else {})},
     )
     with urllib.request.urlopen(req, timeout=10) as resp:
         if json.load(resp).get("ok") is not True:
             raise RuntimeError("telegram answered not ok")
+
+
+def mail(lead: dict, message: str) -> None:
+    """Письмо с заявкой: тема сразу говорит, что за заявка и как связаться."""
+    plain = re.sub(r"<[^>]+>", "", message)
+    plain = html.unescape(plain)
+    who = lead["phone"] or lead["contact"]
+    msg = EmailMessage()
+    msg["Subject"] = f"Заявка с сайта: {SOURCES.get(lead['source'], 'заявка')} · {who}"
+    msg["From"] = formataddr(("Сайт Корпорации", SMTP_USER))
+    msg["To"] = ", ".join(MAIL_TO)
+    msg.set_content(plain + "\n\n--\nmarketing-studio.pro\n")
+    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ssl.create_default_context(), timeout=15) as smtp:
+        smtp.login(SMTP_USER, SMTP_PASS)
+        smtp.send_message(msg)
 
 
 def normalize(data: dict) -> dict:
@@ -190,11 +223,17 @@ class Handler(BaseHTTPRequestHandler):
 
         message = build_message(lead)
         delivered = 0
+        if MAIL_TO:
+            try:
+                mail(lead, message)
+                delivered += 1
+            except (smtplib.SMTPException, OSError) as err:
+                print(f"mail: {err}", file=sys.stderr, flush=True)
         for chat in CHATS:
             try:
                 telegram(chat, message)
                 delivered += 1
-            except (urllib.error.URLError, RuntimeError, TimeoutError) as err:
+            except (urllib.error.URLError, RuntimeError, TimeoutError, OSError) as err:
                 print(f"telegram {chat}: {err}", file=sys.stderr, flush=True)
 
         try:
@@ -205,7 +244,7 @@ class Handler(BaseHTTPRequestHandler):
             print(f"log: {err}", file=sys.stderr, flush=True)
 
         if delivered == 0:
-            return self.reply(502, {"ok": False, "error": "telegram"})
+            return self.reply(502, {"ok": False, "error": "delivery"})
         self.reply(200, {"ok": True})
 
     def log_message(self, fmt, *args):
@@ -213,5 +252,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"lead-bot on 127.0.0.1:{PORT}, chats: {len(CHATS)}", file=sys.stderr, flush=True)
+    print(f"lead-bot on 127.0.0.1:{PORT}, mail: {len(MAIL_TO)}, telegram chats: {len(CHATS)}", file=sys.stderr, flush=True)
+    if not (MAIL_TO or CHATS):
+        print("no delivery channels configured", file=sys.stderr, flush=True)
     ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

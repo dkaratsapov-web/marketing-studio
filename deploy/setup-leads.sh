@@ -4,10 +4,14 @@
 # и написать в группе любое сообщение, например /start.
 # Запуск на сервере под root (токен бота вставить вместо ТОКЕН):
 #   curl -fsSL https://raw.githubusercontent.com/dkaratsapov-web/marketing-studio/main/deploy/setup-leads.sh | bash -s -- ТОКЕН
+# Если api.telegram.org с сервера недоступен, через ретранслятор deploy/relay/worker.js:
+#   ... | bash -s -- ТОКЕН https://АДРЕС.workers.dev КЛЮЧ
 # Повторный запуск безопасен: обновит код бота и при необходимости заново найдёт чат.
 set -euo pipefail
 
 TOKEN="${1:-}"
+RELAY_URL="${2:-}"
+RELAY_KEY="${3:-}"
 REPO_RAW="https://raw.githubusercontent.com/dkaratsapov-web/marketing-studio/main"
 DEPLOY_USER="deploy"
 BOT_DIR="/home/${DEPLOY_USER}/lead-bot"
@@ -21,22 +25,40 @@ if [ -z "${TOKEN}" ] && [ -f "${ENV_FILE}" ]; then
   TOKEN="$(grep '^BOT_TOKEN=' "${ENV_FILE}" | cut -d= -f2-)"
 fi
 [ -n "${TOKEN}" ] || { echo "Передайте токен бота: ... | bash -s -- ТОКЕН" >&2; exit 1; }
+if [ -z "${RELAY_URL}" ] && [ -f "${ENV_FILE}" ]; then
+  RELAY_URL="$(grep '^TG_API=' "${ENV_FILE}" | cut -d= -f2- | grep -v '^https://api.telegram.org$' || true)"
+  RELAY_KEY="$(grep '^RELAY_KEY=' "${ENV_FILE}" | cut -d= -f2- || true)"
+fi
+RELAY_URL="${RELAY_URL%/}"
+TG_BASE="${RELAY_URL:-https://api.telegram.org}"
+if [ -n "${RELAY_URL}" ] && [ -z "${RELAY_KEY}" ]; then
+  echo "Для ретранслятора нужен ключ: ... | bash -s -- ТОКЕН АДРЕС КЛЮЧ" >&2; exit 1
+fi
 
 # Только IPv4 и ограничение по времени: без них curl может бесконечно ждать IPv6, которого у VPS нет
-api() { curl -4 -fsS --connect-timeout 8 -m 20 "https://api.telegram.org/bot${TOKEN}/$1"; }
+api() { curl -4 -fsS --connect-timeout 8 -m 20 -H "X-Relay-Key: ${RELAY_KEY}" "${TG_BASE}/bot${TOKEN}/$1"; }
 
-echo "==> Проверяю связь сервера с Telegram"
-if ! curl -4 -sS --connect-timeout 8 -m 15 -o /dev/null https://api.telegram.org/ 2>/tmp/tg-check.err; then
+echo "==> Проверяю связь сервера с Telegram (${TG_BASE})"
+if [ -n "${RELAY_URL}" ]; then
+  # Ответ сначала в переменную: с pipefail ранний выход grep -q ложно ронял бы проверку
+  RELAY_ANSWER="$(curl -4 -sS --connect-timeout 8 -m 15 "${RELAY_URL}/" 2>/tmp/tg-check.err || true)"
+  if [ "${RELAY_ANSWER}" != "relay ok" ]; then
+    echo "    Ретранслятор ${RELAY_URL} не отвечает с этого сервера:" >&2
+    sed 's/^/      /' /tmp/tg-check.err >&2
+    echo "    Проверьте адрес (откройте его в браузере, должно быть «relay ok») и пришлите этот вывод." >&2
+    exit 2
+  fi
+elif ! curl -4 -sS --connect-timeout 8 -m 15 -o /dev/null https://api.telegram.org/ 2>/tmp/tg-check.err; then
   echo "    Сервер не может достучаться до api.telegram.org:" >&2
   sed 's/^/      /' /tmp/tg-check.err >&2
-  echo "    Похоже, Telegram API недоступен из этого дата-центра. Пришлите этот вывод, подберём обход." >&2
+  echo "    Telegram API недоступен из этого дата-центра: нужен ретранслятор (deploy/relay/worker.js)." >&2
   exit 2
 fi
 echo "    Связь есть"
 
 echo "==> Проверяю токен"
 BOT_NAME="$(api getMe | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["username"])')" \
-  || { echo "Telegram не принял токен. Проверьте, что скопировали его целиком." >&2; exit 1; }
+  || { echo "Telegram не принял токен (или ключ ретранслятора). Проверьте, что скопировали их целиком." >&2; exit 1; }
 echo "    Бот: @${BOT_NAME}"
 
 echo "==> Ищу группу, куда добавлен бот"
@@ -88,6 +110,8 @@ umask 027
 cat > "${ENV_FILE}" <<ENV
 BOT_TOKEN=${TOKEN}
 CHAT_IDS=${CHAT_ID}
+TG_API=${TG_BASE}
+RELAY_KEY=${RELAY_KEY}
 LEAD_LOG=${DATA_DIR}/leads.jsonl
 PORT=8787
 ENV
