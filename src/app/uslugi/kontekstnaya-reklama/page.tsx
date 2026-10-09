@@ -26,7 +26,13 @@ export default function ContextPage() {
         <Seam from="dark" to="light" label="Отчёт" />
         <NotClicks report={CONTEXT.report} />
         <Seam from="light" to="dark" label="Смета" />
-        <Estimate estimate={CONTEXT.estimate} head={CONTEXT.head.name} department={CONTEXT.department} />
+        <Estimate
+          estimate={CONTEXT.estimate}
+          calc={CONTEXT.calc}
+          service={CONTEXT.name}
+          head={CONTEXT.head.name}
+          department={CONTEXT.department}
+        />
         <Seam from="dark" to="light" label="Кампании" />
         <Campaigns campaigns={CONTEXT.campaigns} />
         <Seam from="light" to="dark" label="Минус-слова" />

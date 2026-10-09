@@ -2,17 +2,21 @@
 
 import { useId, useState } from "react";
 import { TELEGRAM } from "@/content/contacts";
-import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type LeadResult } from "@/lib/lead";
+import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type Lead, type LeadResult } from "@/lib/lead";
 import styles from "./HeroLead.module.css";
 
 type Props = {
-  /** Откуда заявка: главная или страница услуги (тогда в Telegram придёт и название услуги) */
-  source?: "hero" | "service";
+  /** Откуда заявка: главная, страница услуги или калькулятор сметы (тогда в Telegram придёт и название услуги) */
+  source?: Lead["source"];
   service?: string;
+  /** Текст кнопки, по умолчанию «Получить консультацию» */
+  cta?: string;
+  /** Что ещё уходит с заявкой, например ответы калькулятора и посчитанная смета */
+  answers?: Record<string, string>;
 };
 
 /** Открытая форма в первом экране: только телефон и кнопка консультации */
-export default function HeroLead({ source = "hero", service }: Props) {
+export default function HeroLead({ source = "hero", service, cta = "Получить консультацию", answers }: Props) {
   const id = useId();
   const [phone, setPhone] = useState("");
   const [touched, setTouched] = useState(false);
@@ -26,9 +30,10 @@ export default function HeroLead({ source = "hero", service }: Props) {
     if (!phoneOk(phone) || busy) return;
     setBusy(true);
     setSent(
-      await submitLead({ source, service, phone }, [
+      await submitLead({ source, service, phone, answers }, [
         service ? `Консультация по услуге «${service}»` : "Консультация с сайта Корпорации",
         `Телефон: ${phone.trim()}`,
+        ...Object.entries(answers ?? {}).map(([q, a]) => `${q}: ${a}`),
       ]),
     );
     setBusy(false);
@@ -75,7 +80,7 @@ export default function HeroLead({ source = "hero", service }: Props) {
           aria-describedby={`${id}-note`}
         />
         <button type="submit" className={`btn btn--primary ${styles.submit}`} disabled={busy}>
-          {busy ? "Отправляем…" : "Получить консультацию"}
+          {busy ? "Отправляем…" : cta}
           <svg className="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M1 8h13M9 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" />
           </svg>

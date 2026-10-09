@@ -38,7 +38,7 @@ export const phoneBlur = (v: string) => (localDigits(v) ? v : "");
 
 export type Lead = {
   /** Какая форма: от этого зависит заголовок сообщения в Telegram */
-  source: "hero" | "protocol" | "brief" | "service";
+  source: "hero" | "protocol" | "brief" | "service" | "estimate";
   name?: string;
   phone?: string;
   contact?: string;

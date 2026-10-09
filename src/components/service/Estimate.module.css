@@ -14,8 +14,6 @@
 
 .intro {
   grid-column: 1 / span 5;
-  position: sticky;
-  top: calc(6rem + env(safe-area-inset-top, 0px));
   display: grid;
   gap: 1.25rem;
 }
@@ -161,6 +159,59 @@
   background-repeat: no-repeat;
   background-size: 100% 100%;
   font-size: 1rem;
+}
+
+/* Ответы калькулятора: «ваш проект» прямо в чеке */
+.project {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0 0 0.9rem;
+  list-style: none;
+  border-bottom: 1px dashed rgb(0 0 0 / 0.35);
+}
+
+.project li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.project li span:first-child {
+  color: rgb(0 0 0 / 0.6);
+}
+
+.project li span:last-child {
+  text-align: right;
+}
+
+/* Печать «Рано» при маленьком бюджете: язык отказов главной */
+.stamp {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  translate: -50% -50%;
+  rotate: -12deg;
+  padding: 0.3rem 1.1rem;
+  border: 4px solid var(--pink-deep);
+  border-radius: 4px;
+  color: var(--pink-deep);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: 2.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  mix-blend-mode: multiply;
+  opacity: 0.85;
+  animation: stamp 0.45s var(--ease-stamp) 1.1s both;
+}
+
+@keyframes stamp {
+  from {
+    opacity: 0;
+    scale: 1.8;
+  }
 }
 
 .signed {

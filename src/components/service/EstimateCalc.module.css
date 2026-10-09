@@ -1,0 +1,230 @@
+/* Калькулятор сметы: тёмная плашка под текстом блока, в языке формы первого экрана */
+.calc {
+  display: grid;
+  gap: 1rem;
+  width: min(100%, 40rem);
+  margin-top: clamp(0.5rem, 2vh, 1.25rem);
+  padding: clamp(1.1rem, 2vw, 1.5rem);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--bg-raised);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.title {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-1);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.step {
+  flex: none;
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Полоса прогресса: салатовая, как печатающая головка принтера рядом */
+.bar {
+  height: 2px;
+  background: var(--line);
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: var(--lime);
+  box-shadow: 0 0 10px rgb(196 245 66 / 0.6);
+  transform-origin: 0 50%;
+  transition: transform 0.6s var(--ease-snap);
+}
+
+.question,
+.result {
+  display: grid;
+  gap: 0.9rem;
+  animation: stepIn 0.5s var(--ease-out) both;
+}
+
+@keyframes stepIn {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+}
+
+.q {
+  font-size: var(--step-0);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.q:focus,
+.price:focus,
+.refuseTitle:focus {
+  outline: none;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.option {
+  min-height: 2.75rem;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--step-0);
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    border-color 0.25s var(--ease-out),
+    background-color 0.25s var(--ease-out),
+    color 0.25s var(--ease-out);
+}
+
+@media (hover: hover) {
+  .option:hover {
+    border-color: var(--lime);
+    background: var(--lime);
+    color: var(--ink-950);
+  }
+}
+
+.option:active {
+  transform: translateY(1px);
+}
+
+.option:focus-visible,
+.linkBtn:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
+}
+
+.linkBtn {
+  justify-self: start;
+  padding: 0.35rem 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition:
+    color 0.25s var(--ease-out),
+    text-underline-offset 0.25s var(--ease-out);
+}
+
+.linkBtn:hover {
+  color: var(--lime);
+  text-underline-offset: 0.45em;
+}
+
+/* Итог: крупная вилка цены */
+.price {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(2.2rem, 1.4rem + 2.4vw, 3.4rem);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--lime);
+}
+
+.rub {
+  color: var(--fg);
+}
+
+.per {
+  margin-top: -0.5rem;
+  color: var(--muted);
+  font-size: var(--step--1);
+  font-family: var(--ff-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lines {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-block: 0.8rem;
+  border-block: 1px dashed var(--line);
+  font-size: var(--step-0);
+}
+
+.lines div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.2rem 1rem;
+}
+
+.lines dt {
+  color: var(--muted);
+}
+
+.lines dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Отказ: розовый, как печать «Отказано» на главной */
+.refuseTitle {
+  color: var(--pink);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-3);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.refuseText {
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+
+.actions .linkBtn:first-child {
+  color: var(--lime);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .question,
+  .result {
+    animation: none;
+  }
+}
