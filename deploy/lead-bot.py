@@ -51,6 +51,7 @@ SOURCES = {
     "hero": "Консультация · первый экран",
     "protocol": "Заявка · блок «Протокол»",
     "brief": "Бриф",
+    "service": "Консультация · страница услуги",
     "test": "Проверка связи",
 }
 UTM_KEYS = ("utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "yclid", "gclid")

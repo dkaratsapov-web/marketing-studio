@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { PHONES, TELEGRAM } from "@/content/contacts";
 import { QUOTE } from "@/components/Logo";
+import HomeLink from "@/components/HomeLink";
 import styles from "./Footer.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -83,9 +84,9 @@ export default function Footer() {
         </div>
         <nav className={styles.nav} aria-label="Разделы">
           {NAV.map((n) => (
-            <a key={n.href} href={n.href} className={styles.navLink}>
+            <HomeLink key={n.href} hash={n.href} className={styles.navLink}>
               {n.label}
-            </a>
+            </HomeLink>
           ))}
         </nav>
       </div>

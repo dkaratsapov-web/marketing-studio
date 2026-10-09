@@ -6,7 +6,7 @@
 
 const ALLOWED = new Set(["getMe", "getUpdates", "sendMessage"]);
 
-export default {
+const relay = {
   async fetch(request, env) {
     const url = new URL(request.url);
 
@@ -32,3 +32,5 @@ export default {
     });
   },
 };
+
+export default relay;

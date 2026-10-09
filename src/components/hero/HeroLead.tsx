@@ -5,8 +5,14 @@ import { TELEGRAM } from "@/content/contacts";
 import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type LeadResult } from "@/lib/lead";
 import styles from "./HeroLead.module.css";
 
+type Props = {
+  /** Откуда заявка: главная или страница услуги (тогда в Telegram придёт и название услуги) */
+  source?: "hero" | "service";
+  service?: string;
+};
+
 /** Открытая форма в первом экране: только телефон и кнопка консультации */
-export default function HeroLead() {
+export default function HeroLead({ source = "hero", service }: Props) {
   const id = useId();
   const [phone, setPhone] = useState("");
   const [touched, setTouched] = useState(false);
@@ -20,8 +26,8 @@ export default function HeroLead() {
     if (!phoneOk(phone) || busy) return;
     setBusy(true);
     setSent(
-      await submitLead({ source: "hero", phone }, [
-        "Консультация с сайта Корпорации",
+      await submitLead({ source, service, phone }, [
+        service ? `Консультация по услуге «${service}»` : "Консультация с сайта Корпорации",
         `Телефон: ${phone.trim()}`,
       ]),
     );

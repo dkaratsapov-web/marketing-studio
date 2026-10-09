@@ -1,0 +1,265 @@
+/* Первый экран отдела: слева заголовок, текст и форма, справа живая сцена, снизу три факта */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  padding-block: calc(4.5rem + env(safe-area-inset-top, 0px) + clamp(1.25rem, 3vh, 2.5rem))
+    clamp(2rem, 5vh, 3.5rem);
+  overflow: hidden;
+  perspective: 1400px;
+}
+
+/* Мягкое салатовое зарево за сценой: цвет отдела */
+.glow {
+  position: absolute;
+  top: 10%;
+  right: -10%;
+  width: min(70vw, 900px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(196 245 66 / 0.14), transparent 70%);
+  pointer-events: none;
+}
+
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: 1fr auto;
+  column-gap: var(--gutter);
+  row-gap: clamp(2rem, 5vh, 3.5rem);
+  min-height: calc(100svh - 4.5rem - clamp(3.25rem, 8vh, 6rem));
+}
+
+.text {
+  grid-column: 1 / span 6;
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 1.25rem;
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  animation: fadeUp 0.9s var(--ease-out) 0.1s both;
+}
+
+.crumbs a {
+  transition: color 0.25s var(--ease-out);
+}
+
+.crumbs a:hover {
+  color: var(--fg);
+}
+
+.crumbs [aria-current] {
+  color: var(--fg);
+}
+
+.kicker {
+  color: var(--lime);
+  animation: fadeUp 0.9s var(--ease-out) 0.2s both;
+}
+
+.kickerTools {
+  color: var(--muted);
+}
+
+.title {
+  font-size: clamp(4.2rem, 1.2rem + 9.4vw, 11.5rem);
+  font-weight: 650;
+  line-height: 0.86;
+  letter-spacing: -0.055em;
+  margin-left: -0.05em;
+}
+
+.mask {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.12em 0.08em;
+  margin-block: -0.12em -0.08em;
+}
+
+/* Строки выезжают с лёгким наклоном и выпрямляются: родственно главной, но не копия */
+.line {
+  display: block;
+  transform-origin: 0 100%;
+  animation: rise 1.1s var(--ease-out) both;
+  animation-delay: calc(0.3s + var(--i) * 0.14s);
+}
+
+.mask:nth-child(3) .line {
+  padding-left: 0.6em;
+}
+
+.dot {
+  color: var(--lime);
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(105%) rotate(4deg);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.lead {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: clamp(0.5rem, 2vh, 1.25rem);
+  animation: fadeUp 1s var(--ease-out) 0.75s both;
+}
+
+.leadText {
+  max-width: 40ch;
+  color: var(--muted);
+  font-size: var(--step-1);
+  line-height: 1.45;
+}
+
+/* Сцена */
+.stageWrap {
+  grid-column: 7 / -1;
+  align-self: center;
+  display: grid;
+  /* Дорожка не растягивается под длинный запрос: он обрезается внутри строки поиска */
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  gap: 1.25rem;
+  animation: stageIn 1.2s var(--ease-out) 0.5s both;
+}
+
+.stage {
+  transform-origin: 50% 70%;
+  transform-style: preserve-3d;
+}
+
+@keyframes stageIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.96);
+  }
+}
+
+/* Кто ведёт отдел: подпись под сценой */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  justify-self: end;
+}
+
+.headMark {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--ink-950);
+  font-family: var(--ff-display);
+  font-weight: 700;
+}
+
+.headName {
+  display: block;
+  font-weight: 600;
+}
+
+.headRole {
+  display: block;
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+/* Три факта по низу экрана, разделены тонкими линиями */
+.facts {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--line);
+  animation: fadeUp 1s var(--ease-out) 1s both;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.3rem;
+  padding: 1.1rem 1.25rem 0 0;
+}
+
+.fact + .fact {
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--line);
+}
+
+.factValue {
+  margin: 0;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.fact:first-child .factValue {
+  color: var(--lime);
+}
+
+.factLabel {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+@media (max-width: 960px) {
+  .text,
+  .stageWrap {
+    grid-column: 1 / -1;
+  }
+
+  .grid {
+    min-height: 0;
+  }
+
+  .head {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 600px) {
+  .facts {
+    grid-template-columns: 1fr;
+  }
+
+  .fact,
+  .fact + .fact {
+    padding: 0.9rem 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crumbs,
+  .kicker,
+  .line,
+  .lead,
+  .stageWrap,
+  .facts {
+    animation: none;
+  }
+}

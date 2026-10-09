@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "./Logo";
 import { PHONES, TELEGRAM } from "@/content/contacts";
+import HomeLink from "@/components/HomeLink";
 import styles from "./Header.module.css";
 
 const NAV = [
@@ -81,17 +82,17 @@ export default function Header() {
       data-open={open}
     >
       <div className={styles.bar}>
-        <a href="#top" className={styles.logo} aria-label="Корпорация, на главную">
+        <HomeLink hash="#top" className={styles.logo} aria-label="Корпорация, на главную">
           <Logo className={styles.logoInner} />
-        </a>
+        </HomeLink>
 
         <nav className={styles.nav} aria-label="Основная навигация">
           {NAV.map((item) => (
-            <a key={item.href} href={item.href} className={styles.link}>
+            <HomeLink key={item.href} hash={item.href} className={styles.link}>
               <span className={styles.linkText} data-text={item.label}>
                 {item.label}
               </span>
-            </a>
+            </HomeLink>
           ))}
         </nav>
 
@@ -134,14 +135,14 @@ export default function Header() {
       <div id="mobile-nav" className={styles.sheet} hidden={!open}>
         <nav className={styles.sheetNav} aria-label="Мобильная навигация">
           {NAV.map((item) => (
-            <a
+            <HomeLink
               key={item.href}
-              href={item.href}
+              hash={item.href}
               className={styles.sheetLink}
               onClick={() => setOpen(false)}
             >
               {item.label}
-            </a>
+            </HomeLink>
           ))}
         </nav>
         <div className={styles.sheetContacts}>
