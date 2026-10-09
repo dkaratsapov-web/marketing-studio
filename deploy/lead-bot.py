@@ -12,6 +12,7 @@ import html
 import json
 import os
 import re
+import socket
 import sys
 import threading
 import time
@@ -35,6 +36,16 @@ SOURCES = {
     "test": "Проверка связи",
 }
 UTM_KEYS = ("utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "yclid", "gclid")
+
+# Только IPv4: у многих VPS IPv6 объявлен, но не работает, и запрос к Telegram висит до таймаута
+_getaddrinfo = socket.getaddrinfo
+
+
+def _ipv4_only(host, port, family=0, *args, **kwargs):
+    return _getaddrinfo(host, port, socket.AF_INET, *args, **kwargs)
+
+
+socket.getaddrinfo = _ipv4_only
 
 # Не больше 5 заявок с одного адреса за 10 минут: защита от ботов и случайных повторов
 _hits: dict[str, list[float]] = {}

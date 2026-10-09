@@ -22,7 +22,17 @@ if [ -z "${TOKEN}" ] && [ -f "${ENV_FILE}" ]; then
 fi
 [ -n "${TOKEN}" ] || { echo "Передайте токен бота: ... | bash -s -- ТОКЕН" >&2; exit 1; }
 
-api() { curl -fsS "https://api.telegram.org/bot${TOKEN}/$1"; }
+# Только IPv4 и ограничение по времени: без них curl может бесконечно ждать IPv6, которого у VPS нет
+api() { curl -4 -fsS --connect-timeout 8 -m 20 "https://api.telegram.org/bot${TOKEN}/$1"; }
+
+echo "==> Проверяю связь сервера с Telegram"
+if ! curl -4 -sS --connect-timeout 8 -m 15 -o /dev/null https://api.telegram.org/ 2>/tmp/tg-check.err; then
+  echo "    Сервер не может достучаться до api.telegram.org:" >&2
+  sed 's/^/      /' /tmp/tg-check.err >&2
+  echo "    Похоже, Telegram API недоступен из этого дата-центра. Пришлите этот вывод, подберём обход." >&2
+  exit 2
+fi
+echo "    Связь есть"
 
 echo "==> Проверяю токен"
 BOT_NAME="$(api getMe | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["username"])')" \
