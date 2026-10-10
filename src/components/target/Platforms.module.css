@@ -1,6 +1,8 @@
 /* Светлый блок: слева вкладки площадок, справа сцена с карточкой, которая меняет формат */
 .section {
   padding-block: var(--section-y);
+  /* Скрытые экраны колоды стоят сбоку: не даём им растянуть страницу вширь на телефоне */
+  overflow-x: clip;
 }
 
 .grid {
@@ -181,6 +183,34 @@
   font-weight: 600;
 }
 
+/* Колода экранов: все три в одной клетке, высота по самому высокому, поэтому не прыгает */
+.deck {
+  display: grid;
+  align-items: center;
+  perspective: 1400px;
+}
+
+.slot {
+  grid-area: 1 / 1;
+  display: grid;
+  transition:
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.45s var(--ease-out);
+}
+
+/* Выбранный экран впереди, прошлые уезжают влево, следующие ждут справа: как переключение приложений */
+.slot[data-state="prev"] {
+  opacity: 0;
+  transform: translateX(-14%) rotateY(16deg) scale(0.88);
+  pointer-events: none;
+}
+
+.slot[data-state="next"] {
+  opacity: 0;
+  transform: translateX(14%) rotateY(-16deg) scale(0.88);
+  pointer-events: none;
+}
+
 /* Экран площадки: шапка и лента. Ширина как у телефона, у Авито шире: там сетка выдачи */
 .screen {
   align-self: center;
@@ -213,14 +243,6 @@
   padding: 0.7rem 0.9rem;
   background: var(--white);
   color: var(--ink-950);
-  animation: barIn 0.5s var(--ease-out) both;
-}
-
-@keyframes barIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
 }
 
 .barMark {
@@ -326,7 +348,6 @@
   color: var(--ink-950);
   font-size: 0.82rem;
   line-height: 1.4;
-  animation: barIn 0.5s var(--ease-out) 0.1s both;
 }
 
 .chanTime {
@@ -342,7 +363,6 @@
   font-size: 0.7rem;
   text-decoration: underline;
   text-underline-offset: 2px;
-  animation: barIn 0.5s var(--ease-out) 0.4s both;
 }
 
 /* Соседи по выдаче Авито: чужие карточки с фото, ценой и районом */
@@ -350,7 +370,6 @@
   display: grid;
   gap: 0.3rem;
   color: var(--ink-950);
-  animation: barIn 0.5s var(--ease-out) 0.15s both;
 }
 
 .nbPhoto {
@@ -615,11 +634,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tabTimer[data-run],
-  .bar,
-  .chanPost,
-  .why,
-  .neighbor {
+  .tabTimer[data-run] {
     animation: none;
+  }
+
+  .slot {
+    transition: none;
   }
 }
