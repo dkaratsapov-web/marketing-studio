@@ -1,0 +1,170 @@
+/* Тёмный блок: плитки дел, поверх темнота с круглым просветом за курсором */
+.section {
+  padding-block: var(--section-y);
+}
+
+.head {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 54rem;
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 50ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.wall {
+  --x: 20%;
+  --y: 30%;
+  --tr: 0rem;
+  position: relative;
+}
+
+/* Темнота с просветом: маска прозрачна в круге луча и плотна вокруг */
+.wall[data-dark]::after {
+  content: "";
+  position: absolute;
+  inset: -1rem;
+  z-index: 2;
+  pointer-events: none;
+  background: rgb(5 5 5 / 0.9);
+  mask-image: radial-gradient(circle at var(--x) var(--y), transparent 0, transparent var(--tr), #000 calc(var(--tr) * 1.9));
+}
+
+/* Тёплое пятно луча на стене */
+.wall[data-dark]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--x) var(--y), rgb(196 245 66 / 0.08), transparent calc(var(--tr) * 1.4));
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--line);
+}
+
+.tile {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto auto;
+  gap: 0.6rem;
+  min-height: 22rem;
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  background: #0c0c0e;
+  transition: opacity 0.5s var(--ease-out);
+}
+
+.code {
+  color: var(--pink);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sector {
+  font-size: var(--step-3);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.client {
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.35;
+}
+
+.metric {
+  display: grid;
+  align-content: end;
+  gap: 0.2rem;
+  margin-top: 1rem;
+}
+
+.value {
+  color: var(--lime);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(2.6rem, 1.6rem + 2.6vw, 4.2rem);
+  font-weight: 650;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+
+.mLabel {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.caseTitle {
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--line);
+  font-size: var(--step-0);
+  line-height: 1.4;
+}
+
+.more {
+  justify-self: start;
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  text-decoration-color: rgb(196 245 66 / 0.4);
+  transition: text-decoration-color 0.25s var(--ease-out);
+}
+
+.more:hover {
+  text-decoration-color: currentColor;
+}
+
+/* Сенсорные экраны: плитка ярче, когда она посередине экрана */
+.wall[data-touch] .tile {
+  opacity: 0.4;
+}
+
+.wall[data-touch] .tile[data-lit] {
+  opacity: 1;
+}
+
+@media (max-width: 1100px) {
+  .tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .tiles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tile {
+    min-height: 0;
+  }
+}

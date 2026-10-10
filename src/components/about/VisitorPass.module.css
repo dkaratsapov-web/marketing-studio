@@ -1,0 +1,407 @@
+/* Светлый финал: слева форма пропуска, справа пропуск у турникета и контакты */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto 1fr;
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: start;
+}
+
+.head {
+  grid-column: 1 / span 7;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--accent);
+}
+
+.lead {
+  max-width: 50ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.form,
+.done {
+  grid-column: 1 / span 7;
+  grid-row: 2;
+}
+
+.form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.set {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.label {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+/* Цель визита: сегменты-пилюли */
+.purposes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.purpose {
+  position: relative;
+  cursor: pointer;
+}
+
+.purpose input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.purpose span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.9rem;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--white);
+  font-size: var(--step--1);
+  transition:
+    background-color 0.25s var(--ease-out),
+    border-color 0.25s var(--ease-out),
+    color 0.25s var(--ease-out);
+}
+
+.purpose:hover span {
+  border-color: rgb(5 5 5 / 0.35);
+}
+
+.purpose input:checked + span {
+  border-color: var(--ink-950);
+  background: var(--ink-950);
+  color: var(--lime);
+}
+
+.purpose input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.85rem 0;
+  border: 0;
+  border-bottom: 1.5px solid rgb(5 5 5 / 0.25);
+  border-radius: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--step-1);
+}
+
+.input::placeholder {
+  color: #9a9aa0;
+  font-size: var(--step-0);
+}
+
+.input:focus {
+  outline: none;
+  border-bottom-color: var(--ink-950);
+}
+
+.input:focus-visible {
+  box-shadow: 0 2px 0 0 var(--ink-950);
+}
+
+.field[data-invalid] .input {
+  border-bottom-color: var(--pink-deep);
+}
+
+.submitRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+}
+
+.note {
+  max-width: 34ch;
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.4;
+}
+
+.note[data-error] {
+  color: var(--pink-deep);
+}
+
+.done {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--ink-950);
+  border-radius: 16px;
+  font-size: var(--step-1);
+  line-height: 1.45;
+}
+
+.done a {
+  color: var(--pink-deep);
+  text-decoration: underline;
+}
+
+.doneMark {
+  flex: none;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-top: 0.2rem;
+  border-radius: 50%;
+  background: var(--lime);
+  box-shadow: 0 0 0 2px var(--ink-950);
+}
+
+/* Справа: пропуск над считывателем, турникет и контакты */
+.side {
+  grid-column: 9 / -1;
+  grid-row: 1 / span 2;
+  position: sticky;
+  top: 7rem;
+  display: grid;
+  gap: 2rem;
+}
+
+.gate {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  padding: 1.5rem 1.25rem 0;
+  border-radius: 20px;
+  border-bottom: 4px solid #2a2a30;
+  background: #f3f3f4;
+  overflow: hidden;
+}
+
+.pass {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 19rem);
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--ink-950);
+  color: var(--white);
+  box-shadow: 0 24px 40px -24px rgb(5 5 5 / 0.6);
+  transition: transform 0.7s var(--ease-in-out);
+}
+
+.passTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0;
+  padding: 0.85rem 1.1rem;
+  background: var(--lime);
+  color: var(--ink-950);
+  font-family: var(--ff-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.passRows {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 1.1rem 1.1rem 1.4rem;
+}
+
+.passRows dt {
+  color: var(--grey-400);
+  font-family: var(--ff-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.passRows dd {
+  margin: 0.15rem 0 0;
+  overflow: hidden;
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.passRows dd[data-empty] {
+  color: #4a4a52;
+}
+
+/* Чип пропуска */
+.chip {
+  position: absolute;
+  right: 1.1rem;
+  bottom: 1.3rem;
+  width: 2.2rem;
+  height: 1.7rem;
+  border-radius: 5px;
+  background:
+    linear-gradient(90deg, transparent 45%, rgb(5 5 5 / 0.35) 45% 55%, transparent 55%),
+    linear-gradient(0deg, transparent 45%, rgb(5 5 5 / 0.35) 45% 55%, transparent 55%),
+    linear-gradient(135deg, #e3d48a, #a8964a);
+}
+
+/* Тумба турникета: сверху считыватель с огоньком (розовый, пока пропуск не выдан), сбоку планка */
+.reader {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+  width: 9rem;
+  margin-top: 1.25rem;
+  padding: 0.75rem 0 0.7rem;
+  border-radius: 12px 12px 0 0;
+  background: #2a2a30;
+}
+
+.light {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--pink);
+  box-shadow: 0 0 12px var(--pink);
+  transition:
+    background-color 0.3s var(--ease-out) 0.6s,
+    box-shadow 0.3s var(--ease-out) 0.6s;
+}
+
+.slot {
+  width: 5rem;
+  height: 0.35rem;
+  border-radius: 0.2rem;
+  background: #111114;
+}
+
+.turnstile {
+  position: relative;
+  width: 9rem;
+  height: 3.5rem;
+  background: linear-gradient(90deg, #1b1b1f, #26262b 50%, #1b1b1f);
+}
+
+.post {
+  position: absolute;
+  inset: 0.6rem auto auto 50%;
+  width: 1.6rem;
+  height: 1.6rem;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: #3a3a40;
+  box-shadow: inset 0 0 0 4px #2a2a30;
+}
+
+/* Планка: поперёк прохода справа от тумбы, после выдачи пропуска опускается */
+.arm {
+  position: absolute;
+  left: calc(50% + 0.6rem);
+  top: 1.2rem;
+  width: 8.5rem;
+  height: 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--ink-950);
+  transform-origin: 0 50%;
+  transition: transform 0.6s var(--ease-stamp) 0.8s;
+}
+
+.gate[data-open] .pass {
+  transform: translateY(1.25rem) scale(0.96);
+}
+
+.gate[data-open] .light {
+  background: var(--lime);
+  box-shadow: 0 0 16px var(--lime);
+}
+
+.gate[data-open] .arm {
+  transform: rotate(78deg);
+}
+
+.contacts {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.contacts .label {
+  margin-bottom: 0.35rem;
+}
+
+.contact {
+  justify-self: start;
+  font-size: var(--step-1);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: color 0.25s var(--ease-out);
+}
+
+.contact:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 960px) {
+  .head,
+  .form,
+  .done,
+  .side {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .side {
+    position: static;
+  }
+
+  .pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pass,
+  .light,
+  .arm,
+  .purpose span {
+    transition: none;
+  }
+}

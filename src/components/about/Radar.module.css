@@ -1,0 +1,292 @@
+/* Тёмный блок: слева заголовок и список городов, справа радар с лучом обзора */
+.section {
+  padding-block: var(--section-y);
+  overflow: hidden;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 3rem;
+  align-items: center;
+}
+
+.head {
+  grid-column: 1 / span 5;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 44ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.legend {
+  display: grid;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.city {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--line);
+  transition: padding 0.3s var(--ease-out);
+}
+
+.city[data-hot] {
+  padding-left: 0.5rem;
+}
+
+.cityName {
+  font-size: var(--step-1);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  transition: color 0.3s var(--ease-out);
+}
+
+.city[data-hot] .cityName {
+  color: var(--lime);
+}
+
+.cityKm {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cityCases {
+  grid-column: 1 / -1;
+  color: var(--pink);
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.figure {
+  grid-column: 7 / -1;
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  margin: 0;
+}
+
+/* Экран радара: круг, кольца расстояний, перекрестие */
+.radar {
+  position: relative;
+  width: min(100%, 40rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, rgb(196 245 66 / 0.07), transparent),
+    #0a0c08;
+  box-shadow:
+    inset 0 0 0 1px rgb(196 245 66 / 0.25),
+    inset 0 0 80px rgb(0 0 0 / 0.8),
+    0 40px 120px -40px rgb(196 245 66 / 0.15);
+}
+
+.ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--r) * 100%);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border: 1px dashed rgb(196 245 66 / 0.18);
+  border-radius: 50%;
+}
+
+.ringKm {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  translate: -50% -50%;
+  padding: 0 0.3rem;
+  background: #0a0c08;
+  color: rgb(196 245 66 / 0.45);
+  font-family: var(--ff-mono);
+  font-size: 0.6rem;
+  white-space: nowrap;
+}
+
+.cross {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 0.5px), rgb(196 245 66 / 0.12) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+    linear-gradient(0deg, transparent calc(50% - 0.5px), rgb(196 245 66 / 0.12) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+}
+
+/* Луч: сектор с хвостом, передний край смотрит на север при нулевом повороте */
+.sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0deg 290deg, rgb(196 245 66 / 0.04) 300deg, rgb(196 245 66 / 0.32) 359deg, rgb(196 245 66 / 0.9) 360deg);
+  animation: sweep var(--T) linear infinite paused;
+}
+
+@keyframes sweep {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.compass {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  color: rgb(196 245 66 / 0.5);
+  font-family: var(--ff-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  translate: -50% -50%;
+  transform: rotate(calc(var(--q) * 90deg)) translateY(calc(-50cqw + 0.9rem)) rotate(calc(var(--q) * -90deg));
+}
+
+.radar {
+  container-type: inline-size;
+}
+
+/* Отметка города: точка вспыхивает в такт лучу, подпись рядом */
+.blip {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  translate: -0.35rem -50%;
+  cursor: default;
+}
+
+.blip[data-left] {
+  flex-direction: row-reverse;
+  translate: calc(-100% + 0.35rem) -50%;
+}
+
+.dot {
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--lime);
+  box-shadow: 0 0 12px var(--lime);
+  opacity: 0.35;
+  animation: ping var(--T) linear var(--delay) infinite paused;
+}
+
+@keyframes ping {
+  0% {
+    opacity: 1;
+    scale: 1.5;
+  }
+  8% {
+    scale: 1;
+  }
+  70%,
+  100% {
+    opacity: 0.3;
+  }
+}
+
+.blipName {
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background: rgb(10 12 8 / 0.75);
+  color: var(--fg);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  white-space: nowrap;
+  transition:
+    color 0.25s var(--ease-out),
+    background-color 0.25s var(--ease-out);
+}
+
+.blip[data-hot] .blipName {
+  background: var(--lime);
+  color: var(--ink-950);
+}
+
+.blip[data-hot] .dot {
+  opacity: 1;
+}
+
+/* Москва: центр, розовая точка с расходящимся кольцом */
+.blip[data-center] {
+  translate: -0.45rem -50%;
+}
+
+.blip[data-center] .dot {
+  width: 0.9rem;
+  height: 0.9rem;
+  background: var(--pink);
+  box-shadow: 0 0 0 0 rgb(255 77 157 / 0.6);
+  opacity: 1;
+  animation: home 2.4s var(--ease-out) infinite paused;
+}
+
+@keyframes home {
+  to {
+    box-shadow: 0 0 0 1.2rem rgb(255 77 157 / 0);
+  }
+}
+
+.radar[data-run] .sweep,
+.radar[data-run] .dot {
+  animation-play-state: running;
+}
+
+.note {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+@media (max-width: 960px) {
+  .head,
+  .figure {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 520px) {
+  .blipName {
+    font-size: 0.64rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sweep {
+    display: none;
+  }
+
+  .dot,
+  .blip[data-center] .dot {
+    animation: none;
+    opacity: 1;
+  }
+}

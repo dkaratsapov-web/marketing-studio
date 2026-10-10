@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { HOURS, PHONES, TELEGRAM } from "@/content/contacts";
 import { QUOTE } from "@/components/Logo";
+import Link from "next/link";
 import HomeLink from "@/components/HomeLink";
 import styles from "./Footer.module.css";
 
@@ -88,6 +89,9 @@ export default function Footer() {
               {n.label}
             </HomeLink>
           ))}
+          <Link href="/o-nas/" className={styles.navLink}>
+            О нас
+          </Link>
         </nav>
       </div>
 

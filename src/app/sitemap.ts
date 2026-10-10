@@ -14,6 +14,7 @@ const PAGES: { path: string; priority: number; changeFrequency: "weekly" | "mont
   { path: "/uslugi/skvoznaya-analitika/", priority: 0.9, changeFrequency: "monthly" },
   { path: "/otrasli/restorany/", priority: 0.8, changeFrequency: "monthly" },
   { path: "/kejsy/sfera/", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/o-nas/", priority: 0.6, changeFrequency: "monthly" },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

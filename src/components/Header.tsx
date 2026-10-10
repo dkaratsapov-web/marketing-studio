@@ -161,6 +161,11 @@ export default function Header() {
               </HomeLink>
             ),
           )}
+          <Link href="/o-nas/" className={styles.link} aria-current={pathname === "/o-nas/" ? "page" : undefined}>
+            <span className={styles.linkText} data-text="О нас">
+              О нас
+            </span>
+          </Link>
         </nav>
 
         <div className={styles.phones}>
@@ -220,6 +225,11 @@ export default function Header() {
                 : null}
             </div>
           ))}
+          <div className={styles.sheetItem}>
+            <Link href="/o-nas/" className={styles.sheetLink} onClick={() => setOpen(false)}>
+              О нас
+            </Link>
+          </div>
         </nav>
         <div className={styles.sheetContacts}>
           {PHONES.map((p) => (
