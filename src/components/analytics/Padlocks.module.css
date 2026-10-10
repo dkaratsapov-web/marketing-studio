@@ -38,13 +38,16 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--gutter);
-  align-items: start;
+  /* Карточки одной высоты и закрытыми, и открытыми: строка сетки по самой высокой */
+  align-items: stretch;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .item {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--line);
   border-radius: 20px;
   background: #0f0f12;
@@ -130,7 +133,11 @@
   transform: translateY(4px);
 }
 
+/* Подпись замка всегда в две строки высотой: однострочные не делают карточку ниже */
 .case {
+  display: grid;
+  align-items: center;
+  min-height: calc(2 * 1.3em);
   font-size: var(--step-1);
   font-weight: 600;
   line-height: 1.3;
