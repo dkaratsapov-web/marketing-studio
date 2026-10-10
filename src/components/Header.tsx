@@ -6,7 +6,7 @@ import { HOURS, PHONES, TELEGRAM } from "@/content/contacts";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import HomeLink from "@/components/HomeLink";
-import { SERVICE_MENU } from "@/content/services";
+import { INDUSTRY_MENU, SERVICE_MENU } from "@/content/services";
 import styles from "./Header.module.css";
 
 const NAV = [
@@ -130,6 +130,24 @@ export default function Header() {
                       </li>
                     ))}
                   </ul>
+                  <p className={`label ${styles.menuLabel}`}>Отраслевые решения</p>
+                  <ul className={styles.menuList}>
+                    {INDUSTRY_MENU.filter((s) => s.href).map((s) => (
+                      <li key={s.name}>
+                        <Link
+                          href={s.href!}
+                          className={styles.menuLink}
+                          aria-current={pathname === s.href ? "page" : undefined}
+                        >
+                          <span className={styles.menuName}>{s.name}</span>
+                          <span className={styles.menuNote}>{s.note}</span>
+                          <span className={styles.menuArrow} aria-hidden="true">
+                            →
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                   <HomeLink hash="#departments" className={styles.menuAll}>
                     Все отделы на главной
                   </HomeLink>
@@ -189,7 +207,7 @@ export default function Header() {
                 {item.label}
               </HomeLink>
               {item.href === "#departments"
-                ? SERVICE_MENU.filter((s) => s.href).map((s) => (
+                ? [...SERVICE_MENU, ...INDUSTRY_MENU].filter((s) => s.href).map((s) => (
                     <Link
                       key={s.name}
                       href={s.href!}

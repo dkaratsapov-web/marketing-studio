@@ -206,6 +206,13 @@
   padding-inline: 0.6rem;
 }
 
+/* Второй раздел меню (отраслевые решения) отделён от первого отступом и линией */
+.menuList + .menuLabel {
+  margin-top: 0.6rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+
 .menuList {
   display: grid;
   gap: 0.15rem;

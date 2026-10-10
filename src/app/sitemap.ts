@@ -12,6 +12,7 @@ const PAGES: { path: string; priority: number; changeFrequency: "weekly" | "mont
   { path: "/uslugi/karty-i-geoservisy/", priority: 0.9, changeFrequency: "monthly" },
   { path: "/uslugi/razrabotka-sajtov/", priority: 0.9, changeFrequency: "monthly" },
   { path: "/uslugi/skvoznaya-analitika/", priority: 0.9, changeFrequency: "monthly" },
+  { path: "/otrasli/restorany/", priority: 0.8, changeFrequency: "monthly" },
   { path: "/kejsy/sfera/", priority: 0.7, changeFrequency: "monthly" },
 ];
 

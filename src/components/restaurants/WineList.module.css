@@ -1,0 +1,152 @@
+/* Тёмный блок: цены отделов винной картой */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 3rem;
+  align-items: start;
+}
+
+.head {
+  grid-column: 1 / span 4;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 40ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Карта: плотная бумага в тёмной рамке, двойная линия по краю */
+.card {
+  grid-column: 6 / -1;
+  display: grid;
+  gap: 2rem;
+  padding: clamp(1.5rem, 3vw, 3rem);
+  border-radius: 6px;
+  background: #f4f1ea;
+  color: var(--ink-950);
+  box-shadow: inset 0 0 0 10px #f4f1ea, inset 0 0 0 11px rgb(5 5 5 / 0.35), inset 0 0 0 14px #f4f1ea, inset 0 0 0 15px rgb(5 5 5 / 0.2), 0 50px 100px -50px rgb(0 0 0 / 0.9);
+}
+
+.groupName {
+  margin-bottom: 0.75rem;
+  color: #8a6d3b;
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.rows {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rowLink {
+  display: grid;
+  grid-template-columns: auto minmax(2rem, 1fr) auto;
+  align-items: end;
+  gap: 0.75rem;
+}
+
+.name {
+  display: grid;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-1);
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.note {
+  color: #77777e;
+  font-family: var(--ff-body);
+  font-size: var(--step--1);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* Отточие до цены: протягивается слева направо */
+.leader {
+  height: 1px;
+  margin-bottom: 0.45rem;
+  border-bottom: 2px dotted rgb(5 5 5 / 0.35);
+  transform-origin: 0 50%;
+}
+
+.price {
+  font-family: var(--ff-mono);
+  font-size: var(--step-0);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Рекомендация: салатовая плашка, ссылка на тариф */
+.row[data-best] .rowLink {
+  padding: 0.9rem 1rem;
+  border-radius: 8px;
+  background: var(--lime);
+  transition: transform 0.25s var(--ease-out);
+}
+
+.row[data-best] .rowLink:hover {
+  transform: translateY(-2px);
+}
+
+.row[data-best] .note {
+  color: rgb(5 5 5 / 0.65);
+}
+
+.row[data-best] .leader {
+  border-bottom-color: rgb(5 5 5 / 0.5);
+}
+
+.rowLink:focus-visible {
+  outline: 2px solid var(--ink-950);
+  outline-offset: 3px;
+}
+
+.unit {
+  color: #8a8a90;
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+@media (max-width: 960px) {
+  .head,
+  .card {
+    grid-column: 1 / -1;
+  }
+
+  .rowLink {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .leader {
+    display: none;
+  }
+}

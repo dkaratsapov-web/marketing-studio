@@ -1,0 +1,158 @@
+/* Светлый блок: меловая доска с вопросами в деревянной раме */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+}
+
+.board {
+  position: relative;
+  padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1.25rem, 4vw, 3.5rem) clamp(2.5rem, 5vw, 4rem);
+  border: clamp(10px, 1.4vw, 18px) solid #6b4a2f;
+  border-radius: 10px;
+  background:
+    radial-gradient(120% 90% at 30% 20%, rgb(255 255 255 / 0.06), transparent 60%),
+    radial-gradient(60% 40% at 80% 90%, rgb(255 255 255 / 0.04), transparent 70%),
+    #1f2a24;
+  box-shadow: inset 0 0 40px rgb(0 0 0 / 0.5), 0 40px 80px -40px rgb(5 5 5 / 0.55);
+  color: #eef0ea;
+}
+
+.title {
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 5.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: #f4f6ef;
+  text-shadow: 0 0 1px rgb(255 255 255 / 0.6), 1px 1px 0 rgb(255 255 255 / 0.08);
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+}
+
+.qs {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.q {
+  position: relative;
+  width: 100%;
+  padding: 0.7rem 0;
+  border: 0;
+  background: none;
+  color: rgb(238 240 234 / 0.6);
+  font: inherit;
+  font-size: var(--step-1);
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.25s var(--ease-out);
+}
+
+.q:hover {
+  color: #f4f6ef;
+}
+
+/* Подчёркивание мелом у выбранного вопроса */
+.q::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0.3rem;
+  width: 70%;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--lime);
+  opacity: 0.85;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.q[aria-selected="true"] {
+  color: #f4f6ef;
+}
+
+.q[aria-selected="true"]::after {
+  transform: scaleX(1);
+}
+
+.q:focus-visible {
+  outline: 2px dashed var(--lime);
+  outline-offset: 4px;
+}
+
+.answer {
+  min-height: 10rem;
+  padding: 1.25rem 1.5rem;
+  border: 2px dashed rgb(238 240 234 / 0.25);
+  border-radius: 8px;
+}
+
+/* Мел пишет ответ: маска протягивается слева направо */
+.chalk {
+  font-size: var(--step-1);
+  line-height: 1.55;
+  color: #f4f6ef;
+  text-shadow: 0 0 1px rgb(255 255 255 / 0.5);
+  animation: write 1.1s cubic-bezier(0.45, 0, 0.25, 1) both;
+}
+
+@keyframes write {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Полочка с мелками внизу рамки */
+.ledge {
+  position: absolute;
+  left: 8%;
+  bottom: -4px;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.ledge span {
+  width: 2.4rem;
+  height: 0.55rem;
+  border-radius: 3px;
+  background: #f4f6ef;
+}
+
+.ledge span + span {
+  width: 1.6rem;
+  background: var(--lime);
+}
+
+@media (max-width: 960px) {
+  .cols {
+    grid-template-columns: 1fr;
+  }
+
+  .q {
+    font-size: var(--step-0);
+  }
+
+  .chalk {
+    font-size: var(--step-0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chalk {
+    animation: none;
+  }
+}

@@ -225,3 +225,8 @@ export const SERVICE_MENU: { name: string; note: string; href: string | null }[]
   { name: "Разработка сайтов", note: "Лендинги и корпоративные сайты", href: "/uslugi/razrabotka-sajtov/" },
   { name: "Сквозная аналитика", note: "Заявки и продажи по каждому каналу", href: "/uslugi/skvoznaya-analitika/" },
 ];
+
+/** Отраслевые решения: второй раздел того же меню */
+export const INDUSTRY_MENU: { name: string; note: string; href: string | null }[] = [
+  { name: "Рестораны", note: "Брони из карт и поиска по поводам", href: "/otrasli/restorany/" },
+];

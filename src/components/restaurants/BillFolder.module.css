@@ -1,0 +1,246 @@
+/* Светлый блок: дело 001 в папке для счёта */
+.section {
+  padding-block: var(--section-y);
+  overflow-x: clip;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 3rem;
+  align-items: center;
+}
+
+.head {
+  grid-column: 1 / span 5;
+  display: grid;
+  gap: 1.25rem;
+  justify-items: start;
+}
+
+.code {
+  color: var(--accent);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: clamp(2.4rem, 1.2rem + 3.8vw, 5.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
+}
+
+.dotMark {
+  color: var(--accent);
+}
+
+.task {
+  max-width: 44ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.services {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+}
+
+.toggle {
+  min-height: 2.75rem;
+  padding: 0.6rem 1.2rem;
+  border: 1.5px solid var(--ink-950);
+  border-radius: 999px;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--step--1);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: var(--ink-950);
+  color: var(--white);
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Папка: внутренняя страница и обложка в одной клетке, обложка поворачивается вокруг левого края */
+.folder {
+  position: relative;
+  grid-column: 7 / span 5;
+  display: grid;
+  aspect-ratio: 0.72;
+  margin: 0;
+  perspective: 1800px;
+}
+
+.inside,
+.cover {
+  grid-area: 1 / 1;
+}
+
+.inside {
+  display: grid;
+  align-content: start;
+  gap: 1.25rem;
+  padding: 2rem 1.75rem;
+  border-radius: 6px 14px 14px 6px;
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / 0.12), transparent 6%),
+    #f8f5ee;
+  box-shadow: 0 40px 70px -40px rgb(5 5 5 / 0.55);
+  color: var(--ink-950);
+  font-family: var(--ff-mono);
+}
+
+.billHead {
+  padding-bottom: 0.75rem;
+  border-bottom: 1.5px dashed rgb(5 5 5 / 0.3);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.lines {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lines li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.qty {
+  color: #8a8a90;
+}
+
+.totals {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding-top: 1rem;
+  border-top: 1.5px solid var(--ink-950);
+}
+
+.totals div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.totals dt {
+  font-size: 0.8rem;
+}
+
+.totals dd {
+  margin: 0;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-3);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+
+.totals div:first-child dd {
+  padding: 0 0.3em;
+  background: var(--lime);
+}
+
+.tip {
+  color: #8a8a90;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.cover {
+  position: relative;
+  transform-style: preserve-3d;
+  transform-origin: 0 50%;
+  transition:
+    transform 1.2s cubic-bezier(0.65, 0, 0.25, 1),
+    opacity 0.5s var(--ease-out);
+  z-index: 2;
+}
+
+/* Открытая обложка откидывается влево и гаснет, чтобы не ложиться на текст слева */
+.folder[data-open] .cover {
+  transform: rotateY(-170deg);
+  opacity: 0;
+  transition:
+    transform 1.2s cubic-bezier(0.65, 0, 0.25, 1),
+    opacity 0.45s var(--ease-out) 0.75s;
+  pointer-events: none;
+}
+
+.coverFront,
+.coverBack {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px 14px 14px 6px;
+  backface-visibility: hidden;
+}
+
+/* Кожа: тёмная, тиснение по центру, строчка по краю */
+.coverFront {
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(120% 90% at 30% 20%, rgb(255 255 255 / 0.08), transparent 50%),
+    #1a1412;
+  box-shadow: inset 0 0 0 10px #1a1412, inset 0 0 0 11px rgb(255 255 255 / 0.18), 0 40px 70px -40px rgb(5 5 5 / 0.7);
+}
+
+.emboss {
+  color: #b39b6a;
+  font-family: var(--ff-display);
+  font-size: var(--step-3);
+  font-weight: 650;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.8), 0 -1px 0 rgb(255 255 255 / 0.12);
+}
+
+.coverBack {
+  background: #241c18;
+  transform: rotateY(180deg);
+}
+
+@media (max-width: 960px) {
+  .head,
+  .folder {
+    grid-column: 1 / -1;
+  }
+
+  .folder {
+    width: min(84%, 22rem);
+    justify-self: center;
+    aspect-ratio: auto;
+  }
+
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cover {
+    transition: none;
+  }
+}

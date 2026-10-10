@@ -1,0 +1,236 @@
+/* Тёмный блок: курсы ужина слева, тарелка под клошем прилипает справа */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: clamp(2rem, 5vh, 3.5rem);
+}
+
+.head {
+  grid-column: 1 / span 8;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 50ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.stage {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  align-items: start;
+}
+
+.list {
+  grid-column: 1 / span 5;
+  grid-row: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  align-content: center;
+  gap: 0.6rem;
+  min-height: 58svh;
+  padding-block: 2rem;
+  border-top: 1px solid var(--line);
+  opacity: 0.3;
+  transition: opacity 0.5s var(--ease-out);
+}
+
+.item[data-on] {
+  opacity: 1;
+}
+
+.course {
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.name {
+  font-size: var(--step-3);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.text {
+  max-width: 40ch;
+  color: var(--muted);
+  font-size: var(--step-1);
+  line-height: 1.45;
+}
+
+/* Тарелка: прилипает по центру экрана */
+.plate {
+  grid-column: 7 / -1;
+  grid-row: 1;
+  position: sticky;
+  top: calc(50svh - min(40vw, 30rem) / 2 + 2rem);
+  justify-self: center;
+  width: min(100%, 30rem);
+  aspect-ratio: 1;
+  margin: 0;
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.shadow {
+  fill: rgb(0 0 0 / 0.5);
+  filter: blur(8px);
+}
+
+.rim {
+  fill: #ecebe6;
+}
+
+.well {
+  fill: #f8f7f3;
+}
+
+/* Подача: подпись курса на тарелке */
+.dish {
+  position: absolute;
+  left: 50%;
+  top: 70%;
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  width: 58%;
+  translate: -50% -50%;
+  color: var(--ink-950);
+  text-align: center;
+  animation: serve 0.6s var(--ease-out) 0.35s both;
+}
+
+@keyframes serve {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+.dishCourse {
+  color: #8a8a90;
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dishName {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(0.95rem, 0.7rem + 0.6vw, 1.3rem);
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+/* Клош: на каждом новом курсе опускается и поднимается, открывая подачу */
+.cloche {
+  animation: lift 1.1s cubic-bezier(0.65, 0, 0.35, 1) both;
+  transform-origin: 50% 70%;
+}
+
+@keyframes lift {
+  0% {
+    transform: none;
+  }
+  35% {
+    transform: none;
+  }
+  100% {
+    transform: translate(18%, -30%) rotate(18deg);
+  }
+}
+
+.dome {
+  fill: #c8c8cd;
+}
+
+.shine {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.7);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.knob {
+  fill: #9a9aa0;
+}
+
+.lip {
+  fill: #a8a8ae;
+}
+
+@media (max-width: 960px) {
+  .head {
+    grid-column: 1 / -1;
+  }
+
+  /* Тарелка над курсами и прилипает под шапкой */
+  .stage {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .plate {
+    order: -1;
+    z-index: 2;
+    top: 4.5rem;
+    width: min(62%, 15rem);
+    background: var(--bg);
+    border-radius: 50%;
+  }
+
+  .item {
+    min-height: 44svh;
+  }
+
+  .name {
+    font-size: var(--step-2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cloche {
+    animation: none;
+    transform: translate(18%, -30%) rotate(18deg);
+  }
+
+  .dish,
+  .item {
+    animation: none;
+    transition: none;
+  }
+}
