@@ -302,14 +302,6 @@ a.menuLink:hover .menuArrow {
   color: var(--accent);
 }
 
-/* Часы работы под номерами: мельче и приглушённо, чтобы не спорить с телефонами */
-.hours {
-  color: var(--muted);
-  font-size: 0.66rem;
-  font-weight: 400;
-  letter-spacing: 0.04em;
-}
-
 .tg {
   display: grid;
   place-items: center;

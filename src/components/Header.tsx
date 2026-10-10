@@ -151,7 +151,6 @@ export default function Header() {
               {p.display}
             </a>
           ))}
-          <span className={styles.hours}>{HOURS}</span>
         </div>
 
         <a
