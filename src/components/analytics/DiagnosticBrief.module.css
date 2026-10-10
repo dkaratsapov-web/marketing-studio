@@ -1,0 +1,344 @@
+/* Тёмный блок: отметки слева, цепочка диагностики справа */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto 1fr;
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: start;
+}
+
+.head {
+  grid-column: 1 / span 7;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 50ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.form,
+.done {
+  grid-column: 1 / span 7;
+  grid-row: 2;
+}
+
+.form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.set {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.label {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.checks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 3rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--step--1);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.25s var(--ease-out),
+    background-color 0.25s var(--ease-out);
+}
+
+.check:hover {
+  border-color: rgb(255 255 255 / 0.4);
+}
+
+.check[aria-pressed="true"] {
+  border-color: var(--lime);
+  background: rgb(196 245 66 / 0.08);
+}
+
+.check:active {
+  transform: translateY(1px);
+}
+
+.check:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 2px;
+}
+
+.box {
+  flex: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 1.5px solid var(--muted);
+  border-radius: 4px;
+}
+
+.check[aria-pressed="true"] .box {
+  border-color: var(--lime);
+  background:
+    linear-gradient(45deg, transparent 44%, var(--ink-950) 44% 58%, transparent 58%) no-repeat,
+    var(--lime);
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.85rem 0;
+  border: 0;
+  border-bottom: 1.5px solid rgb(255 255 255 / 0.25);
+  border-radius: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--step-1);
+}
+
+.input::placeholder {
+  color: #77777e;
+  font-size: var(--step-0);
+}
+
+.input:focus {
+  outline: none;
+  border-bottom-color: var(--lime);
+}
+
+.input:focus-visible {
+  box-shadow: 0 2px 0 0 var(--lime);
+}
+
+.field[data-invalid] .input {
+  border-bottom-color: var(--pink);
+}
+
+.submitRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+}
+
+.note {
+  max-width: 34ch;
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.4;
+}
+
+.note[data-error] {
+  color: var(--pink);
+}
+
+.done {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--lime);
+  border-radius: 16px;
+  font-size: var(--step-1);
+  line-height: 1.45;
+}
+
+.done a {
+  color: var(--lime);
+  text-decoration: underline;
+}
+
+.doneMark {
+  flex: none;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-top: 0.2rem;
+  border-radius: 50%;
+  background: var(--lime);
+}
+
+/* Диагностика */
+.diag {
+  grid-column: 9 / -1;
+  grid-row: 1 / span 2;
+  position: sticky;
+  top: 7rem;
+  display: grid;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #0f0f12;
+}
+
+.summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.gapNum {
+  color: var(--pink);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-4);
+  font-weight: 650;
+  line-height: 0.9;
+  animation: bump 0.4s var(--ease-stamp);
+}
+
+.gapNum[data-zero] {
+  color: var(--lime);
+}
+
+@keyframes bump {
+  from {
+    transform: scale(1.25);
+  }
+}
+
+.gapLabel {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.chain {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Звено: узел на линии, разрыв рисуется пунктиром розовым */
+.link {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr);
+  gap: 0.85rem;
+  padding-bottom: 1.1rem;
+}
+
+.link::before {
+  content: "";
+  position: absolute;
+  left: calc(0.625rem - 1px);
+  top: 1.25rem;
+  bottom: 0;
+  border-left: 2px dashed var(--pink);
+}
+
+.link[data-ok]::before {
+  border-left-style: solid;
+  border-left-color: var(--lime);
+}
+
+.link:last-child::before {
+  display: none;
+}
+
+.node {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--pink);
+  border-radius: 50%;
+  background: #0f0f12;
+  transition:
+    background-color 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out);
+}
+
+.link[data-ok] .node {
+  border-color: var(--lime);
+  background: var(--lime);
+}
+
+.linkBody {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.linkName {
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.status {
+  color: var(--pink);
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.link[data-ok] .status {
+  color: var(--lime);
+}
+
+@media (max-width: 960px) {
+  .head,
+  .form,
+  .done,
+  .diag {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .diag {
+    position: static;
+  }
+
+  .checks,
+  .pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gapNum {
+    animation: none;
+  }
+}

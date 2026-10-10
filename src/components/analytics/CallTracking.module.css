@@ -1,0 +1,273 @@
+/* Тёмный блок: источники, номер-счётчик на сайте и журнал звонков */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: start;
+}
+
+.head {
+  grid-column: 1 / span 8;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 54ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.sources {
+  grid-column: 1 / span 3;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.source {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 3.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.25s var(--ease-out),
+    color 0.25s var(--ease-out),
+    background-color 0.25s var(--ease-out);
+}
+
+.source:hover {
+  color: var(--fg);
+}
+
+.source[aria-pressed="true"] {
+  border-color: var(--lime);
+  background: rgb(196 245 66 / 0.08);
+  color: var(--fg);
+}
+
+.source:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 2px;
+}
+
+.srcDot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.source[aria-pressed="true"] .srcDot {
+  background: var(--lime);
+  box-shadow: 0 0 0 4px rgb(196 245 66 / 0.2);
+}
+
+/* Шапка сайта клиента с номером */
+.site {
+  grid-column: 4 / span 5;
+  display: grid;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 1.25rem;
+  border-radius: 18px;
+  background: var(--white);
+  color: var(--ink-950);
+}
+
+.siteBar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #ececef;
+}
+
+.siteBrand {
+  font-weight: 700;
+}
+
+.siteLinks {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.siteLinks span {
+  width: 3rem;
+  height: 0.45rem;
+  border-radius: 3px;
+  background: #e2e2e6;
+}
+
+.phone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.call {
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  background: var(--ink-950);
+  color: var(--lime);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Счётчик: у каждой цифры свой барабан, прокрутка с задержкой по позиции */
+.odo {
+  display: inline-flex;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(1.6rem, 1rem + 1.6vw, 2.6rem);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.drum {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+}
+
+.strip {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc(var(--n) * -1em));
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--d);
+}
+
+.strip span {
+  height: 1em;
+}
+
+.sym {
+  white-space: pre;
+}
+
+.note {
+  color: #8a8a90;
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+
+/* Журнал звонков */
+.log {
+  grid-column: 9 / -1;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.logTitle {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.logList {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #121215;
+  animation: entryIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.entry:not(:first-child) {
+  opacity: 0.55;
+}
+
+@keyframes entryIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+.time {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+}
+
+.entryBody {
+  display: grid;
+  gap: 0.2rem;
+  font-size: var(--step--1);
+}
+
+.from {
+  color: var(--muted);
+}
+
+.from b {
+  color: var(--lime);
+  font-weight: 600;
+}
+
+@media (max-width: 960px) {
+  .head,
+  .sources,
+  .site,
+  .log {
+    grid-column: 1 / -1;
+  }
+
+  .sources {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .source {
+    padding: 0.6rem;
+    font-size: var(--step--1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .strip,
+  .entry {
+    transition: none;
+    animation: none;
+  }
+}

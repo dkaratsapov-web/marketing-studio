@@ -222,5 +222,5 @@ export const SERVICE_MENU: { name: string; note: string; href: string | null }[]
   { name: "Таргетированная реклама", note: "VK Ads, Telegram Ads, Avito Ads", href: "/uslugi/targetirovannaya-reklama/" },
   { name: "Карты и геосервисы", note: "Яндекс Карты, 2ГИС, Яндекс Бизнес", href: "/uslugi/karty-i-geoservisy/" },
   { name: "Разработка сайтов", note: "Лендинги и корпоративные сайты", href: "/uslugi/razrabotka-sajtov/" },
-  { name: "Сквозная аналитика", note: "Заявки и продажи по каждому каналу", href: null },
+  { name: "Сквозная аналитика", note: "Заявки и продажи по каждому каналу", href: "/uslugi/skvoznaya-analitika/" },
 ];

@@ -1,0 +1,225 @@
+/* Светлый блок: дашборд «Сферы» с метками и список пояснений */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: start;
+}
+
+.head {
+  grid-column: 1 / span 8;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.dotMark {
+  color: var(--accent);
+}
+
+.lead {
+  max-width: 54ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.frame {
+  position: relative;
+  grid-column: 1 / span 8;
+  margin: 0;
+}
+
+.shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  box-shadow: 0 40px 80px -45px rgb(5 5 5 / 0.5), 0 0 0 1px rgb(5 5 5 / 0.08);
+}
+
+/* Метка: чёрный круг с номером и салатовым пульсом */
+.spot {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  translate: -50% -50%;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink-950);
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 0 0 rgb(196 245 66 / 0.6);
+  animation: ping 2s var(--ease-out) infinite;
+}
+
+.spot[aria-pressed="true"] {
+  background: var(--lime);
+  color: var(--ink-950);
+  animation: none;
+  box-shadow: 0 0 0 4px var(--ink-950);
+}
+
+@keyframes ping {
+  70% {
+    box-shadow: 0 0 0 14px rgb(196 245 66 / 0);
+  }
+}
+
+/* Пояснение рядом с меткой */
+.pop {
+  position: absolute;
+  display: grid;
+  gap: 0.3rem;
+  width: min(18rem, 40%);
+  margin: 1.5rem 0 0 -1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: var(--ink-950);
+  color: rgb(255 255 255 / 0.8);
+  font-size: var(--step--1);
+  line-height: 1.45;
+  pointer-events: none;
+  animation: popIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pop[data-right] {
+  translate: -100% 0;
+  margin-left: 1rem;
+}
+
+.pop b {
+  color: var(--lime);
+  font-weight: 600;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.note {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+
+.list {
+  grid-column: 9 / -1;
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.25s var(--ease-out),
+    border-color 0.25s var(--ease-out);
+}
+
+.item:hover {
+  background: #f3f3f4;
+}
+
+.item[aria-pressed="true"] {
+  border-color: var(--ink-950);
+  background: var(--white);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.num {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--ink-950);
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.itemBody {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.itemTitle {
+  font-weight: 650;
+}
+
+.itemText {
+  display: none;
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.45;
+}
+
+.item[aria-pressed="true"] .itemText {
+  display: block;
+}
+
+@media (max-width: 960px) {
+  .head,
+  .frame,
+  .list {
+    grid-column: 1 / -1;
+  }
+
+  /* На телефоне пояснение только в списке: над снимком оно закрыло бы цифры */
+  .pop {
+    display: none;
+  }
+
+  .spot {
+    width: 1.6rem;
+    height: 1.6rem;
+    font-size: 0.7rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spot,
+  .pop {
+    animation: none;
+  }
+}

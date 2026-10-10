@@ -1,0 +1,185 @@
+/* Тёмный блок: смета листом электронной таблицы */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 3rem;
+  align-items: center;
+}
+
+.head {
+  grid-column: 1 / span 4;
+  display: grid;
+  gap: 1.5rem;
+  justify-items: start;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 40ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Лист: светлый, как настоящая таблица, с серыми заголовками строк и столбцов */
+.sheet {
+  grid-column: 6 / -1;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--ink-950);
+  box-shadow: 0 50px 100px -50px rgb(0 0 0 / 0.9);
+}
+
+.fx {
+  display: grid;
+  grid-template-columns: 4.5rem 2.5rem minmax(0, 1fr);
+  align-items: center;
+  border-bottom: 1px solid #d9d9de;
+  font-size: var(--step--1);
+}
+
+.ref,
+.fxIcon,
+.fxText {
+  padding: 0.55rem 0.75rem;
+}
+
+.ref {
+  border-right: 1px solid #d9d9de;
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+}
+
+.fxIcon {
+  border-right: 1px solid #d9d9de;
+  color: #8a8a90;
+  font-family: var(--ff-mono);
+  font-style: italic;
+  text-align: center;
+}
+
+.fxText {
+  overflow: hidden;
+  font-family: var(--ff-mono);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  animation: fxIn 0.25s var(--ease-out);
+}
+
+@keyframes fxIn {
+  from {
+    opacity: 0;
+  }
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+
+.table th,
+.table td {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #e3e3e7;
+  text-align: left;
+  font-weight: 400;
+}
+
+.table thead th,
+.table tbody th {
+  background: #f3f3f5;
+  color: #77777e;
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.table tbody th {
+  width: 2.5rem;
+}
+
+.table td:nth-of-type(1) {
+  width: 2.5rem;
+  color: #8a8a90;
+  text-align: center;
+}
+
+.table td:nth-of-type(3) {
+  width: 9rem;
+  color: #5c5c63;
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+}
+
+.hrow td {
+  font-weight: 650;
+}
+
+.table tbody tr:not(.hrow) {
+  cursor: cell;
+}
+
+/* Выделенная строка: зелёная рамка, как у выделения в таблице */
+.table tbody tr[data-sel] td {
+  background: #f1fbe0;
+}
+
+.table tbody tr[data-sel] td:nth-of-type(2) {
+  outline: 2.5px solid #5a8f00;
+  outline-offset: -2px;
+}
+
+.total td {
+  font-weight: 650;
+}
+
+.total td[data-value] {
+  color: var(--ink-950);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-1);
+  white-space: nowrap;
+}
+
+.total:last-child td[data-value] {
+  background: var(--lime);
+}
+
+@media (max-width: 960px) {
+  .head,
+  .sheet {
+    grid-column: 1 / -1;
+  }
+
+  .table td:nth-of-type(1),
+  .table thead th:nth-child(2) {
+    display: none;
+  }
+
+  .table td:nth-of-type(3) {
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fxText {
+    animation: none;
+  }
+}
