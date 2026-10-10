@@ -1,0 +1,282 @@
+/* Тёмный блок: что было и что стало в карточке, ползунок сравнения справа */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 3rem;
+  align-items: center;
+}
+
+.head {
+  grid-column: 1 / span 6;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 48ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Было → стало списком: зачёркнутое и исправленное в одной строке */
+.diff {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.diff li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--step-0);
+}
+
+.diffOld {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: rgb(255 255 255 / 0.35);
+}
+
+.diffNew::before {
+  content: "→ ";
+  color: var(--lime);
+}
+
+.figure {
+  grid-column: 8 / -1;
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+  margin: 0;
+}
+
+/* Рамка сравнения: обе карточки в одной клетке, «стало» обрезается слева по ползунку */
+.frame {
+  --pos: 50%;
+  position: relative;
+  display: grid;
+  width: min(100%, 25rem);
+  border-radius: 22px;
+  user-select: none;
+}
+
+.card {
+  grid-area: 1 / 1;
+  display: grid;
+  align-content: start;
+  gap: 0.4rem;
+  padding: 0.9rem 0.9rem 1.2rem;
+  border-radius: 22px;
+  background: var(--white);
+  color: var(--ink-950);
+}
+
+.card[data-v="before"] {
+  background: #e9e9ec;
+}
+
+.card[data-v="after"] {
+  clip-path: inset(0 0 0 var(--pos) round 0 22px 22px 0);
+}
+
+.photoEmpty {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 10;
+  margin-bottom: 0.5rem;
+  border: 2px dashed #c4c4ca;
+  border-radius: 14px;
+  color: #8a8a90;
+  font-family: var(--ff-mono);
+  font-size: 0.8rem;
+}
+
+.photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  margin-bottom: 0.5rem;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.name {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: 1.5rem;
+  font-weight: 650;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.kind {
+  color: #66666d;
+  font-size: 0.85rem;
+}
+
+.missing {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.missing span {
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  background: #dcdce0;
+  color: #77777d;
+  font-size: 0.85rem;
+}
+
+.open {
+  color: #1f9d55;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.action {
+  flex: 1;
+  padding: 0.6rem 0.4rem;
+  border-radius: 10px;
+  background: #f0f0f2;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.action[data-main] {
+  background: var(--ink-950);
+  color: var(--lime);
+}
+
+.prices {
+  display: grid;
+  margin-top: 0.6rem;
+  border-top: 1px solid #ececef;
+}
+
+.price {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #ececef;
+  font-size: 0.88rem;
+}
+
+.price span:last-child {
+  font-weight: 650;
+}
+
+.reply {
+  margin-top: 0.4rem;
+  color: #1f9d55;
+  font-size: 0.8rem;
+}
+
+.reply::before {
+  content: "✓ ";
+}
+
+.labels {
+  position: absolute;
+  inset: auto 0 -2.2rem;
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Ползунок: вертикальная линия с ручкой */
+.handle {
+  position: absolute;
+  top: -0.75rem;
+  bottom: -0.75rem;
+  left: var(--pos);
+  width: 2px;
+  margin-left: -1px;
+  background: var(--lime);
+  pointer-events: none;
+}
+
+.knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--ink-950);
+  box-shadow: 0 10px 30px -8px rgb(0 0 0 / 0.6);
+}
+
+.knob svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+/* Настоящий ползунок поверх всей карточки, невидимый: тянуть можно за любое место */
+.range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+}
+
+.frame:has(.range:focus-visible) .knob {
+  outline: 3px solid var(--white);
+  outline-offset: 3px;
+}
+
+.note {
+  margin-top: 2.5rem;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 960px) {
+  .head,
+  .figure {
+    grid-column: 1 / -1;
+  }
+}

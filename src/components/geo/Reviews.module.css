@@ -1,0 +1,213 @@
+/* Светлый блок: вкладки типов отзывов слева, отзыв и печатающийся ответ справа */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 3rem;
+  align-items: center;
+}
+
+.side {
+  grid-column: 1 / span 6;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--accent);
+}
+
+.lead {
+  max-width: 48ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-self: start;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #f0f0f2;
+}
+
+.tab {
+  min-height: 2.75rem;
+  padding: 0.55rem 1.2rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--step--1);
+  cursor: pointer;
+  transition:
+    background-color 0.25s var(--ease-out),
+    color 0.25s var(--ease-out);
+}
+
+.tab:hover {
+  color: var(--fg);
+}
+
+.tab[aria-pressed="true"] {
+  background: var(--ink-950);
+  color: var(--lime);
+  font-weight: 600;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Ветка отзыва: отзыв сверху, ответ владельца с отступом и линией слева */
+.thread {
+  grid-column: 7 / -1;
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: #fafafa;
+  min-height: 24rem;
+  align-content: start;
+}
+
+.review {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 0.9rem;
+  animation: reviewIn 0.5s var(--ease-out) both;
+}
+
+@keyframes reviewIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.ava {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: #e2e2e6;
+  font-weight: 700;
+}
+
+.body {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.author {
+  font-weight: 650;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+}
+
+.stars svg {
+  width: 1rem;
+  height: 1rem;
+  fill: #d8d8dc;
+}
+
+.stars svg[data-on] {
+  fill: #f5b300;
+}
+
+.text {
+  font-size: var(--step-1);
+  line-height: 1.45;
+}
+
+.answer {
+  display: grid;
+  gap: 0.5rem;
+  margin-left: 3.65rem;
+  padding: 1rem 1.1rem;
+  border-left: 3px solid var(--lime);
+  border-radius: 0 14px 14px 0;
+  background: var(--white);
+  box-shadow: 0 20px 40px -30px rgb(5 5 5 / 0.35);
+}
+
+.owner {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.reply {
+  min-height: 4.5em;
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: var(--ink-950);
+  opacity: 0;
+}
+
+.caret[data-on] {
+  opacity: 1;
+  animation: blink 0.9s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.note {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 960px) {
+  .side,
+  .thread {
+    grid-column: 1 / -1;
+  }
+
+  .answer {
+    margin-left: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review,
+  .caret[data-on] {
+    animation: none;
+  }
+}

@@ -1,0 +1,332 @@
+/* Тёмный блок: форма слева, схема города с вашим пином справа */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto 1fr;
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: start;
+}
+
+.head {
+  grid-column: 1 / span 7;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 50ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.form,
+.done {
+  grid-column: 1 / span 6;
+  grid-row: 2;
+}
+
+.form {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.label {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.input {
+  width: 100%;
+  padding: 0.85rem 0;
+  border: 0;
+  border-bottom: 1.5px solid rgb(255 255 255 / 0.25);
+  border-radius: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--step-1);
+  transition: border-color 0.25s var(--ease-out);
+}
+
+.input::placeholder {
+  color: #77777e;
+  font-size: var(--step-0);
+}
+
+.input:hover {
+  border-bottom-color: rgb(255 255 255 / 0.5);
+}
+
+.input:focus {
+  outline: none;
+  border-bottom-color: var(--lime);
+}
+
+.input:focus-visible {
+  box-shadow: 0 2px 0 0 var(--lime);
+}
+
+.field[data-invalid] .input {
+  border-bottom-color: var(--pink);
+}
+
+.where {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--step--1);
+  cursor: pointer;
+  transition:
+    background-color 0.25s var(--ease-out),
+    border-color 0.25s var(--ease-out);
+}
+
+.pill:hover {
+  border-color: rgb(255 255 255 / 0.4);
+}
+
+.pill[aria-pressed="true"] {
+  border-color: var(--lime);
+  background: rgb(196 245 66 / 0.1);
+  font-weight: 600;
+}
+
+.pill:active {
+  transform: translateY(1px);
+}
+
+.pill:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
+}
+
+.pillDot {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: var(--c);
+}
+
+.submitRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+}
+
+.note {
+  max-width: 34ch;
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.4;
+}
+
+.note[data-error] {
+  color: var(--pink);
+}
+
+.done {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--lime);
+  border-radius: 16px;
+  font-size: var(--step-1);
+  line-height: 1.45;
+}
+
+.done a {
+  color: var(--lime);
+  text-decoration: underline;
+}
+
+.doneMark {
+  flex: none;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-top: 0.2rem;
+  border-radius: 50%;
+  background: var(--lime);
+}
+
+/* Схема города: тёмная, пин падает в центр */
+.map {
+  position: relative;
+  grid-column: 8 / -1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  aspect-ratio: 1;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: #131315;
+}
+
+.streets {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.route {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1.2s var(--ease-in-out) 0.3s;
+}
+
+.map[data-sent] .route {
+  stroke-dashoffset: 0;
+}
+
+.pin {
+  position: absolute;
+  left: 52.5%;
+  top: 50%;
+  display: grid;
+  justify-items: center;
+  translate: -50% -100%;
+  opacity: 0.3;
+}
+
+.pin[data-on] {
+  opacity: 1;
+  animation: drop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes drop {
+  from {
+    transform: translateY(-120px);
+    opacity: 0;
+  }
+}
+
+.map[data-sent] .pin {
+  animation: hop 0.6s var(--ease-out) 1.4s 2;
+}
+
+@keyframes hop {
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+.pinSvg {
+  width: 2.8rem;
+  height: 3.5rem;
+  filter: drop-shadow(0 10px 14px rgb(0 0 0 / 0.6));
+}
+
+.label2 {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  max-width: 16rem;
+  margin-bottom: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--ink-950);
+  text-align: center;
+}
+
+.pinName {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.pinCity {
+  color: #66666d;
+  font-size: 0.78rem;
+}
+
+.pinDots {
+  display: flex;
+  gap: 4px;
+  margin-top: 0.2rem;
+}
+
+.pinDots span {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+}
+
+@media (max-width: 960px) {
+  .head,
+  .form,
+  .done,
+  .map {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .map {
+    aspect-ratio: 4 / 3;
+  }
+
+  .pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin[data-on],
+  .map[data-sent] .pin {
+    animation: none;
+  }
+
+  .route {
+    transition: none;
+  }
+}

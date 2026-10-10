@@ -1,0 +1,291 @@
+/* Светлый блок: список площадок слева, разобранная стопка карт справа */
+@property --gap {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 8px;
+}
+
+.section {
+  padding-block: var(--section-y);
+  overflow: hidden;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: center;
+}
+
+.head {
+  grid-column: 1 / span 8;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--accent);
+}
+
+.lead {
+  max-width: 52ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.list {
+  grid-column: 1 / span 5;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.item {
+  display: grid;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 1.2rem 0 1.3rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.itemName {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-3);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: rgb(5 5 5 / 0.3);
+  transition: color 0.3s var(--ease-out);
+}
+
+.swatch {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: var(--c);
+  opacity: 0.4;
+  transition: opacity 0.3s var(--ease-out);
+}
+
+.item[aria-pressed="true"] .itemName,
+.item:hover .itemName {
+  color: var(--fg);
+}
+
+.item[aria-pressed="true"] .swatch {
+  opacity: 1;
+}
+
+.itemWhere {
+  padding-left: 1.5rem;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.04em;
+}
+
+.itemText {
+  display: grid;
+  grid-template-rows: 0fr;
+  max-width: 46ch;
+  padding-left: 1.5rem;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.5;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.45s var(--ease-out),
+    opacity 0.3s var(--ease-out);
+}
+
+.itemText > span {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.item[aria-pressed="true"] .itemText {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* Изометрия: три слоя один над другим, при раскрытии расходятся по высоте */
+.figure {
+  grid-column: 7 / -1;
+  display: grid;
+  place-items: center;
+  min-height: 34rem;
+  margin: 0;
+  perspective: 1600px;
+}
+
+.iso {
+  --gap: 8px;
+  position: relative;
+  width: min(100%, 24rem);
+  aspect-ratio: 1;
+  margin-top: 6rem;
+  transform: rotateX(58deg) rotateZ(-40deg);
+  transform-style: preserve-3d;
+  transition: --gap 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.iso[data-open] {
+  --gap: 110px;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--c);
+  border-radius: 18px;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 4px), rgb(5 5 5 / 0.07) calc(50% - 4px) calc(50% + 4px), transparent calc(50% + 4px)),
+    linear-gradient(0deg, transparent calc(40% - 4px), rgb(5 5 5 / 0.07) calc(40% - 4px) calc(40% + 4px), transparent calc(40% + 4px)),
+    repeating-linear-gradient(90deg, transparent 0 46px, rgb(5 5 5 / 0.05) 46px 48px),
+    repeating-linear-gradient(0deg, transparent 0 46px, rgb(5 5 5 / 0.05) 46px 48px),
+    rgb(255 255 255 / 0.82);
+  box-shadow: 0 0 0 1px rgb(5 5 5 / 0.04), 0 40px 60px -30px rgb(5 5 5 / 0.25);
+  opacity: 0.55;
+  transform: translateZ(calc(var(--n) * var(--gap)));
+  transition:
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s var(--ease-out);
+}
+
+.layer[data-i="0"] { --n: 0; }
+.layer[data-i="1"] { --n: 1; }
+.layer[data-i="2"] { --n: 2; }
+
+.layer[data-on] {
+  opacity: 1;
+  transform: translateZ(calc(var(--n) * var(--gap) + 24px));
+}
+
+/* Подпись площадки в углу слоя */
+.tag {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+  background: var(--c);
+  color: var(--white);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.layer[data-i="2"] .tag {
+  color: var(--ink-950);
+}
+
+/* Точка адреса: одна и та же на каждом слое */
+.spot {
+  position: absolute;
+  left: 62%;
+  top: 40%;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border: 3px solid var(--c);
+  border-radius: 50%;
+  background: var(--white);
+}
+
+/* Ось: встаёт из нижнего слоя вверх сквозь остальные */
+.axis {
+  position: absolute;
+  left: 62%;
+  top: 40%;
+  width: 2px;
+  height: calc(var(--gap) * 2 + 70px);
+  margin-left: -1px;
+  background: repeating-linear-gradient(180deg, var(--ink-950) 0 6px, transparent 6px 11px);
+  transform-origin: 50% 0;
+  transform: rotateX(90deg);
+}
+
+.pin {
+  position: absolute;
+  left: 62%;
+  top: 40%;
+  display: grid;
+  justify-items: center;
+  width: 9rem;
+  transform-origin: 0 0;
+  transform: translateZ(calc(var(--gap) * 2 + 70px)) rotateZ(40deg) rotateX(-58deg) translate(-50%, -100%);
+}
+
+.pin svg {
+  order: 2;
+  width: 2.6rem;
+  height: 3.25rem;
+}
+
+.pinLabel {
+  order: 1;
+  margin-bottom: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: var(--ink-950);
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+@media (max-width: 960px) {
+  .head,
+  .list,
+  .figure {
+    grid-column: 1 / -1;
+  }
+
+  /* Раскрытая стопка растёт вверх: оставляем ей место над собой */
+  .figure {
+    grid-row: 2;
+    min-height: 28rem;
+    padding-top: 8rem;
+  }
+
+  .iso {
+    width: min(58%, 14rem);
+    margin-top: 0;
+  }
+
+  .iso[data-open] {
+    --gap: 80px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iso,
+  .layer {
+    transition: none;
+  }
+}

@@ -1,0 +1,190 @@
+/* Тёмный блок: три дорожных знака на столбах, переворачиваются причиной */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: clamp(2.5rem, 6vh, 4rem);
+}
+
+.head {
+  grid-column: 1 / span 8;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 44ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.signs {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gutter);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  justify-items: center;
+}
+
+/* Столб под знаком: полосатый, как настоящий */
+.post {
+  width: 10px;
+  height: clamp(4rem, 10vh, 7rem);
+  background: repeating-linear-gradient(180deg, #e8e8ea 0 18px, #2a2a30 18px 36px);
+  border-radius: 0 0 3px 3px;
+}
+
+.flip {
+  width: 100%;
+  max-width: 22rem;
+  aspect-ratio: 1 / 1.05;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  perspective: 1000px;
+}
+
+.flip:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 6px;
+  border-radius: 20px;
+}
+
+.inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.flip[aria-expanded="true"] .inner {
+  transform: rotateY(180deg);
+}
+
+@media (hover: hover) {
+  .flip:hover .inner {
+    transform: rotateY(180deg);
+  }
+
+  .flip[aria-expanded="true"]:hover .inner {
+    transform: rotateY(180deg);
+  }
+}
+
+.front,
+.back {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  border-radius: 20px;
+  backface-visibility: hidden;
+}
+
+.front {
+  grid-template-rows: 1fr auto;
+  justify-items: center;
+  gap: 1rem;
+  padding: 1.5rem 1rem 1.25rem;
+  background: #17171b;
+  border: 1px solid var(--line);
+}
+
+.sign {
+  display: grid;
+  place-items: center;
+  width: 72%;
+}
+
+.sign svg {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 20px 30px rgb(0 0 0 / 0.5));
+}
+
+.case {
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.back {
+  align-content: center;
+  gap: 1rem;
+  padding: 1.75rem;
+  background: var(--lime);
+  color: var(--ink-950);
+  text-align: left;
+  transform: rotateY(180deg);
+}
+
+.backCase {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 650;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.reason {
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+.hint {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+@media (max-width: 960px) {
+  .head {
+    grid-column: 1 / -1;
+  }
+
+  .signs {
+    grid-template-columns: 1fr;
+  }
+
+  .flip {
+    max-width: 15rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inner {
+    transition: none;
+  }
+}
