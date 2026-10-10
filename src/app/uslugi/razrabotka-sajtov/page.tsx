@@ -4,7 +4,9 @@ import Footer from "@/components/footer/Footer";
 import Seam from "@/components/seam/Seam";
 import JsonLd from "@/components/JsonLd";
 import WebHero from "@/components/web/WebHero";
-import Adaptive from "@/components/web/Adaptive";
+import PathDuel from "@/components/web/PathDuel";
+import IntentRouter from "@/components/web/IntentRouter";
+import BuildLoader from "@/components/web/BuildLoader";
 import DrawingEstimate from "@/components/web/DrawingEstimate";
 import CaseFan from "@/components/web/CaseFan";
 import ErrorCodes from "@/components/web/ErrorCodes";
@@ -37,8 +39,12 @@ export default function WebPage() {
       <main>
         <JsonLd data={LD} />
         <WebHero data={WEB} />
-        <Seam from="dark" to="light" label="Адаптив" />
-        <Adaptive data={WEB.adaptive} />
+        <Seam from="dark" to="light" label="Продавец" />
+        <PathDuel data={WEB.path} />
+        <Seam from="light" to="dark" label="Запросы" />
+        <IntentRouter data={WEB.intents} />
+        <Seam from="dark" to="light" label="Сборка" />
+        <BuildLoader data={WEB.build} />
         <Seam from="light" to="dark" label="Смета" />
         <DrawingEstimate data={WEB.estimate} />
         <Seam from="dark" to="light" label="Дела" />
