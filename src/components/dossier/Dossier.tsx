@@ -198,7 +198,7 @@ export default function Dossier() {
                   <Image
                     className={styles.coverPhone}
                     src={c.cover.phone}
-                    alt=""
+                    alt={`${c.cover.alt}, версия для телефона`}
                     sizes="12vw"
                   />
                 ) : null}

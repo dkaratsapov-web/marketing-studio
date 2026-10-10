@@ -3,6 +3,8 @@ import { Geologica, Golos_Text, IBM_Plex_Mono } from "next/font/google";
 import SmoothScroll from "@/components/SmoothScroll";
 import Cursor from "@/components/Cursor";
 import BriefModal from "@/components/brief/BriefModal";
+import JsonLd from "@/components/JsonLd";
+import { IS_MIRROR, ORGANIZATION, SITE_NAME, SITE_URL, WEBSITE } from "@/lib/seo";
 import "./globals.css";
 
 const display = Geologica({
@@ -25,10 +27,23 @@ const mono = IBM_Plex_Mono({
   display: "swap",
 });
 
+// Общие метаданные. Страницы задают свои title, description, canonical и превью через pageMeta
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Корпорация | маркетинговое агентство",
   description:
-    "Маркетинговое агентство Даниила Карацапова. Контекст, таргет, карты, сайты и сквозная аналитика: каналы запускаются параллельно, у каждого свой специалист. В digital с 2019 года, 22 кейса с измеримым результатом.",
+    "Маркетинговое агентство Даниила Карацапова: контекст, таргет, карты, сайты и сквозная аналитика. В digital с 2019 года, 22 кейса с измеримым результатом.",
+  applicationName: SITE_NAME,
+  authors: [{ name: "Даниил Карацапов" }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  // Копия на GitHub Pages не индексируется: основной сайт один
+  robots: IS_MIRROR
+    ? { index: false, follow: false }
+    : { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+  formatDetection: { telephone: false, email: false, address: false },
+  openGraph: { type: "website", locale: "ru_RU", siteName: SITE_NAME, images: ["/og/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
@@ -43,6 +58,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${display.variable} ${body.variable} ${mono.variable}`}
     >
       <body>
+        <JsonLd data={[ORGANIZATION, WEBSITE]} />
         <SmoothScroll />
         <Cursor />
         {children}

@@ -13,20 +13,43 @@ import VisitorTools from "@/components/case/VisitorTools";
 import BotsSeeding from "@/components/case/BotsSeeding";
 import CaseFinale from "@/components/case/CaseFinale";
 import { SFERA } from "@/content/sfera";
+import JsonLd from "@/components/JsonLd";
+import { absoluteUrl, breadcrumbs, ORG_ID, pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title:
-    "Кейс «Сфера»: сайт, Директ, аналитика и ИИ-агент для проектной компании | Корпорация",
-  description:
-    "Дело 004. Собрали проектной компании «Сфера» маркетинг целиком: сайт на 121 страницу под спрос, Яндекс Директ, связанный с аналитикой, ИИ-агента по рекламе, контент и боты.",
-  alternates: { canonical: "/kejsy/sfera/" },
-};
+const TITLE =
+  "Кейс «Сфера»: маркетинг проектной компании под ключ | Корпорация";
+const DESCRIPTION =
+  "Дело 004: маркетинг проектной компании «Сфера» целиком. Сайт на 121 страницу под спрос, Яндекс Директ с аналитикой, ИИ-агент по рекламе и боты.";
+const PATH = "/kejsy/sfera/";
+
+export const metadata: Metadata = pageMeta({ title: TITLE, description: DESCRIPTION, path: PATH, og: "sfera", type: "article" });
+
+// Микроразметка: кейс как статья агентства и хлебные крошки
+const LD = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: "Кейс «Сфера»: маркетинг проектной компании от сайта до ИИ-агента по Директу",
+    description: DESCRIPTION,
+    url: absoluteUrl(PATH),
+    image: absoluteUrl("/og/sfera.jpg"),
+    inLanguage: "ru-RU",
+    author: { "@type": "Person", name: "Даниил Карацапов" },
+    publisher: { "@id": ORG_ID },
+    about: { "@type": "Organization", name: "Проектная компания «Сфера»" },
+  },
+  breadcrumbs([
+    { name: "Корпорация", path: "/" },
+    { name: "Кейс «Сфера»", path: PATH },
+  ]),
+];
 
 export default function SferaCasePage() {
   return (
     <>
       <Header />
       <main>
+        <JsonLd data={LD} />
         <CaseHero data={SFERA} />
         <Seam from="dark" to="light" label="Клиент" />
         <CaseBrief brief={SFERA.brief} client={SFERA.client} />

@@ -149,7 +149,7 @@ function Icon({ d }: { d: string }) {
 function Neighbor({ n }: { n: Data["avito"]["neighbors"][number] }) {
   return (
     <span className={styles.neighbor} aria-hidden="true">
-      <Image src={NB_PHOTO[n.photo]} alt="" className={styles.nbPhoto} sizes="200px" />
+      <Image src={NB_PHOTO[n.photo]} alt={`${n.title}: фото соседнего объявления`} className={styles.nbPhoto} sizes="200px" />
       <span className={styles.nbTitle}>{n.title}</span>
       <span className={styles.nbPrice}>{n.price}</span>
       <span className={styles.nbPlace}>{n.place}</span>

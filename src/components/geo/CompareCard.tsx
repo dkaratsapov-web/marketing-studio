@@ -81,7 +81,7 @@ export default function CompareCard({ data }: { data: Data }) {
 
             {/* Стало: заполненная карточка, видна справа от ползунка */}
             <div className={styles.card} data-v="after" aria-hidden="true">
-              <Image src={coffeeMain} alt="" className={styles.photo} sizes="(max-width: 960px) 90vw, 420px" />
+              <Image src={coffeeMain} alt={a.photo} className={styles.photo} sizes="(max-width: 960px) 90vw, 420px" />
               <span className={styles.name}>{a.name}</span>
               <span className={styles.kind}>{a.kind}</span>
               <span className={styles.open}>{a.open}</span>

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/footer/Footer";
 import Seam from "@/components/seam/Seam";
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbs, faqPage, pageMeta, service } from "@/lib/seo";
 import TargetHero from "@/components/target/TargetHero";
 import Platforms from "@/components/target/Platforms";
 import Aim from "@/components/target/Aim";
@@ -14,18 +16,29 @@ import ChatFaq from "@/components/target/ChatFaq";
 import AdBrief from "@/components/target/AdBrief";
 import { TARGET } from "@/content/target";
 
-export const metadata: Metadata = {
-  title: "Таргетированная реклама VK Ads, Telegram Ads, Avito Ads | Корпорация",
-  description:
-    "Настроим таргет во ВКонтакте, Telegram и на Авито за 4–6 дней: аудитория, креативы под каждую площадку, A/B-тесты и еженедельный отчёт по заявкам. Работа отдела от 20 000 ₽ в месяц.",
-  alternates: { canonical: "/uslugi/targetirovannaya-reklama/" },
-};
+const TITLE = "Таргетированная реклама VK, Telegram и Авито | Корпорация";
+const DESCRIPTION =
+  "Таргет во ВКонтакте, Telegram и на Авито за 4–6 дней: аудитория, креативы, A/B-тесты и отчёт по заявкам каждую неделю. От 20 000 ₽ в месяц.";
+const PATH = "/uslugi/targetirovannaya-reklama/";
+
+export const metadata: Metadata = pageMeta({ title: TITLE, description: DESCRIPTION, path: PATH, og: "target" });
+
+// Микроразметка: услуга с ценой из прайса, хлебные крошки, вопросы
+const LD = [
+  service({ name: TARGET.name, type: "Таргетированная реклама", description: DESCRIPTION, path: PATH, price: 20000 }),
+  breadcrumbs([
+    { name: "Корпорация", path: "/" },
+    { name: TARGET.name, path: PATH },
+  ]),
+  faqPage(TARGET.faq.items),
+];
 
 export default function TargetPage() {
   return (
     <>
       <Header />
       <main>
+        <JsonLd data={LD} />
         <TargetHero data={TARGET} />
         <Seam from="dark" to="light" label="Площадки" />
         <Platforms platforms={TARGET.platforms} />

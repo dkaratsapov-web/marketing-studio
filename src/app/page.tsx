@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Hero from "@/components/hero/Hero";
 import Manifest from "@/components/manifest/Manifest";
@@ -10,6 +11,15 @@ import Faq from "@/components/faq/Faq";
 import Brief from "@/components/brief/Brief";
 import Footer from "@/components/footer/Footer";
 import Seam from "@/components/seam/Seam";
+import { pageMeta } from "@/lib/seo";
+
+export const metadata: Metadata = pageMeta({
+  title: "Маркетинговое агентство «Корпорация»: реклама, карты, сайты",
+  description:
+    "Маркетинговое агентство Даниила Карацапова: контекст, таргет, карты, сайты и сквозная аналитика. В digital с 2019 года, 22 кейса с измеримым результатом.",
+  path: "/",
+  og: "home",
+});
 
 export default function Home() {
   return (

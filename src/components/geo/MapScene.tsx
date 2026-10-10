@@ -120,7 +120,7 @@ const MapScene = forwardRef<HTMLDivElement, { map: MapData }>(function MapScene(
         </span>
 
         <div className={styles.card} data-part="card">
-          <Image src={coffeeThumb} alt="" className={styles.thumb} sizes="96px" />
+          <Image src={coffeeThumb} alt={map.place.photo} className={styles.thumb} sizes="96px" />
           <div className={styles.cardBody}>
             <span className={styles.cardName}>{map.place.name}</span>
             <span className={styles.cardMeta}>

@@ -8,20 +8,32 @@ import Campaigns from "@/components/service/Campaigns";
 import MinusWords from "@/components/service/MinusWords";
 import Calendar from "@/components/service/Calendar";
 import Seam from "@/components/seam/Seam";
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbs, pageMeta, service } from "@/lib/seo";
 import { CONTEXT } from "@/content/services";
 
-export const metadata: Metadata = {
-  title: "Контекстная реклама в Яндекс Директ под ключ | Корпорация",
-  description:
-    "Настроим Яндекс Директ за 3–5 дней: поиск, РСЯ и ретаргетинг. Работа отдела от 30 000 ₽ в месяц, еженедельный отчёт по заявкам и продажам. Ведёт основатель агентства.",
-  alternates: { canonical: "/uslugi/kontekstnaya-reklama/" },
-};
+const TITLE = "Контекстная реклама в Яндекс Директ под ключ | Корпорация";
+const DESCRIPTION =
+  "Настроим Яндекс Директ за 3–5 дней: поиск, РСЯ и ретаргетинг. Работа отдела от 30 000 ₽ в месяц, отчёт по заявкам и продажам каждую неделю.";
+const PATH = "/uslugi/kontekstnaya-reklama/";
+
+export const metadata: Metadata = pageMeta({ title: TITLE, description: DESCRIPTION, path: PATH, og: "context" });
+
+// Микроразметка: услуга с ценой из прайса, хлебные крошки
+const LD = [
+  service({ name: CONTEXT.name, type: "Контекстная реклама", description: DESCRIPTION, path: PATH, price: 30000 }),
+  breadcrumbs([
+    { name: "Корпорация", path: "/" },
+    { name: CONTEXT.name, path: PATH },
+  ]),
+];
 
 export default function ContextPage() {
   return (
     <>
       <Header />
       <main>
+        <JsonLd data={LD} />
         <ServiceHero service={CONTEXT} queries={CONTEXT.queries} />
         <Seam from="dark" to="light" label="Отчёт" />
         <NotClicks report={CONTEXT.report} />
