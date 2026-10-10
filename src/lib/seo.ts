@@ -9,6 +9,16 @@ export const SITE_URL = (process.env.SITE_URL ?? "https://marketing-studio.pro")
 export const IS_MIRROR = Boolean(process.env.PAGES_BASE_PATH);
 export const SITE_NAME = "Корпорация";
 
+/**
+ * Коды подтверждения прав на сайт: Яндекс Вебмастер и Google Search Console.
+ * Это значение content из мета-тега, который выдаёт сервис. Код не секретный: он и так виден
+ * в разметке страницы. Пустая строка — тег не выводится.
+ */
+export const VERIFICATION = {
+  yandex: "",
+  google: "",
+};
+
 const abs = (path: string) => `${SITE_URL}${path}`;
 
 type PageMeta = {

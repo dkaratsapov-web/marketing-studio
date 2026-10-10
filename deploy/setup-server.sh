@@ -65,6 +65,8 @@ server {
     index index.html;
     # Приёмник заявок (появляется после deploy/setup-leads.sh)
     include snippets/lead-api*.conf;
+    # Редирект www на главное зеркало (появляется после deploy/setup-seo.sh)
+    include snippets/seo-redirect*.conf;
 
     # Статический экспорт Next.js: страницы лежат как папка/index.html
     location / {
@@ -80,7 +82,7 @@ server {
     error_page 404 /404.html;
 
     gzip on;
-    gzip_types text/css application/javascript application/json image/svg+xml;
+    gzip_types text/css text/plain text/xml application/xml application/javascript application/json image/svg+xml;
 }
 NGINX
 fi

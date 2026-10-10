@@ -4,7 +4,7 @@ import SmoothScroll from "@/components/SmoothScroll";
 import Cursor from "@/components/Cursor";
 import BriefModal from "@/components/brief/BriefModal";
 import JsonLd from "@/components/JsonLd";
-import { IS_MIRROR, ORGANIZATION, SITE_NAME, SITE_URL, WEBSITE } from "@/lib/seo";
+import { IS_MIRROR, ORGANIZATION, SITE_NAME, SITE_URL, VERIFICATION, WEBSITE } from "@/lib/seo";
 import "./globals.css";
 
 const display = Geologica({
@@ -42,6 +42,10 @@ export const metadata: Metadata = {
     ? { index: false, follow: false }
     : { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
   formatDetection: { telephone: false, email: false, address: false },
+  // Мета-теги подтверждения Вебмастера и Search Console: только на основном сайте
+  verification: IS_MIRROR
+    ? undefined
+    : { yandex: VERIFICATION.yandex || undefined, google: VERIFICATION.google || undefined },
   openGraph: { type: "website", locale: "ru_RU", siteName: SITE_NAME, images: ["/og/home.jpg"] },
   twitter: { card: "summary_large_image" },
 };

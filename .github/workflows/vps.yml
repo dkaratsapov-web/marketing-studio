@@ -80,8 +80,21 @@ jobs:
             echo "lead-bot ещё не установлен, пропускаю"
           fi
 
+      # Скрипт настройки сервера для поиска лежит в домашней папке: его запускают один раз под root
+      - name: Upload server scripts
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          rsync -az -e "ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes" \
+            deploy/setup-seo.sh "$VPS_USER@$VPS_HOST:setup-seo.sh"
+
       - name: Smoke test
         run: |
           sleep 2
           curl -fsS -o /dev/null -w "https://marketing-studio.pro -> %{http_code}\n" https://marketing-studio.pro/ \
             || curl -fsS -o /dev/null -w "http://${{ secrets.VPS_HOST }} -> %{http_code}\n" "http://${{ secrets.VPS_HOST }}/"
+          # Файлы для поисковиков: не роняем деплой, только показываем статус
+          for f in robots.txt sitemap.xml; do
+            curl -sS -o /dev/null -w "$f -> %{http_code}\n" "https://marketing-studio.pro/$f" || true
+          done
