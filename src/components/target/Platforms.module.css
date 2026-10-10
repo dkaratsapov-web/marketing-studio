@@ -1,0 +1,435 @@
+/* Светлый блок: слева вкладки площадок, справа сцена с карточкой, которая меняет формат */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: clamp(2rem, 5vh, 3.5rem);
+  align-items: start;
+}
+
+.head {
+  grid-column: 1 / span 8;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.dotMark {
+  color: var(--pink-deep);
+}
+
+.lead {
+  max-width: 50ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Вкладки: имя площадки крупно, описание раскрывается у активной */
+.tabs {
+  grid-column: 1 / span 5;
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+
+.tab {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.25rem 0 1.4rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tabName {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-3);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: rgb(5 5 5 / 0.3);
+  transition: color 0.3s var(--ease-out);
+}
+
+.tab:hover .tabName,
+.tab[aria-selected="true"] .tabName {
+  color: var(--fg);
+}
+
+.tabWhere {
+  color: var(--pink-deep);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.04em;
+}
+
+.tabText {
+  display: grid;
+  grid-template-rows: 0fr;
+  max-width: 44ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.5;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.45s var(--ease-out),
+    opacity 0.3s var(--ease-out);
+}
+
+.tabText > span {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tab[aria-selected="true"] .tabText {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--pink-deep);
+  outline-offset: 4px;
+}
+
+/* Полоска времени: розовая, растёт до следующей вкладки */
+.tabTimer {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  width: 100%;
+  background: var(--pink-deep);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+.tab[aria-selected="true"] .tabTimer:not([data-run]) {
+  transform: scaleX(1);
+}
+
+.tabTimer[data-run] {
+  animation: timer linear both;
+}
+
+@keyframes timer {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Сцена: фон меняется под площадку */
+.stage {
+  grid-column: 7 / -1;
+  position: relative;
+  display: grid;
+  /* Плашка формата и подпись по своей высоте, всё свободное место у карточки */
+  grid-template-rows: auto 1fr auto;
+  gap: 1rem;
+  min-height: 34rem;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  border-radius: 18px;
+  background: #eceef1;
+  transition: background-color 0.6s var(--ease-out);
+}
+
+.stage[data-platform="tg"] {
+  background:
+    radial-gradient(circle at 20% 20%, rgb(255 255 255 / 0.05), transparent 30%),
+    #16202b;
+}
+
+.stage[data-platform="avito"] {
+  background: #f6f6f6;
+}
+
+.format {
+  justify-self: start;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: rgb(5 5 5 / 0.06);
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.format span {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.stage[data-platform="tg"] .format {
+  background: rgb(255 255 255 / 0.08);
+  color: rgb(255 255 255 / 0.6);
+}
+
+.stage[data-platform="tg"] .format span {
+  color: var(--white);
+}
+
+.feedArea {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  gap: 1rem;
+}
+
+/* Соседние объявления Авито: серые силуэты слева и справа */
+.neighbor {
+  display: none;
+  width: 100%;
+  aspect-ratio: 3 / 4.2;
+  border-radius: 12px;
+  background:
+    linear-gradient(#dcdcdc, #dcdcdc) 0 0 / 100% 58% no-repeat,
+    linear-gradient(#e6e6e6, #e6e6e6) 10px calc(58% + 14px) / 70% 10px no-repeat,
+    linear-gradient(#ececec, #ececec) 10px calc(58% + 34px) / 45% 8px no-repeat,
+    #fff;
+  opacity: 0.8;
+}
+
+.stage[data-platform="avito"] .feedArea {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+}
+
+.stage[data-platform="avito"] .neighbor {
+  display: block;
+}
+
+/* Карточка: одни и те же части, три раскладки */
+.card {
+  display: grid;
+  gap: 0.75rem;
+  width: min(100%, 24rem);
+  padding: 1rem;
+  border-radius: 16px;
+  background: var(--white);
+  color: var(--ink-950);
+  box-shadow: 0 30px 60px -30px rgb(5 5 5 / 0.35);
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ava {
+  flex: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink), var(--pink-deep));
+}
+
+.whoText {
+  display: grid;
+  line-height: 1.2;
+}
+
+.whoName {
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.badge {
+  color: #6b6b72;
+  font-size: 0.72rem;
+}
+
+.media {
+  display: grid;
+  place-items: end start;
+  aspect-ratio: 16 / 11;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 25% 30%, rgb(255 255 255 / 0.35), transparent 45%),
+    linear-gradient(135deg, var(--pink), var(--pink-deep));
+  color: rgb(255 255 255 / 0.9);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cardTitle {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: 1.35rem;
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.cardText {
+  color: #4f4f56;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.cta {
+  display: block;
+  padding: 0.7rem;
+  border-radius: 10px;
+  background: var(--ink-950);
+  color: var(--white);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ВКонтакте: шапка, текст, фото, кнопка на всю ширину */
+.card[data-platform="vk"] .who {
+  order: 0;
+}
+
+.card[data-platform="vk"] .cardTitle {
+  order: 1;
+}
+
+.card[data-platform="vk"] .cardText {
+  order: 2;
+}
+
+.card[data-platform="vk"] .media {
+  order: 3;
+}
+
+.card[data-platform="vk"] .cta {
+  order: 4;
+}
+
+/* Telegram: тёмное сообщение под постом канала, без картинки, кнопка «Открыть» */
+.card[data-platform="tg"] {
+  width: min(100%, 22rem);
+  border-radius: 16px 16px 16px 4px;
+  background: #22303f;
+  color: var(--white);
+  box-shadow: 0 20px 40px -20px rgb(0 0 0 / 0.6);
+}
+
+.card[data-platform="tg"] .media {
+  display: none;
+}
+
+.card[data-platform="tg"] .ava {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.card[data-platform="tg"] .badge {
+  color: #8db4dc;
+}
+
+.card[data-platform="tg"] .cardTitle {
+  font-family: var(--ff-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.card[data-platform="tg"] .cardText {
+  color: rgb(255 255 255 / 0.85);
+}
+
+.card[data-platform="tg"] .cta {
+  background: rgb(255 255 255 / 0.1);
+  color: #8db4dc;
+}
+
+/* Авито: фото сверху, заголовок, место, маленькая кнопка; аватар прячется в шапку */
+.card[data-platform="avito"] {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 12px;
+  box-shadow: 0 0 0 2px var(--pink-deep), 0 20px 40px -20px rgb(5 5 5 / 0.35);
+}
+
+.card[data-platform="avito"] .media {
+  order: 0;
+  aspect-ratio: 4 / 3.4;
+}
+
+.card[data-platform="avito"] .cardTitle {
+  order: 1;
+  font-size: 1rem;
+}
+
+.card[data-platform="avito"] .cardText {
+  order: 2;
+  font-size: 0.78rem;
+}
+
+.card[data-platform="avito"] .who {
+  order: 3;
+}
+
+.card[data-platform="avito"] .ava {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.card[data-platform="avito"] .cta {
+  order: 4;
+  padding: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.note {
+  align-self: end;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+
+.stage[data-platform="tg"] .note {
+  color: rgb(255 255 255 / 0.45);
+}
+
+@media (max-width: 960px) {
+  .head,
+  .tabs,
+  .stage {
+    grid-column: 1 / -1;
+  }
+
+  /* На телефоне карточка над вкладками: нажал площадку и сразу видишь, как перестроилось объявление */
+  .stage {
+    grid-row: 2;
+    min-height: 0;
+  }
+
+  .tabs {
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 520px) {
+  .stage[data-platform="avito"] .feedArea {
+    grid-template-columns: 0.5fr 1.4fr 0.5fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabTimer[data-run] {
+    animation: none;
+  }
+}

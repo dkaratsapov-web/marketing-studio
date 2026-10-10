@@ -1,0 +1,305 @@
+/* Тёмный блок: шаги сужения аудитории слева, поле с прицелом справа прилипает к экрану */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: clamp(2rem, 5vh, 3.5rem);
+  align-items: start;
+}
+
+.head {
+  grid-column: 1 / span 8;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--pink);
+}
+
+.lead {
+  max-width: 50ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Сцена: своя сетка, чтобы поле прилипало на всю высоту шагов (и на телефоне тоже) */
+.stage {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  align-items: start;
+}
+
+/* Шаги: высокие, чтобы было что листать рядом с прилипшим полем */
+.steps {
+  grid-column: 1 / span 5;
+  grid-row: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  align-content: center;
+  gap: 0.6rem;
+  min-height: 62svh;
+  padding-block: 2rem;
+  border-top: 1px solid var(--line);
+  opacity: 0.3;
+  transition: opacity 0.5s var(--ease-out);
+}
+
+.step[data-on] {
+  opacity: 1;
+}
+
+.step[data-past] {
+  opacity: 0.45;
+}
+
+.stepNo {
+  color: var(--pink);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+}
+
+.stepName {
+  font-size: var(--step-4);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+}
+
+.stepText {
+  max-width: 38ch;
+  color: var(--muted);
+  font-size: var(--step-1);
+  line-height: 1.45;
+}
+
+/* Поле с прицелом: прилипает по центру экрана, пока листаются шаги */
+.visual {
+  grid-column: 7 / -1;
+  grid-row: 1;
+  position: sticky;
+  top: calc(4.5rem + (100svh - 4.5rem - min(72svh, 100%)) / 2);
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.field {
+  --r: 1;
+  position: relative;
+  width: min(100%, 72svh);
+  aspect-ratio: 1;
+  justify-self: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgb(255 77 157 / 0.06), transparent 65%),
+    repeating-radial-gradient(circle, transparent 0 calc(12.5% - 1px), rgb(255 255 255 / 0.05) calc(12.5% - 1px) 12.5%);
+}
+
+/* Человек: точка; вне аудитории гаснет и уменьшается */
+.person {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.75);
+  transition:
+    opacity 0.6s var(--ease-out) var(--delay),
+    transform 0.6s var(--ease-out) var(--delay),
+    background-color 0.5s var(--ease-out);
+}
+
+.person[data-out] {
+  opacity: 0.12;
+  transform: scale(0.6);
+}
+
+/* Последний шаг: оставшиеся загораются розовым */
+.field[data-last] .person:not([data-out]) {
+  background: var(--pink);
+  box-shadow: 0 0 10px rgb(255 77 157 / 0.8);
+  transform: scale(1.3);
+}
+
+/* Прицел: кольцо, радиус по доле оставшейся аудитории */
+.reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--r) * 100% + 6%);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border: 2px solid var(--pink);
+  border-radius: 50%;
+  box-shadow: 0 0 24px rgb(255 77 157 / 0.25), inset 0 0 24px rgb(255 77 157 / 0.12);
+  transition: width 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.tick {
+  position: absolute;
+  background: var(--pink);
+}
+
+.tick[data-side="t"],
+.tick[data-side="b"] {
+  left: 50%;
+  width: 2px;
+  height: 14px;
+  margin-left: -1px;
+}
+
+.tick[data-side="t"] {
+  top: -8px;
+}
+
+.tick[data-side="b"] {
+  bottom: -8px;
+}
+
+.tick[data-side="l"],
+.tick[data-side="r"] {
+  top: 50%;
+  width: 14px;
+  height: 2px;
+  margin-top: -1px;
+}
+
+.tick[data-side="l"] {
+  left: -8px;
+}
+
+.tick[data-side="r"] {
+  right: -8px;
+}
+
+.stepTag {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  translate: -50% 0;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: var(--pink);
+  color: var(--ink-950);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Сегменты: подписи вокруг прицела на последнем шаге */
+.segment {
+  position: absolute;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--pink);
+  border-radius: 2px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: var(--step--1);
+  white-space: nowrap;
+  opacity: 0;
+  translate: 0 8px;
+  transition:
+    opacity 0.5s var(--ease-out),
+    translate 0.5s var(--ease-out);
+}
+
+.segment[data-i="0"] {
+  top: 24%;
+  left: 58%;
+  transition-delay: 0.3s;
+}
+
+.segment[data-i="1"] {
+  top: 64%;
+  left: 60%;
+  transition-delay: 0.45s;
+}
+
+.segment[data-i="2"] {
+  top: 40%;
+  right: 62%;
+  transition-delay: 0.6s;
+}
+
+.field[data-last] .segment {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.note {
+  justify-self: center;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+}
+
+/* Телефон: поле прилипает сверху, шаги листаются под ним */
+@media (max-width: 960px) {
+  .head {
+    grid-column: 1 / -1;
+  }
+
+  /* Поле над шагами и прилипает под шапкой, шаги листаются под ним */
+  .stage {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .visual {
+    order: -1;
+    z-index: 2;
+    width: 100%;
+    top: calc(4rem + 0.5rem);
+    padding-block: 0.5rem 1rem;
+    background: var(--bg);
+  }
+
+  .field {
+    width: min(100%, 40svh);
+  }
+
+  .step {
+    min-height: 46svh;
+  }
+
+  .stepName {
+    font-size: var(--step-3);
+  }
+
+  .segment {
+    font-size: 0.68rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .person,
+  .reticle,
+  .segment,
+  .step {
+    transition: none;
+  }
+}
