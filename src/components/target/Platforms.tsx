@@ -1,11 +1,19 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { TARGET } from "@/content/target";
+import adMain from "@/assets/target/ad-main.webp";
+import nbRed from "@/assets/target/nb-red.webp";
+import nbNude from "@/assets/target/nb-nude.webp";
+import { AvitoMark, SalonMark, TelegramMark, VkMark } from "./Marks";
 import styles from "./Platforms.module.css";
+
+const NB_PHOTO = { red: nbRed, nude: nbNude };
+const PLATFORM_MARK = { vk: VkMark, tg: TelegramMark, avito: AvitoMark };
 
 gsap.registerPlugin(Flip, ScrollTrigger);
 
@@ -30,6 +38,9 @@ export default function Platforms({ platforms }: Props) {
   const items = platforms.items;
   const key = items[active].key;
   const c = platforms.card;
+  const tg = platforms.tgChannel;
+  const av = platforms.avito;
+  const Mark = PLATFORM_MARK[key];
 
   // Автопереключение, пока блок на экране и человек не взялся за вкладки сам
   useEffect(() => {
@@ -83,6 +94,7 @@ export default function Platforms({ platforms }: Props) {
     flipState.current = null;
     Flip.from(state, {
       targets: card.current.querySelectorAll("[data-flip]"),
+      // Карточка перестраивается, а окружение площадки (шапка, пост канала, соседи) проявляется заново
       duration: 0.75,
       ease: "power3.inOut",
       absolute: true,
@@ -154,44 +166,126 @@ export default function Platforms({ platforms }: Props) {
           data-platform={key}
         >
           <p className={styles.format}>
+            <Mark className={styles.formatMark} />
             <span>{items[active].name}</span> · {items[active].format}
           </p>
 
-          <div className={styles.feedArea}>
-            {/* Соседние объявления Авито: появляются только в формате выдачи */}
-            <span className={styles.neighbor} aria-hidden="true" />
-            <div
-              ref={card}
-              className={styles.card}
-              data-flip="card"
-              data-platform={key}
-            >
-              <span className={styles.who} data-flip="who">
-                <span className={styles.ava} data-flip="ava" />
-                <span className={styles.whoText}>
-                  <span className={styles.whoName}>{c.who}</span>
-                  <span className={styles.badge}>{c.badge[key]}</span>
+          <div className={styles.screen} data-platform={key}>
+            {/* Шапка площадки: своя у каждой, проявляется при смене вкладки */}
+            {key === "vk" ? (
+              <div key="vk" className={styles.bar} data-bar="vk" aria-hidden="true">
+                <VkMark className={styles.barMark} />
+                <span className={styles.barTitle}>Лента</span>
+                <span className={styles.barSearch} />
+              </div>
+            ) : key === "tg" ? (
+              <div key="tg" className={styles.bar} data-bar="tg" aria-hidden="true">
+                <span className={styles.barBack} />
+                <span className={styles.chanAva}>ТС</span>
+                <span className={styles.chanText}>
+                  <span className={styles.barTitle}>{tg.name}</span>
+                  <span className={styles.chanKind}>{tg.kind}</span>
                 </span>
-              </span>
-              {/* Фото всегда в разметке: в формате Telegram оно скрыто стилями, и Flip плавно его убирает */}
-              <span className={styles.media} data-flip="media">
-                <span>{c.photo}</span>
-              </span>
-              <span className={styles.cardTitle} data-flip="title">
-                {c.title}
-              </span>
-              <span className={styles.cardText} data-flip="text">
-                {c.text[key]}
-              </span>
-              <span className={styles.cta} data-flip="cta">
-                {c.cta[key]}
-              </span>
+              </div>
+            ) : (
+              <div key="avito" className={styles.bar} data-bar="avito" aria-hidden="true">
+                <AvitoMark className={styles.barMark} />
+                <span className={styles.avitoWord}>Авито</span>
+                <span className={styles.avitoSearch}>{av.query}</span>
+                <span className={styles.avitoCity}>{av.city}</span>
+              </div>
+            )}
+
+            <div className={styles.feedArea}>
+              {key === "tg" ? (
+                <p key="post" className={styles.chanPost}>
+                  {tg.post}
+                  <span className={styles.chanTime}>{tg.time}</span>
+                </p>
+              ) : null}
+              {key === "avito" ? (
+                <Neighbor n={av.neighbors[0]} />
+              ) : null}
+              <div
+                ref={card}
+                className={styles.card}
+                data-flip="card"
+                data-platform={key}
+              >
+                <span className={styles.who} data-flip="who">
+                  <SalonMark className={styles.ava} />
+                  <span className={styles.whoText}>
+                    <span className={styles.whoName}>{c.who}</span>
+                    <span className={styles.badge}>{c.badge[key]}</span>
+                  </span>
+                </span>
+                {/* Фото всегда в разметке: в формате Telegram оно скрыто стилями, и Flip плавно его убирает */}
+                <span className={styles.media} data-flip="media">
+                  <Image
+                    src={adMain}
+                    alt={c.photo}
+                    className={styles.photo}
+                    sizes="(max-width: 960px) 90vw, 420px"
+                  />
+                </span>
+                <span className={styles.cardTitle} data-flip="title">
+                  {c.title}
+                </span>
+                {key === "avito" ? (
+                  <span className={styles.price} data-flip="price">
+                    {c.price}
+                  </span>
+                ) : null}
+                <span className={styles.cardText} data-flip="text">
+                  {c.text[key]}
+                </span>
+                {key === "vk" ? (
+                  <span className={styles.link} data-flip="link">
+                    {c.link}
+                  </span>
+                ) : null}
+                <span className={styles.cta} data-flip="cta">
+                  {c.cta[key]}
+                </span>
+                {key === "vk" ? (
+                  <span className={styles.reactions} data-flip="reactions" aria-hidden="true">
+                    <Icon d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" />
+                    <Icon d="M5 5h14v10H9l-4 4V5Z" />
+                    <Icon d="M14 5l6 6-6 6v-4c-5 0-8 1.5-10 5 .8-5 3.5-9 10-9V5Z" />
+                  </span>
+                ) : null}
+              </div>
+              {key === "tg" ? (
+                <span className={styles.why}>{tg.why}</span>
+              ) : null}
+              {key === "avito" ? (
+                <Neighbor n={av.neighbors[1]} />
+              ) : null}
             </div>
-            <span className={styles.neighbor} aria-hidden="true" />
           </div>
           <p className={styles.note}>{platforms.note}</p>
         </div>
       </div>
     </section>
+  );
+}
+
+function Icon({ d }: { d: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={styles.icon}>
+      <path d={d} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** Соседнее объявление в выдаче Авито: чужая карточка, без нашего выделения */
+function Neighbor({ n }: { n: (typeof TARGET)["platforms"]["avito"]["neighbors"][number] }) {
+  return (
+    <span className={styles.neighbor} aria-hidden="true">
+      <Image src={NB_PHOTO[n.photo]} alt="" className={styles.nbPhoto} sizes="200px" />
+      <span className={styles.nbTitle}>{n.title}</span>
+      <span className={styles.nbPrice}>{n.price}</span>
+      <span className={styles.nbPlace}>{n.place}</span>
+    </span>
   );
 }

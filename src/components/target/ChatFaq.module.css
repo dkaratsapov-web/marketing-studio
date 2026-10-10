@@ -1,0 +1,219 @@
+/* Тёмный блок: вопросы-подсказки слева, переписка справа */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 3rem;
+  align-items: center;
+}
+
+.side {
+  grid-column: 1 / span 6;
+  display: grid;
+  gap: 2rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--pink);
+}
+
+/* Быстрые вопросы: пилюли, заданные помечаются галочкой */
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.chip {
+  position: relative;
+  padding: 0.75rem 1.1rem;
+  border: 1px solid rgb(255 77 157 / 0.5);
+  border-radius: 999px;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--step-0);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.25s var(--ease-out),
+    border-color 0.25s var(--ease-out),
+    color 0.25s var(--ease-out);
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--pink);
+  background: rgb(255 77 157 / 0.12);
+}
+
+.chip:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.chip[data-asked] {
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.chip[data-asked]::after {
+  content: " ✓";
+  color: var(--pink);
+}
+
+.chip:disabled {
+  cursor: progress;
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 3px;
+}
+
+/* Окно чата: высота постоянная, старые сообщения уходят вверх за край */
+.chat {
+  grid-column: 8 / -1;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: min(36rem, 75svh);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 15% 20%, rgb(255 77 157 / 0.08), transparent 40%),
+    #0f0f12;
+}
+
+.chatHead {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+  background: #17171b;
+}
+
+.ava {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: var(--pink);
+  color: var(--ink-950);
+  font-weight: 700;
+}
+
+.chatName {
+  display: grid;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.chatSub {
+  color: var(--pink);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  min-height: 0;
+  overflow: hidden;
+  padding: 1.1rem;
+}
+
+.msg {
+  flex: none;
+  max-width: 82%;
+  padding: 0.7rem 0.95rem;
+  font-size: var(--step-0);
+  line-height: 1.45;
+  animation: msgIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.msg[data-from="me"] {
+  align-self: flex-end;
+  border-radius: 18px 18px 4px 18px;
+  background: var(--pink);
+  color: var(--ink-950);
+  transform-origin: 100% 100%;
+}
+
+.msg[data-from="them"] {
+  align-self: flex-start;
+  border-radius: 18px 18px 18px 4px;
+  background: #24242a;
+  transform-origin: 0 100%;
+}
+
+@keyframes msgIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.92);
+  }
+}
+
+/* Три точки «печатает» */
+.msg[data-typing] {
+  display: flex;
+  gap: 5px;
+  padding: 0.9rem 1rem;
+}
+
+.msg[data-typing] span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.6);
+  animation: dot 1s ease-in-out infinite;
+}
+
+.msg[data-typing] span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.msg[data-typing] span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes dot {
+  50% {
+    transform: translateY(-4px);
+    opacity: 0.4;
+  }
+}
+
+@media (max-width: 960px) {
+  .side,
+  .chat {
+    grid-column: 1 / -1;
+  }
+
+  .chat {
+    height: 30rem;
+  }
+
+  .chip {
+    font-size: var(--step--1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msg,
+  .msg[data-typing] span {
+    animation: none;
+  }
+}

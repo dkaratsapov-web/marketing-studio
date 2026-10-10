@@ -1,8 +1,11 @@
 "use client";
 
 import { forwardRef } from "react";
+import Image from "next/image";
 import { gsap } from "gsap";
+import adMain from "@/assets/target/ad-main.webp";
 import type { TARGET } from "@/content/target";
+import { SalonMark } from "./Marks";
 import styles from "./FeedScene.module.css";
 
 type Feed = (typeof TARGET)["feed"];
@@ -195,15 +198,19 @@ const FeedScene = forwardRef<HTMLDivElement, { feed: Feed }>(function FeedScene(
               ) : (
                 <article key="ad" className={styles.ad} data-part="ad">
                   <span className={styles.postHead}>
-                    <span className={`${styles.ava} ${styles.adAva}`} />
+                    <SalonMark className={`${styles.ava} ${styles.adAva}`} />
                     <span className={styles.adWho}>
                       {ad.who}
                       <span className={styles.adBadge}>{ad.badge}</span>
                     </span>
                   </span>
-                  <span className={styles.adPhoto}>
-                    <span>{ad.photo}</span>
-                  </span>
+                  <Image
+                    src={adMain}
+                    alt={ad.photo}
+                    className={styles.adPhoto}
+                    sizes="240px"
+                    priority
+                  />
                   <span className={styles.adTitle}>{ad.title}</span>
                   <span className={styles.adText}>{ad.text}</span>
                   <span className={styles.adCta} data-part="cta">

@@ -1,0 +1,361 @@
+/* Тёмный блок: слева смета списком, справа она же историями в телефоне */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 3rem;
+  align-items: center;
+}
+
+.text {
+  grid-column: 1 / span 6;
+  display: grid;
+  gap: clamp(1.25rem, 3vh, 2rem);
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--pink);
+}
+
+.lead {
+  max-width: 50ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.85rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.3s var(--ease-out);
+}
+
+.row:hover,
+.row[aria-current] {
+  color: var(--fg);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 2px;
+}
+
+.rowNo {
+  color: var(--pink);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+}
+
+.rowName {
+  font-size: var(--step-1);
+  line-height: 1.3;
+}
+
+.rowWhen {
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* Итоги: три значения в ряд, цена отдела крупнее */
+.totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem clamp(1.5rem, 3vw, 3rem);
+  margin: 0;
+}
+
+.total {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.total dt {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.total dd {
+  margin: 0;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.total:nth-child(2) dd {
+  color: var(--pink);
+}
+
+.cta {
+  justify-self: start;
+}
+
+/* Телефон с историями */
+.phone {
+  grid-column: 8 / span 4;
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+  margin: 0;
+}
+
+.story {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 23rem, calc(78svh * 9 / 16));
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  padding: 0.8rem 1.1rem 1.4rem;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 28px;
+  background:
+    radial-gradient(120% 70% at 100% 0%, rgb(255 77 157 / 0.55), transparent 60%),
+    radial-gradient(90% 60% at 0% 100%, rgb(209 0 106 / 0.5), transparent 65%),
+    #140910;
+  transition: background-color 0.6s var(--ease-out);
+}
+
+.story[data-slide="1"] {
+  background:
+    radial-gradient(110% 70% at 0% 0%, rgb(255 77 157 / 0.45), transparent 60%),
+    radial-gradient(90% 60% at 100% 100%, rgb(255 140 190 / 0.35), transparent 65%),
+    #12080e;
+}
+
+.story[data-slide="2"] {
+  background:
+    radial-gradient(120% 80% at 50% 110%, rgb(255 77 157 / 0.6), transparent 60%),
+    #0e0a0c;
+}
+
+.bars {
+  display: flex;
+  gap: 4px;
+}
+
+.barTrack {
+  flex: 1;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.3);
+}
+
+.barFill {
+  display: block;
+  height: 100%;
+  background: var(--white);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+.barFill[data-state="past"] {
+  transform: scaleX(1);
+}
+
+.barFill[data-state="now"] {
+  animation: fill linear both;
+}
+
+@keyframes fill {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.storyHead {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+  font-size: 0.8rem;
+}
+
+.storyAva {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--pink);
+  border-radius: 50%;
+  background: var(--ink-950);
+  font-weight: 700;
+}
+
+.storyWho {
+  font-weight: 650;
+}
+
+.storyWhen {
+  color: rgb(255 255 255 / 0.65);
+}
+
+/* Слайд: текст въезжает снизу с размытием, как новая история */
+.slide {
+  display: grid;
+  align-content: end;
+  gap: 1rem;
+  flex: 1;
+  animation: storyIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes storyIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(6px);
+  }
+}
+
+/* Крупный контурный номер заполняет верх истории */
+.ghost {
+  position: absolute;
+  top: 4.2rem;
+  left: 0.8rem;
+  color: transparent;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(8rem, 5rem + 6vw, 12rem);
+  font-weight: 650;
+  line-height: 0.8;
+  letter-spacing: -0.06em;
+  -webkit-text-stroke: 1.5px rgb(255 77 157 / 0.55);
+  pointer-events: none;
+  animation: ghostIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes ghostIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+}
+
+.slideNo {
+  color: var(--pink);
+  font-family: var(--ff-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+}
+
+.slideName {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(1.7rem, 1rem + 1.6vw, 2.5rem);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.slideText {
+  color: rgb(255 255 255 / 0.8);
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+/* Невидимые зоны касания: левая треть назад, правые две трети вперёд */
+.tap {
+  position: absolute;
+  top: 3.5rem;
+  bottom: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.tap[data-side="prev"] {
+  left: 0;
+  width: 33%;
+}
+
+.tap[data-side="next"] {
+  right: 0;
+  width: 67%;
+}
+
+.tap:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: -4px;
+  border-radius: 20px;
+}
+
+.hint {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+@media (max-width: 960px) {
+  .text,
+  .phone {
+    grid-column: 1 / -1;
+  }
+
+  /* История над списком: сначала видно, как смета листается */
+  .phone {
+    grid-row: 1;
+  }
+
+  .story {
+    width: min(100%, 20rem);
+  }
+
+  .rowWhen {
+    grid-column: 2;
+  }
+
+  .row {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: 0.2rem 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barFill[data-state="now"] {
+    animation: none;
+    transform: scaleX(1);
+  }
+
+  .slide,
+  .ghost {
+    animation: none;
+  }
+}

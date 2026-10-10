@@ -174,7 +174,7 @@
 }
 
 .adAva {
-  background: var(--pink);
+  background: none;
 }
 
 .adWho {
@@ -191,19 +191,12 @@
 }
 
 .adPhoto {
-  display: grid;
-  place-items: end start;
+  display: block;
+  width: 100%;
+  height: auto;
   aspect-ratio: 1 / 0.8;
-  padding: 8px;
+  object-fit: cover;
   border-radius: 8px;
-  background:
-    radial-gradient(circle at 30% 30%, rgb(255 255 255 / 0.35), transparent 40%),
-    linear-gradient(135deg, var(--pink), #b8005c);
-  color: rgb(255 255 255 / 0.85);
-  font-family: var(--ff-mono);
-  font-size: 0.55rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .adTitle {
