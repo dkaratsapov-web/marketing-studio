@@ -1,0 +1,180 @@
+/* Тёмный блок: ящик картотеки, вытянутая карточка с вопросом и ответом */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: end;
+}
+
+.title {
+  grid-column: 1 / span 4;
+  align-self: start;
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.drawer {
+  position: relative;
+  grid-column: 5 / -1;
+  display: grid;
+  padding: 0 1.5rem 1.5rem;
+}
+
+/* Язычки: торчат над карточками ступенькой, выбранный салатовый */
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
+  gap: 0.4rem;
+  position: relative;
+  z-index: 3;
+}
+
+.tab {
+  min-height: 2.75rem;
+  padding: 0.6rem 0.8rem;
+  border: 0;
+  border-radius: 10px 10px 0 0;
+  background: #24242a;
+  color: var(--muted);
+  font: inherit;
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transform: translateY(calc(var(--i) * 4px));
+  transition:
+    background-color 0.25s var(--ease-out),
+    color 0.25s var(--ease-out),
+    transform 0.35s var(--ease-out);
+}
+
+.tab:hover {
+  color: var(--fg);
+}
+
+.tab[aria-selected="true"] {
+  background: var(--lime);
+  color: var(--ink-950);
+  font-weight: 700;
+  transform: translateY(-6px);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 2px;
+}
+
+.cards {
+  position: relative;
+  display: grid;
+  min-height: 17rem;
+}
+
+/* Вытянутая карточка: бумага, линейки как у каталожной карточки */
+.card {
+  grid-area: 1 / 1;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  padding: 1.75rem 2rem 2rem;
+  border-radius: 0 0 12px 12px;
+  background:
+    linear-gradient(var(--pink) 0 0) 0 3.4rem / 100% 1.5px no-repeat,
+    repeating-linear-gradient(180deg, transparent 0 1.9rem, rgb(43 71 232 / 0.18) 1.9rem calc(1.9rem + 1px)) 0 3.6rem / 100% calc(100% - 3.6rem) no-repeat,
+    #f6f4ee;
+  color: var(--ink-950);
+  animation: pull 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.card[hidden] {
+  display: none;
+}
+
+@keyframes pull {
+  from {
+    transform: translateY(26px);
+    opacity: 0.4;
+  }
+}
+
+.q {
+  font-size: var(--step-2);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.a {
+  max-width: 60ch;
+  font-size: var(--step-0);
+  line-height: 1.9rem;
+}
+
+/* Края задних карточек выглядывают снизу */
+.back {
+  position: absolute;
+  left: calc(var(--k) * 6px);
+  right: calc(var(--k) * 6px);
+  bottom: calc(var(--k) * -8px);
+  height: 2rem;
+  z-index: calc(2 - var(--k));
+  border-radius: 0 0 12px 12px;
+  background: color-mix(in srgb, #f6f4ee, #050505 calc(var(--k) * 22%));
+}
+
+/* Ящик: передняя стенка поверх нижних краёв */
+.box {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3.2rem;
+  z-index: 4;
+  border-radius: 6px 6px 14px 14px;
+  background:
+    radial-gradient(ellipse 2.4rem 0.6rem at 50% 45%, #0b0b0d 60%, transparent 62%),
+    linear-gradient(180deg, #3a2f26, #2a221c);
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.08);
+}
+
+@media (max-width: 960px) {
+  .title,
+  .drawer {
+    grid-column: 1 / -1;
+  }
+
+  .drawer {
+    padding: 0 0.5rem 1.5rem;
+  }
+
+  .tab {
+    padding: 0.5rem 0.2rem;
+    font-size: 0.6rem;
+  }
+
+  .card {
+    padding: 1.25rem 1.25rem 2.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+  }
+
+  .tab {
+    transition: none;
+  }
+}

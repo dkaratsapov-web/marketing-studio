@@ -1,0 +1,182 @@
+/* Тёмный блок: циферблат двух недель с дугами запуска каналов */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 3rem;
+  align-items: center;
+}
+
+.head {
+  grid-column: 1 / span 5;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 44ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.legend {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend li {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  opacity: 0.35;
+  transition: opacity 0.4s var(--ease-out);
+}
+
+.legend li[data-on] {
+  opacity: 1;
+}
+
+.swatch {
+  width: 1rem;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--fg);
+}
+
+[data-tone="lime"] .swatch { background: var(--lime); }
+[data-tone="pink"] .swatch { background: var(--pink); }
+
+.legName {
+  font-size: var(--step-0);
+}
+
+.legDays {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+}
+
+.dial {
+  position: relative;
+  grid-column: 7 / -1;
+  justify-self: center;
+  width: min(100%, 36rem);
+  margin: 0;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.ring {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.07);
+  stroke-width: 13;
+}
+
+.tick {
+  stroke: rgb(255 255 255 / 0.3);
+  stroke-width: 2;
+}
+
+.tickText {
+  fill: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.arc {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 13;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+}
+
+.arc[data-tone="lime"] { stroke: var(--lime); }
+.arc[data-tone="pink"] { stroke: var(--pink); }
+
+.hand {
+  stroke: var(--fg);
+  stroke-width: 2;
+}
+
+.handTip {
+  fill: var(--lime);
+}
+
+.center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  justify-items: center;
+  translate: -50% -50%;
+}
+
+.centerLabel {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.centerNum {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-4);
+  font-weight: 650;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  margin-top: 1rem;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+@media (max-width: 960px) {
+  .head,
+  .dial {
+    grid-column: 1 / -1;
+  }
+
+  .dial {
+    order: -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .legend li {
+    transition: none;
+  }
+}

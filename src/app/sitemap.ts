@@ -6,6 +6,7 @@ export const dynamic = "force-static";
 /** Карта сайта: все публичные страницы. Новую страницу добавляйте сюда же */
 const PAGES: { path: string; priority: number; changeFrequency: "weekly" | "monthly" }[] = [
   { path: "/", priority: 1, changeFrequency: "weekly" },
+  { path: "/uslugi/marketing-pod-klyuch/", priority: 0.95, changeFrequency: "monthly" },
   { path: "/uslugi/kontekstnaya-reklama/", priority: 0.9, changeFrequency: "monthly" },
   { path: "/uslugi/targetirovannaya-reklama/", priority: 0.9, changeFrequency: "monthly" },
   { path: "/uslugi/karty-i-geoservisy/", priority: 0.9, changeFrequency: "monthly" },

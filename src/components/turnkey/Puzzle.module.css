@@ -1,0 +1,151 @@
+/* Тёмный блок: пазл из шести частей маркетинга «Сферы» */
+.section {
+  padding-block: var(--section-y);
+  overflow-x: clip;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 3rem;
+  align-items: center;
+}
+
+.head {
+  grid-column: 1 / span 5;
+  display: grid;
+  gap: 1.25rem;
+  justify-items: start;
+}
+
+.code {
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 44ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2.5rem;
+  margin: 0;
+}
+
+.metrics div {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 0.2rem;
+}
+
+.metrics dt {
+  max-width: 14ch;
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.metrics dd {
+  margin: 0;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-3);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+
+.more {
+  font-weight: 600;
+  border-bottom: 1.5px solid currentColor;
+}
+
+.more:hover {
+  color: var(--lime);
+}
+
+.board {
+  grid-column: 7 / -1;
+  margin: 0;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* Рамка вокруг собранного пазла: загорается, когда все детали на местах */
+.frame {
+  fill: none;
+  stroke: var(--lime);
+  stroke-width: 3;
+  stroke-dasharray: 12 10;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out);
+}
+
+.board[data-done] .frame {
+  opacity: 1;
+}
+
+.piece {
+  fill: #1c1c21;
+  stroke: #050505;
+  stroke-width: 3;
+  transition: fill 0.5s var(--ease-out);
+}
+
+.piece[data-i="0"],
+.piece[data-i="4"] {
+  fill: #2a2a30;
+}
+
+.piece[data-i="2"] {
+  fill: #23231f;
+}
+
+.board[data-done] .piece[data-i="1"] {
+  fill: var(--lime);
+}
+
+.label {
+  fill: var(--fg);
+  font-family: var(--ff-display);
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+.board[data-done] [data-piece]:nth-child(3) .label {
+  fill: var(--ink-950);
+}
+
+@media (max-width: 960px) {
+  .head,
+  .board {
+    grid-column: 1 / -1;
+  }
+}

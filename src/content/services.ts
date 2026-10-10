@@ -218,6 +218,7 @@ export const CONTEXT = {
 
 /** Меню «Отделы» в шапке: готовые страницы ведут на себя, остальные пока помечены «скоро» */
 export const SERVICE_MENU: { name: string; note: string; href: string | null }[] = [
+  { name: "Маркетинг под ключ", note: "Все каналы одной командой", href: "/uslugi/marketing-pod-klyuch/" },
   { name: "Контекстная реклама", note: "Яндекс Директ и Google Ads", href: `/uslugi/${CONTEXT.slug}/` },
   { name: "Таргетированная реклама", note: "VK Ads, Telegram Ads, Avito Ads", href: "/uslugi/targetirovannaya-reklama/" },
   { name: "Карты и геосервисы", note: "Яндекс Карты, 2ГИС, Яндекс Бизнес", href: "/uslugi/karty-i-geoservisy/" },
