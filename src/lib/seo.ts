@@ -59,6 +59,12 @@ export const ORGANIZATION = {
   founder: { "@type": "Person", name: "Даниил Карацапов" },
   foundingDate: "2019",
   areaServed: { "@type": "Country", name: "Россия" },
+  openingHoursSpecification: {
+    "@type": "OpeningHoursSpecification",
+    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    opens: "10:00",
+    closes: "21:00",
+  },
   sameAs: [TELEGRAM.href],
   contactPoint: PHONES.map((p) => ({
     "@type": "ContactPoint",
@@ -66,6 +72,7 @@ export const ORGANIZATION = {
     contactType: "sales",
     areaServed: "RU",
     availableLanguage: "Russian",
+    hoursAvailable: { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], opens: "10:00", closes: "21:00" },
   })),
 };
 

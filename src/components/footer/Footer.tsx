@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { PHONES, TELEGRAM } from "@/content/contacts";
+import { HOURS, PHONES, TELEGRAM } from "@/content/contacts";
 import { QUOTE } from "@/components/Logo";
 import HomeLink from "@/components/HomeLink";
 import styles from "./Footer.module.css";
@@ -64,7 +64,7 @@ export default function Footer() {
     <footer ref={root} className={styles.footer} data-surface="dark">
       <div className={`wrap ${styles.top}`}>
         <div className={styles.col}>
-          <p className="label">Позвонить</p>
+          <p className="label">Позвонить · {HOURS}</p>
           {PHONES.map((p) => (
             <a key={p.href} href={p.href} className={styles.big}>
               {p.display}

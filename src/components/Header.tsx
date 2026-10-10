@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "./Logo";
-import { PHONES, TELEGRAM } from "@/content/contacts";
+import { HOURS, PHONES, TELEGRAM } from "@/content/contacts";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import HomeLink from "@/components/HomeLink";
@@ -151,6 +151,7 @@ export default function Header() {
               {p.display}
             </a>
           ))}
+          <span className={styles.hours}>{HOURS}</span>
         </div>
 
         <a
@@ -209,6 +210,7 @@ export default function Header() {
               {p.display}
             </a>
           ))}
+          <span className={styles.sheetHours}>{HOURS}</span>
           <a
             href={TELEGRAM.href}
             target="_blank"
