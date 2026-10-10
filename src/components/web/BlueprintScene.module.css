@@ -1,0 +1,189 @@
+/* Окно браузера первого экрана: снимок сайта и прототип поверх, линия скана сверху вниз */
+.scene {
+  --scan: 0%;
+  position: relative;
+  width: min(100%, 52rem, calc((100svh - 14rem) * 1.52));
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #1b1b1f;
+  box-shadow: 0 50px 100px -50px rgb(0 0 0 / 0.9);
+}
+
+.chrome {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.6rem 0.8rem;
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3a3a40;
+}
+
+.url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  background: #26262b;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Этап: «Прототип», пока линия выше середины, потом «Готовый сайт» */
+.stage {
+  display: grid;
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.stage span {
+  grid-area: 1 / 1;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  text-align: center;
+  transition: opacity 0.3s var(--ease-out);
+}
+
+.stage [data-v="wire"] {
+  background: #2b47e8;
+  color: var(--white);
+}
+
+.stage [data-v="live"] {
+  background: var(--lime);
+  color: var(--ink-950);
+  opacity: 0;
+}
+
+.scene[data-live] .stage [data-v="wire"] {
+  opacity: 0;
+}
+
+.scene[data-live] .stage [data-v="live"] {
+  opacity: 1;
+}
+
+/* На снимке уже есть своя рамка браузера: окно показывает его без верхних 50 px */
+.view {
+  position: relative;
+  aspect-ratio: 1600 / 1003;
+  overflow: hidden;
+}
+
+.wire {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.shot {
+  position: absolute;
+  left: 0;
+  top: calc(-50 / 1003 * 100%);
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Прототип виден только ниже линии скана */
+.wire {
+  clip-path: inset(var(--scan) 0 0 0);
+}
+
+.scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--scan);
+  height: 2px;
+  margin-top: -1px;
+  background: var(--lime);
+  box-shadow: 0 0 18px 4px rgb(196 245 66 / 0.55);
+}
+
+.label {
+  position: absolute;
+  translate: -50% -50%;
+  padding: 0.3rem 0.6rem;
+  border: 1.5px solid #2b47e8;
+  border-radius: 6px;
+  background: var(--white);
+  color: #2b47e8;
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  white-space: nowrap;
+  visibility: hidden;
+}
+
+/* Уведомление о заявке: всплывает снизу справа */
+.toast {
+  position: absolute;
+  right: 4%;
+  bottom: 6%;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  background: var(--ink-950);
+  color: var(--white);
+  box-shadow: 0 20px 40px -10px rgb(0 0 0 / 0.6);
+  visibility: hidden;
+}
+
+.toastDot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--lime);
+  box-shadow: 0 0 0 4px rgb(196 245 66 / 0.25);
+}
+
+.toastBody {
+  display: grid;
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+
+.toastBody span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+@media (max-width: 520px) {
+  .stage {
+    display: none;
+  }
+
+  .label {
+    font-size: 0.56rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .toast {
+    padding: 0.5rem 0.7rem;
+  }
+
+  .toastBody {
+    font-size: 0.7rem;
+  }
+}

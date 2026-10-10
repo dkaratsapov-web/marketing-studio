@@ -1,0 +1,178 @@
+/* Светлый блок: доска с колонками «Вопрос» и «Ответ» */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+}
+
+.head {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--accent);
+}
+
+.hint {
+  max-width: 30ch;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.board {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: var(--gutter);
+  align-items: start;
+}
+
+.col {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: #f1f1f3;
+}
+
+.col[data-done] {
+  background: var(--ink-950);
+}
+
+.colName {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0.4rem;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.col[data-done] .colName {
+  color: var(--lime);
+}
+
+.cards {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgb(5 5 5 / 0.08);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--ink-950);
+  font: inherit;
+  text-align: left;
+  box-shadow: 0 6px 14px -10px rgb(5 5 5 / 0.35);
+}
+
+button.card {
+  cursor: pointer;
+  transition:
+    transform 0.2s var(--ease-out),
+    box-shadow 0.2s var(--ease-out);
+}
+
+button.card:hover {
+  transform: translateY(-2px) rotate(-0.5deg);
+  box-shadow: 0 14px 24px -14px rgb(5 5 5 / 0.45);
+}
+
+button.card:active {
+  transform: translateY(1px);
+}
+
+button.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.tag {
+  justify-self: start;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background: #e8ffd0;
+  color: #3b5b00;
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.q {
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+/* Открытая карточка: крупнее, с ответом */
+.open {
+  gap: 0.9rem;
+  padding: 1.5rem;
+}
+
+.open .q {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.a {
+  color: #4f4f56;
+  font-size: var(--step-0);
+  line-height: 1.6;
+  animation: aIn 0.5s var(--ease-out) 0.35s both;
+}
+
+@keyframes aIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (max-width: 960px) {
+  .board {
+    grid-template-columns: 1fr;
+  }
+
+  .col[data-done] {
+    order: -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .a {
+    animation: none;
+  }
+}

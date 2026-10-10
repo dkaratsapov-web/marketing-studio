@@ -9,6 +9,7 @@ const PAGES: { path: string; priority: number; changeFrequency: "weekly" | "mont
   { path: "/uslugi/kontekstnaya-reklama/", priority: 0.9, changeFrequency: "monthly" },
   { path: "/uslugi/targetirovannaya-reklama/", priority: 0.9, changeFrequency: "monthly" },
   { path: "/uslugi/karty-i-geoservisy/", priority: 0.9, changeFrequency: "monthly" },
+  { path: "/uslugi/razrabotka-sajtov/", priority: 0.9, changeFrequency: "monthly" },
   { path: "/kejsy/sfera/", priority: 0.7, changeFrequency: "monthly" },
 ];
 

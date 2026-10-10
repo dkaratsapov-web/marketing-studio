@@ -1,0 +1,180 @@
+/* Светлый блок: веер страниц сайта «Сферы» и дело 014 */
+.section {
+  padding-block: var(--section-y);
+  overflow-x: clip;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: start;
+}
+
+.title {
+  grid-column: 1 / -1;
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--accent);
+}
+
+.text,
+.pack {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.text {
+  grid-column: 1 / span 4;
+}
+
+.pack {
+  grid-column: 1 / span 4;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.code {
+  color: var(--accent);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.body {
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2.5rem;
+  margin: 0;
+}
+
+.metrics div {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 0.2rem;
+}
+
+.metrics dt {
+  max-width: 16ch;
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.metrics dd {
+  margin: 0;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-3);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+
+.more {
+  justify-self: start;
+  font-weight: 600;
+  border-bottom: 1.5px solid currentColor;
+}
+
+.more:hover {
+  color: var(--accent);
+}
+
+/* Веер: страницы в одной клетке, верхняя ровно, нижние с поворотом и сдвигом */
+.fan {
+  grid-column: 6 / -1;
+  grid-row: 2 / span 2;
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 1.5rem 2rem 0 0;
+}
+
+.deck {
+  display: grid;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.deck:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 8px;
+  border-radius: 12px;
+}
+
+.page {
+  grid-area: 1 / 1;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: 0 30px 60px -30px rgb(5 5 5 / 0.45), 0 0 0 1px rgb(5 5 5 / 0.08);
+  transform-origin: 30% 100%;
+  transition:
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.5s var(--ease-out);
+}
+
+.page[data-pos="1"] { transform: translate(3%, -3%) rotate(3deg) scale(0.97); }
+.page[data-pos="2"] { transform: translate(6%, -6%) rotate(6deg) scale(0.94); }
+.page[data-pos="3"] { transform: translate(8%, -8%) rotate(8deg) scale(0.91); opacity: 0.7; }
+.page[data-pos="4"] { transform: translate(8%, -8%) rotate(8deg) scale(0.9); opacity: 0; }
+
+.deck:hover .page[data-pos="0"] {
+  transform: translateY(-1%) rotate(-1deg);
+}
+
+.shot {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.caption {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+}
+
+.pageName {
+  font-weight: 500;
+}
+
+.counter {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 960px) {
+  .text,
+  .pack,
+  .fan {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .fan {
+    padding-right: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page {
+    transition: none;
+  }
+}
