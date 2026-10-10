@@ -124,8 +124,12 @@
   letter-spacing: 0.04em;
 }
 
+/* Список едет рядом со снимком, пока пояснения перещёлкиваются прокруткой */
 .list {
   grid-column: 9 / -1;
+  position: sticky;
+  top: 7rem;
+  align-self: start;
   display: grid;
   gap: 0.4rem;
   margin: 0;
@@ -203,6 +207,10 @@
   .frame,
   .list {
     grid-column: 1 / -1;
+  }
+
+  .list {
+    position: static;
   }
 
   /* На телефоне пояснение только в списке: над снимком оно закрыло бы цифры */

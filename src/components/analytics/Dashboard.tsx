@@ -14,8 +14,9 @@ type Data = (typeof ANALYTICS)["dashboard"];
 
 /**
  * «Один экран для собственника». Настоящий дашборд «Сферы» целиком, без обрезки,
- * с пронумерованными метками поверх. Метки появляются по очереди, нажатая раскрывает
- * пояснение, тот же текст в списке рядом. Список — кнопки, им можно пройти с клавиатуры.
+ * с пронумерованными метками поверх. Пока блок прокручивается, пояснения перещёлкиваются
+ * сами: прогресс прокрутки через снимок делится на пять отрезков, на каждом своя метка.
+ * Метку можно выбрать и нажатием, в том числе с клавиатуры через список рядом.
  */
 export default function Dashboard({ data }: { data: Data }) {
   const root = useRef<HTMLElement>(null);
@@ -28,8 +29,23 @@ export default function Dashboard({ data }: { data: Data }) {
       const tl = gsap.timeline({ paused: true });
       tl.from(q(`.${styles.spot}`), { scale: 0, autoAlpha: 0, duration: 0.45, ease: "back.out(2.2)", stagger: 0.15 });
       ScrollTrigger.create({ trigger: q(`.${styles.frame}`)[0], start: "top 70%", once: true, onEnter: () => tl.play() });
+      // Метка по прокрутке: смена только при переходе в новый отрезок, нажатие до него не перебивается
+      const n = data.spots.length;
+      let last = -1;
+      ScrollTrigger.create({
+        trigger: q(`.${styles.frame}`)[0],
+        start: "top 75%",
+        end: "bottom 25%",
+        onUpdate: (self) => {
+          const i = Math.min(n - 1, Math.floor(self.progress * n));
+          if (i !== last) {
+            last = i;
+            setOpen(i);
+          }
+        },
+      });
     },
-    { scope: root },
+    { scope: root, dependencies: [data.spots.length] },
   );
 
   const s = data.spots[open];
