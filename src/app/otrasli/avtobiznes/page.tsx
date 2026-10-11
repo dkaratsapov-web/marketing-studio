@@ -5,6 +5,8 @@ import Seam from "@/components/seam/Seam";
 import JsonLd from "@/components/JsonLd";
 import AvtoHero from "@/components/avto/AvtoHero";
 import Inspection from "@/components/avto/Inspection";
+import Showroom from "@/components/avto/Showroom";
+import DealViews from "@/components/avto/DealViews";
 import RoadTrip from "@/components/avto/RoadTrip";
 import RegDoc from "@/components/avto/RegDoc";
 import WindowSticker from "@/components/avto/WindowSticker";
@@ -15,7 +17,7 @@ import { AVTO } from "@/content/avtobiznes";
 
 const TITLE = "Маркетинг для автобизнеса и импорта авто | Корпорация";
 const DESCRIPTION =
-  "Каталог авто на автопилоте, фиды в Директ, Яндекс Бизнес и 2ГИС, Telegram-бот и CRM для автосалонов и импортёров. В деле 023: 284 авто без ручного ввода, 5 547 визитов за 90 дней.";
+  "Каталог авто на автопилоте, фиды в Директ, Яндекс Бизнес и 2ГИС, Telegram-бот и CRM с воронкой под импорт и ссылкой для клиента. В деле 023: 284 авто без ручного ввода, 5 547 визитов за 90 дней.";
 const PATH = "/otrasli/avtobiznes/";
 
 export const metadata: Metadata = pageMeta({ title: TITLE, description: DESCRIPTION, path: PATH, og: "avto" });
@@ -42,6 +44,10 @@ export default function AvtoPage() {
         <AvtoHero data={AVTO} />
         <Seam from="dark" to="light" label="Осмотр" />
         <Inspection data={AVTO.inspect} />
+        <Seam from="light" to="dark" label="Шоурум" />
+        <Showroom data={AVTO.showroom} />
+        <Seam from="dark" to="light" label="CRM" />
+        <DealViews data={AVTO.crm} />
         <Seam from="light" to="dark" label="Маршрут" />
         <RoadTrip data={AVTO.route} />
         <Seam from="dark" to="light" label="Дело 023" />
