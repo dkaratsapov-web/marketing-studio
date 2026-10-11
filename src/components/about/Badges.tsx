@@ -47,7 +47,7 @@ export default function Badges({ data }: { data: Data }) {
     const el = e.currentTarget;
     const dir = e.pointerType === "mouse" ? Math.sign(e.movementX) || 1 : Math.random() > 0.5 ? 1 : -1;
     const power = e.pointerType === "mouse" ? Math.min(Math.abs(e.movementX) * 0.9 + 4, 13) : 9;
-    gsap.fromTo(el, { rotate: dir * power }, { rotate: 0, duration: 2.2, ease: "elastic.out(1.1, 0.2)", overwrite: true });
+    gsap.fromTo(el, { rotate: dir * power }, { rotate: 0, duration: 2.2, ease: "elastic.out(1.1, 0.2)", overwrite: "auto" });
   };
 
   return (

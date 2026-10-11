@@ -118,8 +118,21 @@
   position: relative;
   display: inline-block;
   overflow: hidden;
+  white-space: nowrap;
   font-size: 0.95rem;
   line-height: 1.3;
+}
+
+/* «Отрасли» — кнопка, выглядит как ссылка */
+.linkButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  cursor: pointer;
 }
 
 /* Текст уезжает вверх, снизу приходит копия */
@@ -144,9 +157,11 @@
 .navItem {
   position: relative;
   display: inline-flex;
+  flex: none;
 }
 
 .chevron {
+  display: inline-block;
   width: 0.6rem;
   height: 0.4rem;
   margin-left: 0.35rem;
@@ -460,7 +475,8 @@ a.menuLink:hover .menuArrow {
   }
 }
 
-@media (max-width: 860px) {
+/* Ниже этой ширины пункты меню не помещаются: шапка переходит на бургер */
+@media (max-width: 1060px) {
   .nav,
   .cta {
     display: none;

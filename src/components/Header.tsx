@@ -12,6 +12,7 @@ import styles from "./Header.module.css";
 const NAV = [
   { href: "#dossier", label: "Досье" },
   { href: "#departments", label: "Отделы" },
+  { href: "#industries", label: "Отрасли" },
   { href: "#protocol", label: "Протокол" },
   { href: "#contract", label: "Контракт" },
 ];
@@ -130,6 +131,23 @@ export default function Header() {
                       </li>
                     ))}
                   </ul>
+                  <HomeLink hash="#departments" className={styles.menuAll}>
+                    Все отделы на главной
+                  </HomeLink>
+                </div>
+              </div>
+            ) : item.href === "#industries" ? (
+              // «Отрасли» — кнопка без своей страницы: раскрывает меню отраслевых решений
+              <div key={item.href} className={styles.navItem}>
+                <button type="button" className={`${styles.link} ${styles.linkButton}`} aria-haspopup="true">
+                  <span className={styles.linkText} data-text={item.label}>
+                    {item.label}
+                  </span>
+                  <svg className={styles.chevron} viewBox="0 0 10 6" aria-hidden="true">
+                    <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.4" />
+                  </svg>
+                </button>
+                <div className={styles.menu} data-surface="dark">
                   <p className={`label ${styles.menuLabel}`}>Отраслевые решения</p>
                   <ul className={styles.menuList}>
                     {INDUSTRY_MENU.filter((s) => s.href).map((s) => (
@@ -148,9 +166,6 @@ export default function Header() {
                       </li>
                     ))}
                   </ul>
-                  <HomeLink hash="#departments" className={styles.menuAll}>
-                    Все отделы на главной
-                  </HomeLink>
                 </div>
               </div>
             ) : (
@@ -206,25 +221,27 @@ export default function Header() {
 
       <div id="mobile-nav" className={styles.sheet} hidden={!open}>
         <nav className={styles.sheetNav} aria-label="Мобильная навигация">
-          {NAV.map((item) => (
-            <div key={item.href} className={styles.sheetItem}>
-              <HomeLink hash={item.href} className={styles.sheetLink} onClick={() => setOpen(false)}>
-                {item.label}
-              </HomeLink>
-              {item.href === "#departments"
-                ? [...SERVICE_MENU, ...INDUSTRY_MENU].filter((s) => s.href).map((s) => (
-                    <Link
-                      key={s.name}
-                      href={s.href!}
-                      className={styles.sheetSub}
-                      onClick={() => setOpen(false)}
-                    >
+          {NAV.map((item) => {
+            const subs = item.href === "#departments" ? SERVICE_MENU : item.href === "#industries" ? INDUSTRY_MENU : [];
+            return (
+              <div key={item.href} className={styles.sheetItem}>
+                {item.href === "#industries" ? (
+                  <span className={styles.sheetLink}>{item.label}</span>
+                ) : (
+                  <HomeLink hash={item.href} className={styles.sheetLink} onClick={() => setOpen(false)}>
+                    {item.label}
+                  </HomeLink>
+                )}
+                {subs
+                  .filter((s) => s.href)
+                  .map((s) => (
+                    <Link key={s.name} href={s.href!} className={styles.sheetSub} onClick={() => setOpen(false)}>
                       {s.name} →
                     </Link>
-                  ))
-                : null}
-            </div>
-          ))}
+                  ))}
+              </div>
+            );
+          })}
           <div className={styles.sheetItem}>
             <Link href="/o-nas/" className={styles.sheetLink} onClick={() => setOpen(false)}>
               О нас
