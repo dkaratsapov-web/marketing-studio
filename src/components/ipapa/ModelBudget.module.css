@@ -1,0 +1,235 @@
+/* Светлый блок: слева тезис и шаги, справа сетка кампаний по моделям с полосами бюджета */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: center;
+}
+
+.copy {
+  grid-column: 1 / span 5;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.kicker {
+  color: var(--pink-deep);
+}
+
+.title {
+  font-size: clamp(2.4rem, 1.1rem + 4vw, 5.6rem);
+  line-height: 0.94;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.dotMark {
+  color: var(--pink-deep);
+}
+
+.lead {
+  max-width: 44ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Шаги загораются в такт проверке */
+.steps {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--muted);
+  font-size: var(--step-0);
+  transition: color 0.3s var(--ease-out);
+}
+
+.steps span {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  transition:
+    background-color 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out);
+}
+
+.steps li[data-on] {
+  color: var(--fg);
+}
+
+.steps li[data-on] span {
+  border-color: var(--ink-950);
+  background: var(--ink-950);
+  color: var(--lime);
+}
+
+.result {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.5rem 0 0;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  background: var(--ink-950);
+  color: rgb(255 255 255 / 0.7);
+  font-size: var(--step--1);
+}
+
+.result b {
+  color: var(--lime);
+  font-family: var(--ff-display);
+  font-size: clamp(2.6rem, 1.6rem + 3vw, 4.2rem);
+  font-weight: 650;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+}
+
+/* Табло кампаний */
+.board {
+  position: relative;
+  grid-column: 7 / -1;
+  margin: 0;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  background: var(--bg-raised);
+}
+
+.cells {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Ячейка кампании: имя, полоса бюджета и статус; --b доля бюджета от 0 до 1 */
+.cell {
+  --b: 0.5;
+  display: grid;
+  align-content: space-between;
+  gap: 0.6rem;
+  min-height: 7.2rem;
+  padding: 0.75rem;
+  border: 1px solid rgb(5 5 5 / 0.08);
+  border-radius: 0.75rem;
+  background: var(--white);
+  transition:
+    opacity 0.4s var(--ease-out),
+    border-color 0.3s var(--ease-out);
+}
+
+.name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.bar {
+  display: block;
+  height: 0.5rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ececee;
+}
+
+.bar i {
+  display: block;
+  width: calc(var(--b) * 100%);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ink-950);
+}
+
+.status {
+  justify-self: start;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  opacity: 0;
+  transition: opacity 0.25s var(--ease-out);
+}
+
+.cell[data-state="ok"] {
+  border-color: var(--ink-950);
+}
+
+.cell[data-state="ok"] .bar i {
+  background: var(--lime);
+  box-shadow: inset 0 0 0 1px rgb(5 5 5 / 0.25);
+}
+
+.cell[data-state="ok"] .status {
+  background: var(--lime);
+  opacity: 1;
+}
+
+.cell[data-state="check-off"] {
+  border-color: var(--pink-deep);
+}
+
+.cell[data-state="off"] {
+  opacity: 0.45;
+}
+
+.cell[data-state="check-off"] .status,
+.cell[data-state="off"] .status {
+  background: rgb(209 0 106 / 0.12);
+  color: var(--pink-deep);
+  opacity: 1;
+}
+
+/* Линия проверки окупаемости проходит сетку сверху вниз */
+.scan {
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  height: 2px;
+  background: var(--pink-deep);
+  box-shadow: 0 0 18px 4px rgb(209 0 106 / 0.35);
+  pointer-events: none;
+}
+
+.note {
+  margin-top: 0.9rem;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 960px) {
+  .copy,
+  .board {
+    grid-column: 1 / -1;
+  }
+
+  .cells {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .cells {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

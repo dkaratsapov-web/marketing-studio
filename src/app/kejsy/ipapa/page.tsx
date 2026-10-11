@@ -10,6 +10,8 @@ import AppGallery from "@/components/ipapa/AppGallery";
 import TradeIn from "@/components/ipapa/TradeIn";
 import SyncPipe from "@/components/ipapa/SyncPipe";
 import PriceTags from "@/components/ipapa/PriceTags";
+import SerpIntent from "@/components/ipapa/SerpIntent";
+import ModelBudget from "@/components/ipapa/ModelBudget";
 import { IPAPA } from "@/content/ipapa";
 import { absoluteUrl, breadcrumbs, ORG_ID, pageMeta } from "@/lib/seo";
 
@@ -64,6 +66,10 @@ export default function IpapaCasePage() {
         <TradeIn data={IPAPA.tradein} />
         <Seam from="dark" to="light" label="Автоматизация" />
         <SyncPipe data={IPAPA.sync} />
+        <Seam from="light" to="dark" label="Яндекс Директ" />
+        <SerpIntent data={IPAPA.serp} />
+        <Seam from="dark" to="light" label="Бюджет по моделям" />
+        <ModelBudget data={IPAPA.models} />
         <Seam from="light" to="dark" label="Результат" />
         <PriceTags data={IPAPA.result} client={IPAPA.client} others={OTHERS} />
       </main>
