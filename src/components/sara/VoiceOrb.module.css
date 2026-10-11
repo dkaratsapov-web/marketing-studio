@@ -1,0 +1,11 @@
+/* Холст сферы голоса: квадрат, стоит фоном под расшифровкой и карточкой */
+.host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.canvas {
+  position: absolute !important;
+  inset: 0;
+}
