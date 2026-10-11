@@ -107,6 +107,11 @@
   white-space: nowrap;
 }
 
+/* Длинное значение мельче, чтобы не вылезало за край ценника */
+.tag[data-long] b {
+  font-size: clamp(1.6rem, 1.1rem + 1.3vw, 2.4rem);
+}
+
 .tag span {
   font-size: var(--step--1);
   font-weight: 500;

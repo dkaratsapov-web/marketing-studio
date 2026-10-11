@@ -62,7 +62,7 @@ export default function PriceTags({ data, client, others }: { data: Data; client
         <ul className={styles.rack} data-rack>
           {data.tags.map((t) => (
             <li key={t.label} className={styles.slot}>
-              <div className={styles.tag} data-tag>
+              <div className={styles.tag} data-tag data-long={t.value.length > 6 || undefined}>
                 <span className={styles.hole} aria-hidden="true" />
                 <b>{t.value}</b>
                 <span>{t.label}</span>
