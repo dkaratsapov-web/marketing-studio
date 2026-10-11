@@ -1,0 +1,15 @@
+/* Холст здания сайта на доске «Карты спроса» */
+.host {
+  position: relative;
+}
+
+.canvas {
+  width: 100% !important;
+  height: clamp(18rem, 46vh, 30rem) !important;
+}
+
+@media (max-width: 960px) {
+  .canvas {
+    height: clamp(16rem, 70vw, 24rem) !important;
+  }
+}

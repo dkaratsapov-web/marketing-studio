@@ -1,34 +1,34 @@
 "use client";
 
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import type { SFERA } from "@/content/sfera";
 import { CINEMATIC_MQ } from "@/components/service/SearchScene";
+import { buildState } from "./buildState";
 import styles from "./SiteMap.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 type Props = { map: (typeof SFERA)["map"] };
 
-const COLS = 12;
+const SiteBuilding = dynamic(() => import("./SiteBuilding"), { ssr: false });
 
 /**
- * «Карта спроса». Каждая точка — страница сайта, 121 штука в сетке 12 колонок.
- * По скроллу кластеры загораются по очереди (легенда слева загорается вместе с ними, счётчик растёт),
- * затем первые два ряда соединяются: 12 страниц проектирования и 12 парных страниц разрешений.
+ * «Карта спроса» как здание: каждая страница сайта — модуль, 121 штука. По скроллу сначала
+ * прорисовывается чертёж объёма, затем кластеры застраиваются этаж за этажом (легенда слева
+ * загорается вместе с ними, счётчик растёт). Первый этаж — пары: спереди 12 страниц
+ * проектирования, сзади 12 парных разрешений. Пустые ячейки наверху остаются чертежом.
  * На десктопе сцена закреплена, на телефоне идёт в такт обычной прокрутке.
  * Ниже пара на примере склада: два снимка и запросы, которые их разводят.
  */
 export default function SiteMap({ map }: Props) {
   const root = useRef<HTMLElement>(null);
 
-  // Номер кластера для каждой точки по порядку раскладки
-  const dots = map.clusters.flatMap((c, ci) =>
-    Array.from({ length: c.count }, () => ci),
-  );
+  const counts = map.clusters.map((c) => c.count);
 
   useGSAP(
     () => {
@@ -37,12 +37,10 @@ export default function SiteMap({ map }: Props) {
         "(prefers-reduced-motion: reduce)",
       ).matches;
       const stage = section.querySelector<HTMLElement>(`.${styles.stage}`)!;
-      const all = [...section.querySelectorAll<HTMLElement>(`.${styles.dot}`)];
       const legend = [
         ...section.querySelectorAll<HTMLElement>(`.${styles.item}`),
       ];
       const counter = section.querySelector<HTMLElement>("[data-counter]")!;
-      const links = section.querySelectorAll(`.${styles.link}`);
       const note = section.querySelector(`.${styles.pairNote}`);
 
       if (!reduce) {
@@ -69,62 +67,41 @@ export default function SiteMap({ map }: Props) {
                     scrub: 0.6,
                   },
             });
-            // Явный стартовый кадр: при пересчёте ScrollTrigger отматывает таймлайн к нему
-            gsap.set(all, { scale: 0.45, opacity: 0.18 });
+            // Сначала чертёж здания, затем кластеры застраиваются по очереди, в конце пары
             gsap.set(legend, { opacity: 0.3 });
-            let at = 0.1;
+            const drawEnd = 0.8;
+            let at = drawEnd + 0.1;
+            const windows: [number, number][] = [];
             map.clusters.forEach((c, ci) => {
-              const group = all.filter((d) => Number(d.dataset.c) === ci);
               const dur = 0.35 + c.count * 0.012;
-              tl.to(
-                group,
-                {
-                  scale: 1,
-                  opacity: 1,
-                  duration: dur,
-                  stagger: { amount: dur * 0.8 },
-                },
-                at,
-              ).fromTo(
-                legend[ci],
-                { opacity: 0.3 },
-                { opacity: 1, duration: 0.2 },
-                at,
-              );
+              windows.push([at, at + dur]);
+              tl.fromTo(legend[ci], { opacity: 0.3 }, { opacity: 1, duration: 0.2 }, at);
               at += dur + 0.15;
             });
-            tl.to(
-              shown,
-              {
-                n: map.total,
-                duration: at,
-                ease: "none",
-                onUpdate: () => {
-                  counter.textContent = String(Math.round(shown.n));
-                },
-              },
-              0,
-            )
+            const pairAt = at;
+            const total = pairAt + 0.7;
+            buildState.drawEnd = drawEnd / total;
+            buildState.windows = windows.map(([a, b]) => [a / total, b / total]);
+            buildState.pairAt = pairAt / total;
+            const build = { p: 0 };
+            tl.to(build, { p: 1, duration: total, ease: "none", onUpdate: () => void (buildState.progress = build.p) }, 0)
               .fromTo(
-                links,
-                { scaleY: 0 },
+                shown,
+                { n: 0 },
                 {
-                  scaleY: 1,
-                  duration: 0.5,
-                  stagger: 0.04,
-                  ease: "power2.inOut",
+                  n: map.total,
+                  duration: pairAt - drawEnd - 0.1,
+                  ease: "none",
+                  onUpdate: () => {
+                    counter.textContent = String(Math.round(shown.n));
+                  },
                 },
-                at,
+                drawEnd + 0.1,
               )
-              .fromTo(
-                note,
-                { autoAlpha: 0, y: 10 },
-                { autoAlpha: 1, y: 0, duration: 0.3 },
-                ">-0.1",
-              )
-              .to({}, { duration: 0.3 });
+              .fromTo(note, { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.3 }, pairAt);
             return () => {
               counter.textContent = String(map.total);
+              buildState.progress = 1;
             };
           },
         );
@@ -208,19 +185,7 @@ export default function SiteMap({ map }: Props) {
                 <span className={styles.totalLabel}>страница</span>
               </span>
             </figcaption>
-            <div className={styles.dots} aria-hidden="true">
-              <div className={styles.dotGrid}>
-                {dots.map((ci, i) => (
-                  <span key={i} className={styles.dot} data-c={ci} />
-                ))}
-              </div>
-              {/* Связки пар: между первым рядом (проектирование) и вторым (разрешения) */}
-              <div className={styles.links}>
-                {Array.from({ length: COLS }, (_, i) => (
-                  <span key={i} className={styles.link} />
-                ))}
-              </div>
-            </div>
+            <SiteBuilding counts={counts} />
             <p className={styles.pairNote}>
               <span className={styles.pairIcon} aria-hidden="true">
                 ⇅
