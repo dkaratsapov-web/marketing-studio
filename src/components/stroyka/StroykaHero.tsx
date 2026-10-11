@@ -9,6 +9,8 @@ import HeroLead from "@/components/hero/HeroLead";
 import { CINEMATIC_MQ } from "@/components/service/SearchScene";
 import type { STROYKA } from "@/content/stroyka";
 import GanttScene, { addGanttSteps } from "./GanttScene";
+import ShaderBackdrop from "@/components/backdrop/ShaderBackdrop";
+import { BLUEPRINT } from "@/components/backdrop/shaders";
 import styles from "./StroykaHero.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -76,7 +78,7 @@ export default function StroykaHero({ data }: Props) {
   return (
     <section ref={root} id="top" className={styles.hero} data-surface="dark">
       <div className={styles.grain} aria-hidden="true" />
-      <div className={styles.glow} aria-hidden="true" />
+      <ShaderBackdrop frag={BLUEPRINT} />
 
       <div className={`wrap ${styles.grid}`}>
         <div className={styles.top}>

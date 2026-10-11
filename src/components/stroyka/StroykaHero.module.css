@@ -23,18 +23,6 @@
   80% { transform: translate(3%, 3%); }
 }
 
-/* Салатовое зарево за графиком */
-.glow {
-  position: absolute;
-  right: -10%;
-  top: 10%;
-  width: min(70vw, 900px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(196 245 66 / 0.1), transparent 70%);
-  pointer-events: none;
-}
-
 .grid {
   position: relative;
   z-index: 1;

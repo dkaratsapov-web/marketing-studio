@@ -28,7 +28,7 @@ export default function IntentRouter({ data }: { data: Data }) {
 
   useEffect(() => {
     const el = root.current!;
-    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.35 });
+    const io = new IntersectionObserver((es) => setInView(es[es.length - 1].isIntersecting), { threshold: 0.35 });
     io.observe(el);
     return () => io.disconnect();
   }, []);

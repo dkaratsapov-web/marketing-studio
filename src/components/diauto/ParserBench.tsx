@@ -39,7 +39,7 @@ export default function ParserBench({ data }: { data: Data }) {
   const sc = data.scenarios[s];
 
   useEffect(() => {
-    const io = new IntersectionObserver(([e]) => e.isIntersecting && setArmed(true), { threshold: 0.4 });
+    const io = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && setArmed(true), { threshold: 0.4 });
     io.observe(root.current!);
     return () => io.disconnect();
   }, []);

@@ -234,7 +234,7 @@ export default function RingScene({ total, note }: { total: number; note: string
   const first = CARS[0];
 
   useEffect(() => {
-    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: "100px" });
+    const io = new IntersectionObserver((es) => setVisible(es[es.length - 1].isIntersecting), { rootMargin: "100px" });
     if (host.current) io.observe(host.current);
     return () => io.disconnect();
   }, []);

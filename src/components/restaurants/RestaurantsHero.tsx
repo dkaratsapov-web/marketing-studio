@@ -9,6 +9,8 @@ import HeroLead from "@/components/hero/HeroLead";
 import { CINEMATIC_MQ } from "@/components/service/SearchScene";
 import type { RESTAURANTS } from "@/content/restaurants";
 import FloorScene, { addFloorSteps } from "./FloorScene";
+import ShaderBackdrop from "@/components/backdrop/ShaderBackdrop";
+import { CANDLES } from "@/components/backdrop/shaders";
 import styles from "./RestaurantsHero.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -75,7 +77,7 @@ export default function RestaurantsHero({ data }: Props) {
   return (
     <section ref={root} id="top" className={styles.hero} data-surface="dark">
       <div className={styles.grain} aria-hidden="true" />
-      <div className={styles.glow} aria-hidden="true" />
+      <ShaderBackdrop frag={CANDLES} />
 
       <div className={`wrap ${styles.grid}`}>
         <div className={styles.top}>

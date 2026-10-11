@@ -202,7 +202,7 @@ export default function MarkScene({ floors }: { floors: Floors }) {
   const [still] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
   useEffect(() => {
-    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: "100px" });
+    const io = new IntersectionObserver((es) => setVisible(es[es.length - 1].isIntersecting), { rootMargin: "100px" });
     if (host.current) io.observe(host.current);
     return () => io.disconnect();
   }, []);
