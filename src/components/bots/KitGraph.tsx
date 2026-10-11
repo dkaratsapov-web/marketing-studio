@@ -39,7 +39,8 @@ export default function KitGraph({ data }: { data: Data }) {
           io.disconnect();
         }
       },
-      { threshold: 0.35 },
+      // Старт, когда верх блока проходит 80% высоты экрана: не зависит от высоты блока на телефоне
+      { rootMargin: "0px 0px -20% 0px" },
     );
     io.observe(el);
     return () => io.disconnect();

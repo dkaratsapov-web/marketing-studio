@@ -40,32 +40,50 @@ export default function ModelBudget({ data }: { data: Data }) {
         final();
         return;
       }
-      gsap.set(cells, { "--b": 0.5 });
-      gsap.set(scan, { top: "0%", autoAlpha: 0 });
-      gsap.set(result, { autoAlpha: 0, y: 16 });
       const rows = Math.ceil(cells.length / 4);
       // Состояние ячеек и шагов считается от времени таймлайна: при прокрутке назад всё отматывается
       const at = (i: number) => 0.5 + ((Math.floor(i / 4) + 0.5) / rows) * 2;
+      let stepsByTime = true;
       const sync = (t: number) => {
-        steps.forEach((s, k) => s.toggleAttribute("data-on", t >= [0, 0.5, 2.6][k]));
+        if (stepsByTime) steps.forEach((s, k) => s.toggleAttribute("data-on", t >= [0, 0.5, 2.6][k]));
         cells.forEach((c, i) => {
           const state = t < at(i) ? "idle" : c.dataset.ok ? "ok" : t < 2.6 ? "check-off" : "off";
           if (c.dataset.state !== state) c.setAttribute("data-state", state);
         });
       };
-      const tl = gsap.timeline({
-        defaults: { ease: "none" },
-        onUpdate: () => sync(tl.time()),
-        scrollTrigger: { trigger: el.querySelector("[data-board]"), start: "top 70%", end: "bottom 45%", scrub: 0.6 },
+      const build = (st: ScrollTrigger.Vars) => {
+        gsap.set(cells, { "--b": 0.5 });
+        gsap.set(scan, { top: "0%", autoAlpha: 0 });
+        gsap.set(result, { autoAlpha: 0, y: 16 });
+        const tl = gsap.timeline({ defaults: { ease: "none" }, onUpdate: () => sync(tl.time()), scrollTrigger: { ...st, scrub: 0.6 } });
+        tl.to(scan, { autoAlpha: 1, duration: 0.1 }, 0.5)
+          .to(scan, { top: "100%", duration: 2 }, 0.5)
+          .to(scan, { autoAlpha: 0, duration: 0.1 }, 2.5)
+          .to(cells.filter((c) => !c.dataset.ok), { "--b": 0, duration: 0.8 }, 2.6)
+          .to(cells.filter((c) => c.dataset.ok), { "--b": grown, duration: 0.8 }, 3)
+          .to(result, { autoAlpha: 1, y: 0, duration: 0.4 }, 3.6)
+          .to({}, { duration: 0.4 });
+        sync(0);
+      };
+      const board = el.querySelector("[data-board]");
+      const mm = gsap.matchMedia();
+      // Десктоп: шаги стоят рядом с сеткой, ведёт сама сетка
+      mm.add("(min-width: 961px)", () => build({ trigger: board, start: "top 70%", end: "bottom 45%" }));
+      // Телефон: шаги стоят над высокой сеткой. Они загораются по своему короткому триггеру,
+      // пока их видно, а сетка играет сама, когда доезжает до экрана
+      mm.add("(max-width: 960px)", () => {
+        stepsByTime = false;
+        ScrollTrigger.create({
+          trigger: steps[0].parentElement,
+          start: "top 80%",
+          end: "bottom 55%",
+          onUpdate: (self) => steps.forEach((s, k) => s.toggleAttribute("data-on", self.progress >= k / steps.length)),
+        });
+        build({ trigger: board, start: "top 75%", end: "bottom 60%" });
+        return () => {
+          stepsByTime = true;
+        };
       });
-      tl.to(scan, { autoAlpha: 1, duration: 0.1 }, 0.5)
-        .to(scan, { top: "100%", duration: 2 }, 0.5)
-        .to(scan, { autoAlpha: 0, duration: 0.1 }, 2.5)
-        .to(cells.filter((c) => !c.dataset.ok), { "--b": 0, duration: 0.8 }, 2.6)
-        .to(cells.filter((c) => c.dataset.ok), { "--b": grown, duration: 0.8 }, 3)
-        .to(result, { autoAlpha: 1, y: 0, duration: 0.4 }, 3.6)
-        .to({}, { duration: 0.4 });
-      sync(0);
     },
     { scope: root },
   );

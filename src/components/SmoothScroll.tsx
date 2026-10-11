@@ -18,7 +18,30 @@ export default function SmoothScroll() {
       window.scrollTo(0, 0);
     }
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Страница растёт после загрузки: картинки, шрифты, тяжёлые блоки монтируются позже.
+    // Без пересчёта триггеры ниже по странице срабатывают по старым координатам, раньше
+    // или позже нужного. Следим за высотой документа и пересчитываем, когда она меняется.
+    // Первый замер всегда пересчитывает: между созданием триггеров и этим эффектом высота могла уйти
+    let lastH = -1;
+    let t = 0;
+    const settle = () => {
+      window.clearTimeout(t);
+      t = window.setTimeout(() => {
+        const h = document.documentElement.scrollHeight;
+        if (Math.abs(h - lastH) < 2) return;
+        ScrollTrigger.refresh();
+        lastH = document.documentElement.scrollHeight;
+      }, 200);
+    };
+    const ro = new ResizeObserver(settle);
+    ro.observe(document.body);
+    document.fonts?.ready.then(() => ScrollTrigger.refresh());
+    const stop = () => {
+      window.clearTimeout(t);
+      ro.disconnect();
+    };
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return stop;
 
     const lenis = new Lenis({
       lerp: 0.085,
@@ -33,6 +56,7 @@ export default function SmoothScroll() {
     gsap.ticker.lagSmoothing(0);
 
     return () => {
+      stop();
       gsap.ticker.remove(tick);
       lenis.destroy();
       lenisRef.current = null;

@@ -39,7 +39,8 @@ export default function ParserBench({ data }: { data: Data }) {
   const sc = data.scenarios[s];
 
   useEffect(() => {
-    const io = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && setArmed(true), { threshold: 0.4 });
+    // Старт, когда верх секции проходит 80% экрана: порог в процентах высоты на телефоне запаздывал
+    const io = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && setArmed(true), { rootMargin: "0px 0px -20% 0px" });
     io.observe(root.current!);
     return () => io.disconnect();
   }, []);
