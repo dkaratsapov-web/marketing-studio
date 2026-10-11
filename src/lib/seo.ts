@@ -121,7 +121,8 @@ export function service({
   name: string;
   description: string;
   path: string;
-  price: number;
+  /** Цена «от» в месяц; без неё услуга идёт без предложения (цена по смете) */
+  price?: number;
   type: string;
 }) {
   return {
@@ -133,18 +134,22 @@ export function service({
     url: abs(path),
     provider: { "@id": ORG_ID },
     areaServed: { "@type": "Country", name: "Россия" },
-    offers: {
-      "@type": "Offer",
-      url: abs(path),
-      priceCurrency: "RUB",
-      priceSpecification: {
-        "@type": "UnitPriceSpecification",
-        price,
-        priceCurrency: "RUB",
-        unitText: "месяц",
-        description: `от ${price.toLocaleString("ru-RU")} ₽ в месяц, рекламный бюджет отдельно`,
-      },
-    },
+    ...(price === undefined
+      ? {}
+      : {
+          offers: {
+            "@type": "Offer",
+            url: abs(path),
+            priceCurrency: "RUB",
+            priceSpecification: {
+              "@type": "UnitPriceSpecification",
+              price,
+              priceCurrency: "RUB",
+              unitText: "месяц",
+              description: `от ${price.toLocaleString("ru-RU")} ₽ в месяц, рекламный бюджет отдельно`,
+            },
+          },
+        }),
   };
 }
 

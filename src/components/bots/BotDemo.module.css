@@ -1,0 +1,185 @@
+/* Окно живого бота: шапка, лента фиксированной высоты, кнопки-вопросы снизу */
+.chat {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(100%, 26rem);
+  height: min(36rem, calc(100svh - 12rem));
+  min-height: 28rem;
+  overflow: hidden;
+  border: 1px solid #2a2a30;
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 80% 0%, rgb(196 245 66 / 0.08), transparent 45%),
+    #0f1013;
+  box-shadow: 0 60px 100px -50px rgb(0 0 0 / 0.95);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #22232a;
+  background: #15161a;
+}
+
+.bar b {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.bar small {
+  color: var(--lime);
+  font-size: 0.72rem;
+}
+
+.ava {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--ink-950);
+  font-weight: 700;
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 1rem;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-width: none;
+}
+
+.feed::-webkit-scrollbar {
+  display: none;
+}
+
+.msg {
+  max-width: 86%;
+  padding: 0.6rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  animation: pop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.msg[data-from="bot"] {
+  align-self: flex-start;
+  border-bottom-left-radius: 0.3rem;
+  background: #1e2026;
+}
+
+.msg[data-from="me"] {
+  align-self: flex-end;
+  border-bottom-right-radius: 0.3rem;
+  background: var(--lime);
+  color: var(--ink-950);
+  font-weight: 600;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.links a {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid rgb(196 245 66 / 0.5);
+  border-radius: 999px;
+  color: var(--lime);
+  font-size: 0.75rem;
+}
+
+.dots {
+  display: flex;
+  gap: 0.25rem;
+  padding-block: 0.25rem;
+}
+
+.dots i {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: #8a8a92;
+  animation: dot 1s ease-in-out infinite;
+}
+
+.dots i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.dots i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes dot {
+  50% {
+    translate: 0 -3px;
+    opacity: 0.4;
+  }
+}
+
+/* Кнопки-вопросы как клавиатура бота: два столбца */
+.keys {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border-top: 1px solid #22232a;
+  background: #15161a;
+}
+
+.key {
+  padding: 0.65rem 0.5rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: #24262d;
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s var(--ease-out),
+    opacity 0.2s var(--ease-out);
+}
+
+.key[data-asked] {
+  opacity: 0.55;
+}
+
+.key:disabled {
+  cursor: wait;
+}
+
+.key:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .key:not(:disabled):hover {
+    background: #30333b;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msg,
+  .dots i {
+    animation: none;
+  }
+}

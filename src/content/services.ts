@@ -224,6 +224,7 @@ export const SERVICE_MENU: { name: string; note: string; href: string | null }[]
   { name: "Карты и геосервисы", note: "Яндекс Карты, 2ГИС, Яндекс Бизнес", href: "/uslugi/karty-i-geoservisy/" },
   { name: "Разработка сайтов", note: "Лендинги и корпоративные сайты", href: "/uslugi/razrabotka-sajtov/" },
   { name: "Сквозная аналитика", note: "Заявки и продажи по каждому каналу", href: "/uslugi/skvoznaya-analitika/" },
+  { name: "Разработка ботов и приложений", note: "Боты, мини-приложения, ассистенты", href: "/uslugi/razrabotka-botov/" },
 ];
 
 /** Отраслевые решения: второй раздел того же меню */

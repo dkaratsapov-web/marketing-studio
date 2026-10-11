@@ -1,0 +1,139 @@
+/* Тёмный блок: три стопки блоков складываются в лестницу */
+.section {
+  padding-block: var(--section-y);
+  overflow: clip;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 42ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.stairs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 var(--gutter);
+  margin: clamp(3rem, 8vh, 5rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.level {
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+/* Стопка: блоки снизу вверх; у всех стопок общий пол, поэтому выходит лестница */
+.stack {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  height: calc(3 * var(--brick) + 2 * 0.35rem);
+  padding-bottom: 0;
+  border-bottom: 2px solid var(--fg);
+  --brick: clamp(3.4rem, 2.4rem + 2.6vw, 5.4rem);
+}
+
+.brick {
+  display: flex;
+  align-items: center;
+  flex: none;
+  height: var(--brick);
+  padding-inline: clamp(0.9rem, 1.6vw, 1.5rem);
+  border: 1px solid #34343a;
+  border-radius: 0.6rem;
+  background: var(--ink-800);
+  color: rgb(255 255 255 / 0.6);
+  font-family: var(--ff-display);
+  font-size: var(--step-1);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  will-change: transform;
+}
+
+/* Новый блок уровня салатовый */
+.brick[data-new] {
+  border-color: var(--lime);
+  background: var(--lime);
+  color: var(--ink-950);
+}
+
+.body {
+  display: grid;
+  align-content: start;
+  gap: 0.9rem;
+  padding-top: 1.5rem;
+}
+
+.name {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: var(--step-3);
+  letter-spacing: -0.04em;
+}
+
+.num {
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.text {
+  max-width: 38ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.fits {
+  display: grid;
+  gap: 0.3rem;
+  max-width: 38ch;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+  font-size: var(--step--1);
+  line-height: 1.45;
+}
+
+.fits span {
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 860px) {
+  .stairs {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  /* На телефоне стопка растёт только на свои блоки */
+  .stack {
+    height: auto;
+  }
+}

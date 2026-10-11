@@ -1,0 +1,198 @@
+/* Тёмный блок: полоса из 14 дней, под ней этапы по своим дням */
+.section {
+  padding-block: var(--section-y);
+}
+
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: end;
+  gap: 1rem var(--gutter);
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 44ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.board {
+  margin-top: clamp(2.5rem, 7vh, 4.5rem);
+}
+
+.days,
+.steps {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  height: clamp(4rem, 3rem + 3vw, 6.5rem);
+  padding: 0.45rem;
+  border: 1px solid #2c2c32;
+  border-radius: 0.4rem;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  transition:
+    background-color 0.25s var(--ease-out),
+    border-color 0.25s var(--ease-out),
+    color 0.25s var(--ease-out);
+}
+
+.day[data-done] {
+  border-color: var(--lime);
+  background: var(--lime);
+  color: var(--ink-950);
+}
+
+/* День запуска розовый и подписан */
+.day[data-launch][data-done] {
+  border-color: var(--pink);
+  background: var(--pink);
+}
+
+.day[data-launch]::after {
+  content: "запуск";
+  position: absolute;
+  top: 0.45rem;
+  left: 0.45rem;
+  font-size: 0.62rem;
+}
+
+.steps {
+  margin-top: 1.25rem;
+}
+
+.step {
+  grid-column: var(--from) / var(--to);
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+  padding: 1rem 0.75rem 0 0;
+  border-top: 2px solid var(--line);
+  transition: border-color 0.3s var(--ease-out);
+}
+
+.step[data-now] {
+  border-top-color: var(--lime);
+}
+
+.when {
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.name {
+  font-size: var(--step-1);
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+}
+
+.text {
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.note {
+  margin-top: 1.5rem;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+
+.trust {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gutter);
+  margin: clamp(3rem, 8vh, 5rem) 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.trustItem {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.trustItem dd {
+  margin: 0;
+  font-family: var(--ff-display);
+  font-size: clamp(2.6rem, 1.4rem + 3.6vw, 5.5rem);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+}
+
+.trustItem dt {
+  max-width: 24ch;
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.4;
+}
+
+/* Узкий экран: дни сеткой 7×2, этапы списком */
+@media (max-width: 860px) {
+  .head {
+    grid-template-columns: 1fr;
+  }
+
+  .days {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  .day {
+    height: 3.4rem;
+    padding: 0.3rem;
+  }
+
+  .day[data-launch]::after {
+    top: 0.3rem;
+    left: 0.3rem;
+    font-size: 0.5rem;
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .step {
+    grid-column: auto;
+  }
+
+  .trust {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .day,
+  .step {
+    transition: none;
+  }
+}
