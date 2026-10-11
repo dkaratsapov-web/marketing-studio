@@ -11,3 +11,9 @@ export const TELEGRAM = {
   handle: "@Daniil_065",
   href: "https://t.me/Daniil_065",
 };
+
+/** Все контакты в Telegram: первый основной (на него ведут формы), второй в подвале рядом */
+export const TELEGRAMS = [
+  TELEGRAM,
+  { handle: "@smok1204", href: "https://t.me/smok1204" },
+];

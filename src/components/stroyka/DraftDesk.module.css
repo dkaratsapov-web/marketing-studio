@@ -1,0 +1,262 @@
+/* Тёмный блок: коврик для резки с разметкой, стопка листов слева, вытянутый лист на столе */
+.section {
+  padding-block: var(--section-y);
+}
+
+.head {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 54rem;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 50ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.mat {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  align-items: start;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  border-radius: 20px;
+  background:
+    linear-gradient(90deg, rgb(196 245 66 / 0.07) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(0deg, rgb(196 245 66 / 0.07) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(90deg, rgb(196 245 66 / 0.03) 1px, transparent 1px) 0 0 / 8px 8px,
+    #121a14;
+  box-shadow: inset 0 0 0 1px #24302a;
+}
+
+/* Стопка: листы внахлёст с наклоном */
+.stack {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stack li {
+  margin-top: -1.6rem;
+  rotate: var(--t);
+  transition: rotate 0.3s var(--ease-out);
+}
+
+.stack li:first-child {
+  margin-top: 0;
+}
+
+.tab {
+  position: relative;
+  display: grid;
+  grid-template-columns: 4.2rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 4px;
+  background: #f4f4ef;
+  color: var(--ink-950);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 10px 20px -10px rgb(0 0 0 / 0.8);
+  transition:
+    transform 0.3s var(--ease-out),
+    background-color 0.3s var(--ease-out);
+}
+
+.tab:hover {
+  transform: translateX(0.5rem);
+}
+
+.tab[aria-pressed="true"] {
+  transform: translateX(1rem);
+  background: var(--lime);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 3px;
+}
+
+.tabImg {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--white);
+}
+
+.tabImg img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 0;
+}
+
+.tabName {
+  display: grid;
+  font-size: var(--step--1);
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.tabNo {
+  color: rgb(5 5 5 / 0.55);
+  font-family: var(--ff-mono);
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Лист на столе: выезжает из стопки с поворотом, по углам скотч */
+.sheet {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  rotate: -0.8deg;
+  animation: pull 0.6s var(--ease-out);
+}
+
+@keyframes pull {
+  from {
+    opacity: 0;
+    transform: translateX(-18%) rotate(-6deg) scale(0.9);
+  }
+}
+
+.paper {
+  overflow: hidden;
+  border: 10px solid #f4f4ef;
+  border-radius: 3px;
+  background: #f4f4ef;
+  box-shadow: 0 40px 70px -30px rgb(0 0 0 / 0.95);
+}
+
+.sheet[data-phone] .paper {
+  justify-self: center;
+  width: min(100%, 20rem);
+}
+
+.img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Малярный скотч по углам */
+.tape {
+  position: absolute;
+  z-index: 1;
+  width: 5.5rem;
+  height: 1.6rem;
+  background: rgb(232 214 160 / 0.85);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.25);
+}
+
+.tape[data-c="a"] {
+  top: -0.6rem;
+  left: -1.4rem;
+  rotate: -35deg;
+}
+
+.tape[data-c="b"] {
+  top: -0.6rem;
+  right: -1.4rem;
+  rotate: 35deg;
+}
+
+.sheet[data-phone] .tape[data-c="a"] {
+  left: calc(50% - 11.5rem);
+}
+
+.sheet[data-phone] .tape[data-c="b"] {
+  right: calc(50% - 11.5rem);
+}
+
+.caption {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 62ch;
+  rotate: 0.8deg;
+}
+
+.caption b {
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.caption span {
+  color: var(--fg);
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+.note {
+  margin-top: 1rem;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 960px) {
+  .mat {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stack {
+    display: flex;
+    gap: 0.5rem;
+    margin-inline: -0.5rem;
+    padding: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .stack li {
+    flex: none;
+    width: 11rem;
+    margin-top: 0;
+    rotate: none;
+  }
+
+  .tab:hover,
+  .tab[aria-pressed="true"] {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    animation: none;
+  }
+
+  .tab {
+    transition: none;
+  }
+}

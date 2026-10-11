@@ -1,4 +1,4 @@
-/* Светлый блок: слева карточка сделки с переключателем вида, справа возможности и снимок */
+/* Светлый блок: сделка на двух экранах. Окно CRM менеджера, провод ссылки, телефон клиента */
 .section {
   padding-block: var(--section-y);
 }
@@ -7,18 +7,12 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--gutter);
-  row-gap: 2.5rem;
-  align-items: start;
-}
-
-.head {
-  grid-column: 1 / -1;
-  display: grid;
-  gap: 1.25rem;
-  max-width: 60rem;
+  row-gap: clamp(2rem, 4vw, 3.5rem);
+  align-items: end;
 }
 
 .title {
+  grid-column: 1 / span 7;
   font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
   line-height: 0.92;
   letter-spacing: -0.055em;
@@ -29,144 +23,128 @@
 }
 
 .lead {
-  max-width: 60ch;
+  grid-column: 8 / -1;
+  max-width: 46ch;
   color: var(--muted);
   font-size: var(--step-0);
   line-height: 1.55;
 }
 
-.left {
-  grid-column: 1 / span 7;
+/* Пара экранов */
+.pair {
+  grid-column: 1 / -1;
   display: grid;
-  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) clamp(3rem, 6vw, 6rem) 18rem;
+  align-items: center;
 }
 
-/* Переключатель: две половины и бегунок под выбранной */
-.switch {
-  position: relative;
+.crm,
+.client {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  justify-self: start;
-  width: min(100%, 26rem);
-  padding: 0.3rem;
-  border-radius: 999px;
-  background: #ececef;
+  gap: 0.6rem;
+  margin: 0;
 }
 
-.switch button {
-  position: relative;
-  z-index: 1;
-  min-height: 2.8rem;
-  border: 0;
-  border-radius: 999px;
-  background: none;
+.who {
   color: var(--muted);
-  font: inherit;
   font-size: var(--step--1);
   font-weight: 600;
-  cursor: pointer;
-  transition: color 0.3s var(--ease-out);
 }
 
-.switch button[aria-pressed="true"] {
-  color: var(--lime);
+/* Окно CRM: светлый интерфейс, как у клиента */
+.app {
+  overflow: hidden;
+  border: 1px solid #dcdce0;
+  border-radius: 16px;
+  background: #f6f6f8;
+  box-shadow: 0 40px 70px -40px rgb(5 5 5 / 0.45);
 }
 
-.switch button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.knob {
-  position: absolute;
-  top: 0.3rem;
-  bottom: 0.3rem;
-  left: 0.3rem;
-  width: calc(50% - 0.3rem);
-  border-radius: 999px;
-  background: var(--ink-950);
-  transition: transform 0.45s var(--ease-in-out);
-}
-
-.knob[data-right] {
-  transform: translateX(100%);
-}
-
-/* Карточка сделки */
-.card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 13rem;
-  grid-template-areas:
-    "head head"
-    "stages stages"
-    "rows photo"
-    "lock lock";
-  gap: 1.25rem;
-  padding: clamp(1.25rem, 3vw, 1.75rem);
-  border: 1px solid var(--line);
-  border-radius: 18px;
+.appBar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid #e4e4e8;
   background: var(--white);
-  box-shadow: 0 30px 50px -34px rgb(5 5 5 / 0.45);
-  transition: border-color 0.4s var(--ease-out);
+  color: var(--muted);
+  font-size: 0.78rem;
 }
 
-.card[data-client] {
-  border-color: var(--ink-950);
+.appBar b {
+  margin-right: 0.75rem;
+  color: var(--fg);
+  font-weight: 700;
 }
 
-.cardHead {
-  grid-area: head;
+.appLogo {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #b42323, #6e0f0f);
+}
+
+.appTab {
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  background: #f0f0f2;
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.dealHead {
   display: flex;
   justify-content: space-between;
-  align-items: start;
+  align-items: flex-start;
   gap: 1rem;
+  padding: 1.1rem 1.25rem 0;
 }
 
 .dealTitle {
   font-size: var(--step-2);
-  font-weight: 650;
+  font-weight: 700;
   line-height: 1.05;
   letter-spacing: -0.03em;
 }
 
+.dealTitle span {
+  color: var(--muted);
+  font-size: var(--step-0);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
 .dealCar {
-  margin-top: 0.3rem;
+  margin-top: 0.25rem;
   color: var(--muted);
   font-size: var(--step--1);
 }
 
 .source {
   flex: none;
-  padding: 0.3rem 0.65rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid #e4e4e8;
   border-radius: 999px;
-  background: #f3f3f4;
-  font-family: var(--ff-mono);
-  font-size: 0.7rem;
+  background: var(--white);
+  font-size: 0.75rem;
 }
 
-.card[data-client] .source {
-  background: var(--lime);
-}
-
-/* Этапы импорта: пройденные тёмные, текущий салатовый */
+/* Этапы: сегменты как колонки доски */
 .stages {
-  grid-area: stages;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 3px;
-  margin: 0;
+  margin: 1rem 1.25rem 0;
   padding: 0;
   list-style: none;
 }
 
 .stages li {
   display: grid;
-  align-content: start;
   gap: 0.35rem;
-  font-size: 0.66rem;
-  overflow-wrap: anywhere;
-  hyphens: auto;
   color: var(--muted);
+  font-size: 0.68rem;
+  overflow-wrap: anywhere;
 }
 
 .stages li::before {
@@ -190,221 +168,329 @@
   font-weight: 700;
 }
 
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 1.25rem;
+  align-items: start;
+  padding: 1.1rem 1.25rem;
+}
+
 .photo {
-  grid-area: photo;
-  align-self: start;
   overflow: hidden;
-  border-radius: 10px;
-  transition: transform 0.45s var(--ease-out);
-}
-
-.card[data-client] .photo {
-  transform: scale(1.04);
-  box-shadow: 0 0 0 2px var(--lime);
-}
-
-/* Из карточки каталога видно только фото машины: без цены и плашек */
-.photo {
-  aspect-ratio: 1.45;
+  border-radius: 12px;
+  background: #e4e4e8;
 }
 
 .photoImg {
   display: block;
-  width: 230%;
-  max-width: none;
+  width: 100%;
   height: auto;
-  margin: -16% 0 0 -65%;
 }
 
-/* Строки: закрытые сворачиваются в режиме клиента (сетка 1fr → 0fr) */
+/* Строки сделки: публичные вспыхивают при отправке (--hl), закрытые уходят под замок (--lock) */
 .rows {
-  grid-area: rows;
   display: grid;
-  align-content: start;
   margin: 0;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid #e4e4e8;
 }
 
 .row {
-  display: grid;
-  grid-template-rows: 1fr;
-  transition:
-    grid-template-rows 0.45s var(--ease-in-out),
-    opacity 0.3s var(--ease-out);
-}
-
-.rowIn {
+  --hl: 0;
+  --lock: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 1rem;
-  min-height: 0;
-  overflow: hidden;
-  border-bottom: 1px solid var(--line);
+  gap: 0.75rem;
+  margin: 0 -0.5rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid #e4e4e8;
+  border-radius: 6px;
+  background: rgb(196 245 66 / calc(var(--hl) * 0.55));
 }
 
-.rowIn dt,
-.rowIn dd {
-  padding: 0.55rem 0;
-}
-
-.rowIn dt {
+.row dt {
   color: var(--muted);
   font-size: var(--step--1);
 }
 
-.rowIn dd {
+.row dd {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   margin: 0;
   font-size: var(--step--1);
   font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
 
-.row[data-private] dt::after {
-  content: " · только менеджер";
-  color: var(--accent);
-  font-family: var(--ff-mono);
-  font-size: 0.62rem;
+.row[data-priv] .val {
+  filter: blur(calc(var(--lock) * 4px));
+  opacity: calc(1 - var(--lock) * 0.4);
 }
 
-.card[data-client] .row[data-private] {
-  grid-template-rows: 0fr;
-  opacity: 0;
+.lock {
+  width: 0.9rem;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  opacity: var(--lock);
 }
 
-.card[data-client] .row:not([data-private]) dd {
-  color: var(--accent);
+.appFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid #e4e4e8;
+  background: var(--white);
 }
 
 .lockNote {
-  grid-area: lock;
+  color: var(--accent);
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+/* Кнопка как в CRM клиента: тёмно-красная «Выдать ссылку», повторяет сцену */
+.send {
+  flex: none;
+  min-height: 2.6rem;
+  padding: 0.5rem 1.1rem;
+  border: 0;
+  border-radius: 8px;
+  background: #7f1414;
+  color: var(--white);
+  font: inherit;
+  font-size: var(--step--1);
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease-out);
+}
+
+.send:hover {
+  background: #9e1a1a;
+}
+
+.send:focus-visible {
+  outline: 2px solid var(--ink-950);
+  outline-offset: 3px;
+}
+
+/* Провод ссылки и импульс (--x от 0 до 1) */
+.wire {
+  position: relative;
+  height: 2px;
+  margin-top: 1.6rem;
+  background: repeating-linear-gradient(90deg, var(--ink-950) 0 6px, transparent 6px 11px);
+}
+
+.wire i {
+  --x: 0;
+  position: absolute;
+  top: 50%;
+  left: calc(var(--x) * 100%);
+  width: 0.8rem;
+  height: 0.8rem;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: var(--lime);
+  box-shadow:
+    0 0 0 2px var(--ink-950),
+    0 0 14px var(--lime);
+}
+
+/* Телефон клиента */
+.phone {
+  --glow: 0;
+  display: grid;
+  gap: 0.7rem;
+  padding: 1.2rem 1rem 1.4rem;
+  border: 8px solid var(--ink-950);
+  border-radius: 2.2rem;
+  background: var(--white);
+  box-shadow:
+    0 0 0 calc(var(--glow) * 4px) var(--lime),
+    0 40px 70px -36px rgb(5 5 5 / 0.6);
+}
+
+.phBrand {
+  justify-self: center;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #9e1a1a;
+}
+
+.phHello {
+  font-size: var(--step-1);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.phPhoto {
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.phCar {
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.phStages {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.phStages li {
+  height: 5px;
+  border-radius: 3px;
+  background: #e4e4e8;
+}
+
+.phStages li[data-done] {
+  background: var(--ink-950);
+}
+
+.phStages li[data-on] {
+  background: var(--lime);
+  box-shadow: 0 0 0 1.5px var(--ink-950);
+}
+
+.phRows {
+  display: grid;
+  margin: 0;
+}
+
+.phRows div {
   display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  padding: 0.8rem 1rem;
-  border-radius: 10px;
-  background: #f3f3f4;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid #ececef;
+  font-size: var(--step--1);
+}
+
+.phRows dt {
+  color: var(--muted);
+}
+
+.phRows dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.phArrival {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+/* Возможности: спокойная сетка 3 × 2 без карточек */
+.features {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.features li {
+  display: grid;
+  align-content: start;
+  gap: 0.35rem;
+  padding: 1.1rem 0 1.4rem;
+  border-top: 1px solid var(--ink-950);
+}
+
+.features h3 {
+  font-size: var(--step-1);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.features p {
+  max-width: 36ch;
   color: var(--muted);
   font-size: var(--step--1);
   line-height: 1.45;
 }
 
-.lockNote svg {
-  flex: none;
-  width: 1rem;
-  margin-top: 0.15rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-}
-
-.card[data-client] .lockNote {
-  background: var(--ink-950);
-  color: var(--white);
-}
-
 .note {
+  grid-column: 1 / -1;
   color: var(--muted);
-  font-family: var(--ff-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.06em;
-}
-
-.right {
-  grid-column: 9 / -1;
-  display: grid;
-  gap: 1.5rem;
-}
-
-.features {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--line);
-}
-
-.features li {
-  display: grid;
-  gap: 0.2rem;
-  padding: 0.8rem 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.features b {
-  font-size: var(--step-0);
-}
-
-.features span {
-  color: var(--muted);
-  font-size: var(--step--1);
-  line-height: 1.4;
-}
-
-.shot {
-  display: grid;
-  gap: 0.5rem;
-  margin: 0;
-}
-
-.shotImg {
-  width: min(100%, 18rem);
-  height: auto;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 24px 40px -28px rgb(5 5 5 / 0.5);
-}
-
-.shot figcaption {
-  color: var(--muted);
-  font-family: var(--ff-mono);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
 }
 
 @media (max-width: 1100px) {
-  .left,
-  .right {
+  .title,
+  .lead {
     grid-column: 1 / -1;
   }
 
-  .right {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
+  .pair {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .crm {
+    width: 100%;
+  }
+
+  /* Провод встаёт вертикально между окном и телефоном */
+  .wire {
+    width: 2px;
+    height: 4rem;
+    margin: 0.5rem 0;
+    background: repeating-linear-gradient(180deg, var(--ink-950) 0 6px, transparent 6px 11px);
+  }
+
+  .wire i {
+    top: calc(var(--x) * 100%);
+    left: 50%;
+  }
+
+  .client {
+    width: min(100%, 18rem);
+  }
+
+  .features {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 640px) {
-  .card {
+  .body {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "head"
-      "stages"
-      "photo"
-      "rows"
-      "lock";
   }
 
-  .photo {
-    width: 60%;
+  .stages li {
+    font-size: 0;
   }
 
-  .stages li span {
-    display: none;
-  }
-
-  .stages li[data-on] span {
-    display: block;
+  .stages li[data-on] {
+    font-size: 0.66rem;
     white-space: nowrap;
   }
 
-  .right {
-    grid-template-columns: minmax(0, 1fr);
+  .appBar span:not(.appLogo):not(.appTab) {
+    display: none;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .row,
-  .knob,
-  .photo {
-    transition: none;
+  .appFoot {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .features {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

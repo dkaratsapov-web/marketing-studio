@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { HOURS, PHONES, TELEGRAM } from "@/content/contacts";
+import { HOURS, PHONES, TELEGRAMS } from "@/content/contacts";
 import { QUOTE } from "@/components/Logo";
 import Link from "next/link";
 import HomeLink from "@/components/HomeLink";
@@ -74,14 +74,17 @@ export default function Footer() {
         </div>
         <div className={styles.col}>
           <p className="label">Написать</p>
-          <a
-            href={TELEGRAM.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.big}
-          >
-            Telegram {TELEGRAM.handle}
-          </a>
+          {TELEGRAMS.map((t) => (
+            <a
+              key={t.href}
+              href={t.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.big}
+            >
+              Telegram {t.handle}
+            </a>
+          ))}
         </div>
         <nav className={styles.nav} aria-label="Разделы">
           {NAV.map((n) => (

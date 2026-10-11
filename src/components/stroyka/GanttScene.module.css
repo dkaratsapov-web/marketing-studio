@@ -1,0 +1,205 @@
+/* График работ первого экрана: пузыри вопросов сверху, полосы этапов, линия «сегодня» */
+.scene {
+  display: grid;
+  gap: 0.75rem;
+  width: min(100%, 44rem);
+  padding: clamp(1rem, 2vw, 1.5rem) clamp(1rem, 2vw, 1.5rem) 2.4rem;
+  border: 1px solid #2a2a30;
+  border-radius: 18px;
+  background: #101013;
+  box-shadow: 0 60px 100px -50px rgb(0 0 0 / 0.95);
+}
+
+/* Зона вопросов над графиком: пузырь стоит над своим моментом */
+.asks {
+  position: relative;
+  height: 7.5rem;
+  margin-left: 9.5rem;
+}
+
+.ask {
+  position: absolute;
+  bottom: 0;
+  display: grid;
+  gap: 0.35rem;
+  width: max-content;
+  max-width: 14rem;
+  translate: -50% 10px;
+  opacity: 0;
+  transition:
+    opacity 0.3s var(--ease-out),
+    translate 0.3s var(--ease-out);
+}
+
+.ask[data-on] {
+  opacity: 1;
+  translate: -50% 0;
+}
+
+.ask:first-child {
+  translate: -15% 10px;
+}
+
+.ask:first-child[data-on] {
+  translate: -15% 0;
+}
+
+.ask:last-child {
+  translate: -85% 10px;
+}
+
+.ask:last-child[data-on] {
+  translate: -85% 0;
+}
+
+.q {
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px 12px 12px 4px;
+  background: #22222a;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.a {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-self: start;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: var(--lime);
+  color: var(--ink-950);
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.a i {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--ink-950);
+}
+
+.chart {
+  position: relative;
+}
+
+/* Сетка недель за полосами */
+.grid {
+  position: absolute;
+  inset: 0 0 0 9.5rem;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+}
+
+.grid span {
+  border-left: 1px dashed #24242a;
+}
+
+.rows {
+  position: relative;
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  align-items: center;
+}
+
+.name {
+  padding-right: 0.75rem;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.track {
+  position: relative;
+  height: 1.35rem;
+}
+
+/* Полоса этапа: контур, заливка растёт по --fill */
+.bar {
+  --fill: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border: 1px solid #3a3a40;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--lime) calc(var(--fill) * 100%), transparent 0);
+  box-shadow: 0 0 calc(var(--fill) * 10px) rgb(196 245 66 / calc(var(--fill) * 0.3));
+}
+
+.row:nth-child(even) .bar {
+  background: linear-gradient(90deg, var(--pink) calc(var(--fill) * 100%), transparent 0);
+  box-shadow: 0 0 calc(var(--fill) * 10px) rgb(255 77 157 / calc(var(--fill) * 0.3));
+}
+
+/* Линия «сегодня»: слой над дорожками, без колонки подписей */
+.lane {
+  position: absolute;
+  inset: -0.5rem 0 -0.5rem 9.5rem;
+  pointer-events: none;
+}
+
+.now {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background: var(--white);
+  transform: translateX(-1px);
+}
+
+.now b {
+  position: absolute;
+  bottom: -1.4rem;
+  left: 50%;
+  translate: -50% 0;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--ink-950);
+  font-family: var(--ff-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .asks {
+    margin-left: 6.5rem;
+  }
+
+  .grid,
+  .lane {
+    left: 6.5rem;
+  }
+
+  .row {
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+  }
+
+  .name {
+    overflow: hidden;
+    font-size: 0.6rem;
+    text-overflow: ellipsis;
+  }
+
+  .ask {
+    max-width: 11rem;
+  }
+
+  .q {
+    font-size: 0.72rem;
+  }
+}

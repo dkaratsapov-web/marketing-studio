@@ -1,0 +1,369 @@
+/* Светлый блок: ползунок стадии, слева ответы, справа окно сайта, которое перестраивается */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2rem;
+  align-items: start;
+}
+
+.head {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 1.25rem;
+  max-width: 58rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--accent);
+}
+
+.lead {
+  max-width: 58ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Ползунок во всю ширину: дорожка заливается до бегунка */
+.control {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.range {
+  --p: 0;
+  width: 100%;
+  height: 2.6rem;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
+}
+
+.range::-webkit-slider-runnable-track {
+  height: 0.6rem;
+  border-radius: 0.3rem;
+  background: linear-gradient(90deg, var(--ink-950) calc(var(--p) * 100%), #e4e4e8 0);
+}
+
+.range::-moz-range-track {
+  height: 0.6rem;
+  border-radius: 0.3rem;
+  background: linear-gradient(90deg, var(--ink-950) calc(var(--p) * 100%), #e4e4e8 0);
+}
+
+.range::-webkit-slider-thumb {
+  width: 2rem;
+  height: 2rem;
+  margin-top: -0.7rem;
+  border: 3px solid var(--ink-950);
+  border-radius: 50%;
+  background: var(--lime);
+  appearance: none;
+}
+
+.range::-moz-range-thumb {
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 3px solid var(--ink-950);
+  border-radius: 50%;
+  background: var(--lime);
+}
+
+.range:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.ticks {
+  display: flex;
+  justify-content: space-between;
+}
+
+.ticks button {
+  padding: 0.3rem 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ticks button[data-on] {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+/* Ответ стадии */
+.info {
+  grid-column: 1 / span 5;
+  display: grid;
+  gap: 1rem;
+  animation: infoIn 0.4s var(--ease-out);
+}
+
+@keyframes infoIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.kicker {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.queries {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.queries li {
+  justify-self: start;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: var(--step-0);
+}
+
+.queries li::before {
+  content: "⌕ ";
+  color: var(--accent);
+}
+
+.answer {
+  display: grid;
+  margin: 0.5rem 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.answer div {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.answer dt {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+}
+
+.answer dd {
+  margin: 0;
+  font-size: var(--step-0);
+  font-weight: 600;
+}
+
+.ctaChip {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  background: var(--ink-950);
+  color: var(--lime);
+  font-size: var(--step--1);
+}
+
+/* Окно сайта: элементы двигаются между раскладками */
+.browser {
+  grid-column: 7 / -1;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: 0 30px 60px -36px rgb(5 5 5 / 0.45);
+}
+
+.bar {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--line);
+  background: #f3f3f4;
+}
+
+.bar i {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #d4d4d8;
+}
+
+.page {
+  position: relative;
+  aspect-ratio: 16 / 10;
+}
+
+.page > span {
+  position: absolute;
+  border-radius: 6px;
+  transition:
+    top 0.6s var(--ease-in-out),
+    left 0.6s var(--ease-in-out),
+    width 0.6s var(--ease-in-out),
+    height 0.6s var(--ease-in-out),
+    opacity 0.45s var(--ease-out);
+}
+
+.hero {
+  background:
+    linear-gradient(135deg, transparent 48%, rgb(43 71 232 / 0.35) 49% 51%, transparent 52%),
+    repeating-linear-gradient(0deg, transparent 0 18px, rgb(43 71 232 / 0.15) 18px 19px),
+    repeating-linear-gradient(90deg, transparent 0 18px, rgb(43 71 232 / 0.15) 18px 19px),
+    #eef2ff;
+}
+
+.h1 {
+  background: var(--ink-950);
+}
+
+/* Текст: полосы строк */
+.lineA,
+.lineB,
+.lineC {
+  background: repeating-linear-gradient(180deg, #e4e4e8 0 7px, transparent 7px 13px);
+}
+
+.calc {
+  display: grid;
+  align-content: center;
+  gap: 0.8rem;
+  padding: 0 6%;
+  border: 1.5px solid var(--ink-950);
+  background: var(--white);
+}
+
+.calc i {
+  height: 0.45rem;
+  border-radius: 0.25rem;
+  background: linear-gradient(90deg, var(--ink-950) calc(var(--v) * 100%), #e4e4e8 0);
+}
+
+.calc b {
+  height: 0.8rem;
+  border-radius: 0.3rem;
+  background: linear-gradient(90deg, var(--ink-950) 0 55%, #7d7d85 55% 75%, var(--lime) 75% 88%, var(--pink) 88%);
+}
+
+.form {
+  display: grid;
+  align-content: center;
+  gap: 0.6rem;
+  padding: 0 6%;
+  border: 1.5px solid var(--ink-950);
+  background: #f6f6f8;
+}
+
+.form i {
+  height: 1.4rem;
+  border: 1px solid #d4d4d8;
+  border-radius: 6px;
+  background: var(--white);
+}
+
+.form b {
+  height: 1.6rem;
+  border-radius: 6px;
+  background: var(--ink-950);
+}
+
+.chat {
+  display: grid;
+  place-items: center;
+  border-radius: 50% !important;
+  background: var(--accent);
+  color: var(--white);
+  font-weight: 700;
+}
+
+/* Стадия 0: статья — заголовок, длинный текст, кнопка ассистента */
+.page[data-stage="0"] .hero { top: 8%; left: 6%; width: 0; height: 0; opacity: 0; }
+.page[data-stage="0"] .h1 { top: 10%; left: 6%; width: 70%; height: 9%; }
+.page[data-stage="0"] .lineA { top: 26%; left: 6%; width: 86%; height: 18%; }
+.page[data-stage="0"] .lineB { top: 49%; left: 6%; width: 86%; height: 18%; }
+.page[data-stage="0"] .lineC { top: 72%; left: 6%; width: 60%; height: 14%; }
+.page[data-stage="0"] .calc { top: 40%; left: 30%; width: 40%; height: 30%; opacity: 0; }
+.page[data-stage="0"] .form { top: 40%; left: 60%; width: 30%; height: 30%; opacity: 0; }
+.page[data-stage="0"] .chat { top: 76%; left: 84%; width: 2.6rem; height: 2.6rem; opacity: 1; }
+
+/* Стадия 1: калькулятор в центре */
+.page[data-stage="1"] .hero { top: 8%; left: 6%; width: 0; height: 0; opacity: 0; }
+.page[data-stage="1"] .h1 { top: 10%; left: 6%; width: 55%; height: 9%; }
+.page[data-stage="1"] .lineA { top: 24%; left: 6%; width: 70%; height: 5%; }
+.page[data-stage="1"] .lineB { top: 84%; left: 6%; width: 40%; height: 5%; opacity: 0.6; }
+.page[data-stage="1"] .lineC { top: 84%; left: 50%; width: 30%; height: 5%; opacity: 0.6; }
+.page[data-stage="1"] .calc { top: 34%; left: 6%; width: 88%; height: 44%; opacity: 1; }
+.page[data-stage="1"] .form { top: 40%; left: 70%; width: 24%; height: 30%; opacity: 0; }
+.page[data-stage="1"] .chat { top: 76%; left: 84%; width: 0; height: 0; opacity: 0; }
+
+/* Стадия 2: страница услуги — картинка, заголовок и форма справа */
+.page[data-stage="2"] .hero { top: 30%; left: 6%; width: 52%; height: 60%; opacity: 1; }
+.page[data-stage="2"] .h1 { top: 10%; left: 6%; width: 60%; height: 12%; }
+.page[data-stage="2"] .lineA { top: 26%; left: 64%; width: 0; height: 4%; opacity: 0; }
+.page[data-stage="2"] .lineB { top: 92%; left: 6%; width: 0; height: 3%; opacity: 0; }
+.page[data-stage="2"] .lineC { top: 92%; left: 6%; width: 0; height: 3%; opacity: 0; }
+.page[data-stage="2"] .calc { top: 30%; left: 30%; width: 30%; height: 30%; opacity: 0; }
+.page[data-stage="2"] .form { top: 30%; left: 63%; width: 31%; height: 60%; opacity: 1; }
+.page[data-stage="2"] .chat { top: 76%; left: 84%; width: 0; height: 0; opacity: 0; }
+
+.pair {
+  grid-column: 1 / span 6;
+  padding: 1rem 1.2rem;
+  border-left: 3px solid var(--accent);
+  background: #f3f3f4;
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+.note {
+  grid-column: 7 / -1;
+  align-self: end;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 960px) {
+  .info,
+  .browser,
+  .pair,
+  .note {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page > span {
+    transition: none;
+  }
+
+  .info {
+    animation: none;
+  }
+}
