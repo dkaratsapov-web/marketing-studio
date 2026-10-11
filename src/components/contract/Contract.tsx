@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { TARIFFS } from "@/content/offer";
-import { openBrief } from "@/components/brief/briefBus";
+import HeroLead from "@/components/hero/HeroLead";
 import TypedQuote from "./TypedQuote";
 import styles from "./Contract.module.css";
 
@@ -13,7 +13,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const FINE_POINTER = "(hover: hover) and (pointer: fine)";
 
-/** Мышь с наведением: строки раскрываются наведением, клик ведёт к брифу */
+/** Мышь с наведением: строки раскрываются наведением */
 function useFinePointer() {
   return useSyncExternalStore(
     (cb) => {
@@ -61,16 +61,22 @@ export default function Contract() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Пока человек вводит номер в открытой строке, наведение на другие строки её не закрывает
+  const typing = () => {
+    const el = document.activeElement;
+    return Boolean(el && root.current?.querySelector("[data-open]")?.contains(el) && el.tagName === "INPUT");
+  };
+
   // Открываем строку только от движения мыши, а не когда она «наехала» при прокрутке
   const hoverRow = (i: number, at: number) => {
-    if (!fine) return;
+    if (!fine || typing()) return;
     if (at - lastScroll.current < 180) return;
     setOpen(i);
   };
 
   const onRowClick = (i: number) => {
     if (fine) {
-      openBrief(TARIFFS[i].name);
+      setOpen(i);
       return;
     }
     setOpen((cur) => (cur === i ? null : i));
@@ -97,7 +103,7 @@ export default function Contract() {
           className={styles.table}
           data-has-open={open !== null || undefined}
           onPointerLeave={() => {
-            if (fine) setOpen(null);
+            if (fine && !typing()) setOpen(null);
           }}
         >
           {TARIFFS.map((t, i) => {
@@ -108,7 +114,6 @@ export default function Contract() {
                 className={styles.row}
                 data-flagship={t.flagship || undefined}
                 data-open={isOpen || undefined}
-                data-cursor-label="Обсудить проект"
                 onPointerMove={(e) => !isOpen && hoverRow(i, e.timeStamp)}
               >
                 <button
@@ -117,7 +122,8 @@ export default function Contract() {
                   aria-expanded={isOpen}
                   aria-controls={`tariff-${i}`}
                   onClick={() => onRowClick(i)}
-                  onFocus={() => setOpen(i)}
+                  // Открываем по фокусу только с клавиатуры: при тапе фокус и клик приходят подряд и строка закрылась бы обратно
+                  onFocus={(e) => e.currentTarget.matches(":focus-visible") && setOpen(i)}
                 >
                   <span className={styles.what}>
                     <span className={styles.name}>{t.name}</span>
@@ -154,13 +160,7 @@ export default function Contract() {
                       <div className={styles.side}>
                         <p className="label">На выходе</p>
                         <p className={styles.outcome}>{t.outcome}</p>
-                        <a
-                          href="#brief"
-                          data-service={t.name}
-                          className="btn btn--primary"
-                        >
-                          Обсудить
-                        </a>
+                        <HeroLead source="service" service={t.name} cta="Обсудить" />
                       </div>
                     </div>
                   </div>
