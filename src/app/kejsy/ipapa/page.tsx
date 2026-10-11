@@ -36,6 +36,7 @@ const LD = [
   },
   breadcrumbs([
     { name: "Корпорация", path: "/" },
+    { name: "Кейсы", path: "/kejsy/" },
     { name: "Кейс айпапа.рф", path: PATH },
   ]),
 ];

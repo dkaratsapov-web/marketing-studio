@@ -243,6 +243,9 @@ export default function Dossier() {
             Открыть дело
             <Arrow />
           </a>
+          <Link href="/kejsy/" className={styles.allCases}>
+            Все кейсы
+          </Link>
         </aside>
       </div>
     </section>

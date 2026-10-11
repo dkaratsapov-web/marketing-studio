@@ -63,6 +63,8 @@ export default function DiautoHero({ data }: Props) {
           <nav className={styles.crumbs} aria-label="Хлебные крошки">
             <Link href="/">Корпорация</Link>
             <span aria-hidden="true">/</span>
+            <Link href="/kejsy/">Кейсы</Link>
+            <span aria-hidden="true">/</span>
             <span aria-current="page">Дело {data.code}</span>
           </nav>
           <p className={`label ${styles.kicker}`}>

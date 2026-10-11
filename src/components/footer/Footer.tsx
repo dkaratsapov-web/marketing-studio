@@ -95,6 +95,9 @@ export default function Footer() {
               {n.label}
             </HomeLink>
           ))}
+          <Link href="/kejsy/" className={styles.navLink}>
+            Кейсы
+          </Link>
           <Link href="/o-nas/" className={styles.navLink}>
             О нас
           </Link>

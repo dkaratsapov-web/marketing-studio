@@ -152,3 +152,9 @@ export const CASES: Case[] = [
 
 /** Номер следующего дела: на брифе клиент видит, что его дело будет следующим */
 export const NEXT_CASE = String(Math.max(...CASES.map((c) => Number(c.code))) + 1).padStart(3, "0");
+
+const caseNum = new Intl.NumberFormat("ru-RU");
+
+/** Метрика дела строкой: «+53%», «5 547», «12→77%» */
+export const formatMetric = (m: Metric) =>
+  m.text ?? `${m.prefix ?? ""}${m.decimals ? (m.value ?? 0).toFixed(m.decimals).replace(".", ",") : caseNum.format(m.value ?? 0)}${m.suffix ?? ""}`;

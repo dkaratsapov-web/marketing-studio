@@ -423,3 +423,11 @@
     width: auto;
   }
 }
+
+/* Ссылка на архив дел под кнопкой последней карточки */
+.allCases {
+  justify-self: start;
+  border-bottom: 1px solid currentColor;
+  color: var(--lime);
+  font-size: var(--step--1);
+}

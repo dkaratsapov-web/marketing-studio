@@ -187,7 +187,7 @@ export default function CaseFinale({ data }: Props) {
             <ul>
               {others.map((c) => (
                 <li key={c.code}>
-                  <Link href={c.href ?? "/#dossier"} className={styles.other}>
+                  <Link href={c.href ?? "/kejsy/"} className={styles.other}>
                     <span className={styles.otherCode}>Дело {c.code}</span>
                     <span className={styles.otherTitle}>{c.title}</span>
                     <span className={styles.otherSector}>{c.sector}</span>

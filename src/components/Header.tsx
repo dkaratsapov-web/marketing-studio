@@ -10,7 +10,7 @@ import HomeLink from "@/components/HomeLink";
 import { INDUSTRY_MENU, SERVICE_MENU } from "@/content/services";
 import styles from "./Header.module.css";
 
-/** В шапке только то, что ведёт на страницы: меню отделов, меню отраслей и «О нас». Якоря главной живут в подвале */
+/** В шапке только то, что ведёт на страницы: меню отделов, меню отраслей, «Кейсы» и «О нас». Якоря главной живут в подвале */
 const NAV = [
   { href: "#departments", label: "Отделы" },
   { href: "#industries", label: "Отрасли" },
@@ -169,6 +169,11 @@ export default function Header() {
               </div>
             ) : null,
           )}
+          <Link href="/kejsy/" className={styles.link} aria-current={pathname.startsWith("/kejsy/") ? "page" : undefined}>
+            <span className={styles.linkText} data-text="Кейсы">
+              Кейсы
+            </span>
+          </Link>
           <Link href="/o-nas/" className={styles.link} aria-current={pathname === "/o-nas/" ? "page" : undefined}>
             <span className={styles.linkText} data-text="О нас">
               О нас
@@ -239,6 +244,11 @@ export default function Header() {
               </div>
             );
           })}
+          <div className={styles.sheetItem}>
+            <Link href="/kejsy/" className={styles.sheetLink} onClick={() => setOpen(false)}>
+              Кейсы
+            </Link>
+          </div>
           <div className={styles.sheetItem}>
             <Link href="/o-nas/" className={styles.sheetLink} onClick={() => setOpen(false)}>
               О нас
