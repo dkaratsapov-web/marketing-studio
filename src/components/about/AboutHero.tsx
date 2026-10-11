@@ -8,61 +8,51 @@ import { useGSAP } from "@gsap/react";
 import HeroLead from "@/components/hero/HeroLead";
 import { CINEMATIC_MQ } from "@/components/service/SearchScene";
 import type { ABOUT } from "@/content/about";
-import BuildingScene, { addBuildingSteps } from "./BuildingScene";
+import dynamic from "next/dynamic";
+import { aboutState } from "./aboutState";
 import styles from "./AboutHero.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
+const MarkScene = dynamic(() => import("./MarkScene"), { ssr: false });
+
 type Props = { data: typeof ABOUT };
 
 /**
- * Первый экран «О нас». Справа разрез здания: по скроллу лифт поднимается по этажам-отделам,
- * этажи загораются с именами тех, кто их ведёт, наверху зажигается вывеска. На десктопе экран
- * закреплён на время сцены, на телефоне подъём проигрывается сам, пока сцена видна.
+ * Первый экран «О нас». Справа знак «Этажи» в 3D: бруски буквы К разбросаны по сцене
+ * и по скроллу собираются волнами снизу вверх, каждая волна — отдел со своей подписью.
+ * Здесь только прогресс сборки (aboutState), рисует WebGL-сцена. На десктопе экран
+ * закреплён на время подъёма, на телефоне подъём проигрывается сам, пока сцена видна.
  */
 export default function AboutHero({ data }: Props) {
   const root = useRef<HTMLElement>(null);
-  const scene = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      const el = scene.current!;
       const section = root.current!;
+      const v = { p: 0 };
+      const write = () => (aboutState.progress = v.p);
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        // Статичный кадр: все этажи горят, вывеска включена
-        const tl = addBuildingSteps(gsap.timeline({ paused: true }), el);
-        tl.progress(1);
+        aboutState.progress = 1;
         return;
       }
 
       const mm = gsap.matchMedia();
       mm.add(CINEMATIC_MQ, () => {
-        const steps = addBuildingSteps(
-          gsap.timeline({ defaults: { ease: "power2.out" } }),
-          el,
-        );
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: "+=200%",
-            pin: true,
-            scrub: 0.8,
-            invalidateOnRefresh: true,
-          },
-        });
-        tl.add(steps).to({}, { duration: 0.6 });
+        gsap.timeline({
+          scrollTrigger: { trigger: section, start: "top top", end: "+=200%", pin: true, scrub: 0.8, invalidateOnRefresh: true },
+        })
+          .to(v, { p: 1, duration: 1, ease: "none", onUpdate: write })
+          .to({}, { duration: 0.15 });
       });
 
       mm.add(`not all and ${CINEMATIC_MQ}`, () => {
-        const loop = gsap.timeline({
-          repeat: -1,
-          repeatDelay: 1.4,
-          paused: true,
-        });
-        addBuildingSteps(loop, el);
+        v.p = 0;
+        write();
+        const loop = gsap.timeline({ repeat: -1, repeatDelay: 1.6, paused: true });
+        loop.to(v, { p: 1, duration: 6, ease: "none", onUpdate: write }).to(v, { p: 1, duration: 1.5 });
         ScrollTrigger.create({
-          trigger: el,
+          trigger: section.querySelector("figure"),
           start: "top bottom",
           end: "bottom top",
           onToggle: (self) => (self.isActive ? loop.play() : loop.pause()),
@@ -123,7 +113,7 @@ export default function AboutHero({ data }: Props) {
         </div>
 
         <figure className={styles.stage}>
-          <BuildingScene ref={scene} data={data.building} />
+          <MarkScene floors={data.building.floors} />
           <figcaption className={styles.note}>{data.building.note}</figcaption>
         </figure>
       </div>

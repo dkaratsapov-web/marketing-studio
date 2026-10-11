@@ -1,0 +1,88 @@
+/* Сцена «О нас»: холст со знаком, подписи отделов поверх по проекции */
+.host {
+  position: relative;
+  width: min(100%, 44rem);
+  height: clamp(24rem, calc(100svh - 16rem), 40rem);
+}
+
+.canvas {
+  position: absolute !important;
+  inset: 0;
+}
+
+.display {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #2e2e34;
+  border-radius: 6px;
+  background: rgb(12 12 14 / 0.8);
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.display b {
+  color: var(--lime);
+}
+
+.labels {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+/* Подпись отдела: тонкая линия-выноска и текст; позиция из сцены, проявление по --on */
+.label {
+  --on: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  opacity: var(--on);
+  will-change: transform;
+}
+
+.label::before {
+  content: "";
+  width: calc(var(--on) * 1.6rem);
+  height: 1px;
+  background: var(--lime);
+}
+
+.text {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.text b {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: clamp(0.95rem, 0.7rem + 0.8vw, 1.4rem);
+  font-weight: 650;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.text span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 960px) {
+  .host {
+    width: 100%;
+    height: clamp(22rem, 100vw, 30rem);
+  }
+
+  .text span {
+    display: none;
+  }
+}
