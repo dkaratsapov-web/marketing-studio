@@ -1,0 +1,64 @@
+/* Сцена первого экрана: холст телефона, подписи слоёв по проекции из сцены */
+.host {
+  position: relative;
+  width: min(100%, 46rem);
+  height: clamp(24rem, calc(100svh - 14rem), 42rem);
+}
+
+.canvas {
+  position: absolute !important;
+  inset: 0;
+}
+
+.labels {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+/* Подпись слоя: плашка как кнопка в чате, номер слоя в красном кружке */
+.label {
+  --on: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.7rem 0.3rem 0.3rem;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 999px;
+  background: rgb(14 14 17 / 0.82);
+  backdrop-filter: blur(6px);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: var(--on);
+  translate: 0.6rem -50%;
+  will-change: transform;
+}
+
+.label span {
+  display: grid;
+  place-items: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 50%;
+  background: #e5262b;
+  color: #fff;
+  font-family: var(--ff-mono);
+  font-size: 0.62rem;
+}
+
+@media (max-width: 960px) {
+  .host {
+    height: clamp(20rem, 105vw, 30rem);
+  }
+
+  .label {
+    font-size: 0.68rem;
+  }
+}

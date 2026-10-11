@@ -1,0 +1,209 @@
+/* Светлый блок: слева заголовок, справа окно переписки в Telegram */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: start;
+}
+
+.head {
+  grid-column: 1 / span 5;
+  display: grid;
+  gap: 1.1rem;
+  position: sticky;
+  top: 7rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--pink-deep);
+}
+
+.lead {
+  max-width: 40ch;
+  color: var(--muted);
+  font-size: var(--step-1);
+  line-height: 1.45;
+}
+
+/* Окно чата: светлая тема Telegram, фон с мягким узором */
+.chat {
+  grid-column: 7 / -1;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 20% 20%, rgb(229 38 43 / 0.06), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgb(196 245 66 / 0.12), transparent 45%),
+    #eef0ea;
+  box-shadow: 0 40px 80px -50px rgb(5 5 5 / 0.45);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.1rem;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+}
+
+.bar b {
+  display: block;
+  font-size: var(--step-0);
+}
+
+.bar small {
+  color: #2f9e4f;
+  font-size: 0.75rem;
+}
+
+.ava {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: #e5262b;
+  color: #fff;
+  font-weight: 700;
+}
+
+.pinned {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0;
+  padding: 0.6rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+  border-left: 3px solid #e5262b;
+  background: rgb(255 255 255 / 0.85);
+  font-size: 0.85rem;
+}
+
+.pinned span {
+  color: #e5262b;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.feed {
+  display: grid;
+  gap: 1.1rem;
+  margin: 0;
+  padding: 1.25rem 1.1rem 1.5rem;
+  list-style: none;
+}
+
+.pair {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ask,
+.answer {
+  max-width: 78%;
+  margin: 0;
+  padding: 0.65rem 0.9rem;
+  border-radius: 1rem;
+  font-size: var(--step-0);
+  line-height: 1.4;
+}
+
+.ask {
+  justify-self: start;
+  border-bottom-left-radius: 0.3rem;
+  background: var(--white);
+  box-shadow: 0 1px 1px rgb(5 5 5 / 0.08);
+}
+
+.answer {
+  position: relative;
+  justify-self: end;
+  padding-right: 2.2rem;
+  border-bottom-right-radius: 0.3rem;
+  background: #dff5a8;
+  font-weight: 500;
+}
+
+/* «Печатает»: три точки в пузыре, стоят на месте ответа и не занимают своё место */
+.typing {
+  justify-self: end;
+  display: flex;
+  gap: 0.25rem;
+  height: 0;
+  margin-top: -0.45rem;
+  translate: 0 0.9rem;
+}
+
+.typing i {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: #8a8a92;
+  animation: dot 1s ease-in-out infinite;
+}
+
+.typing i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes dot {
+  50% {
+    translate: 0 -3px;
+    opacity: 0.4;
+  }
+}
+
+/* Две галочки: серые, при прочтении зелёные */
+.ticks {
+  --read: 1;
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.55rem;
+  width: 1.05rem;
+}
+
+.ticks svg {
+  display: block;
+  fill: none;
+  stroke: color-mix(in srgb, #2f9e4f calc(var(--read) * 100%), #8a8a92);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 960px) {
+  .head,
+  .chat {
+    grid-column: 1 / -1;
+  }
+
+  .head {
+    position: static;
+  }
+
+  .ask,
+  .answer {
+    max-width: 88%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing {
+    display: none;
+  }
+}

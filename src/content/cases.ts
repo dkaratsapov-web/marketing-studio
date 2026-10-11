@@ -7,6 +7,7 @@ import type { StaticImageData } from "next/image";
 import sferaSite from "@/assets/cases/sfera/glavnaya-desktop.webp";
 import sferaPhone from "@/assets/cases/sfera/glavnaya-phone.webp";
 import { DIAUTO } from "@/content/diauto";
+import { IPAPA } from "@/content/ipapa";
 
 export type Metric = {
   /** Число для отсчёта; знак и единицы задаются через prefix/suffix */
@@ -73,12 +74,14 @@ export const CASES: Case[] = [
   {
     code: "010",
     sector: "Ритейл техники",
-    client: "Айпапа, магазин техники Apple, Тверь",
-    services: "Яндекс Директ · Яндекс Бизнес · Аналитика",
+    client: "айпапа.рф, магазин техники Apple и Android, Тверь",
+    services: "Telegram-бот · Мини-приложение · Яндекс Директ · Telegram Ads · Яндекс Бизнес",
     title: "Обошли маркетплейсы не ценой, а наличием в Твери здесь и сейчас",
     task: "Технику Apple сравнивают по цене за десять секунд, а цены федеральных маркетплейсов не перебить.",
-    solution: "Кампании по моделям и их марже, упор на наличие и самовывоз, карточка-витрина, окупаемость по каждой модели.",
+    solution: "Кампании по моделям и их марже, упор на наличие и самовывоз, карточка-витрина. Бот с подпиской на цену и магазин внутри Telegram с трейд-ином.",
     lead: "Даниил",
+    href: "/kejsy/ipapa/",
+    cover: IPAPA.cover,
     metrics: [
       { value: 53, prefix: "+", suffix: "%", label: "продаж" },
       { value: 45, prefix: "−", suffix: "%", label: "стоимость заявки" },

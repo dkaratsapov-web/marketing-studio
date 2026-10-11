@@ -125,6 +125,7 @@ export default function CompareCard({ data }: { data: Data }) {
               value={Math.round(pos)}
               onChange={(e) => setPos(Number(e.target.value))}
               className={styles.range}
+              data-cursor-label="Тяните"
             />
           </div>
           <figcaption className={styles.note}>{data.note}</figcaption>

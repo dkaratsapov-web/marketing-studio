@@ -1,0 +1,236 @@
+/* Тёмный блок: рейка с ценниками-результатами, каналы, стек и заявка */
+.section {
+  padding-block: var(--section-y);
+  overflow: hidden;
+}
+
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 1rem var(--gutter);
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 48ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Рейка: металлическая планка, с неё на нитках свисают ценники */
+.rack {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gutter);
+  margin: clamp(3rem, 6vw, 4.5rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rack::before {
+  content: "";
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  top: 0;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(#5a5b62, #2a2b30);
+  box-shadow: 0 6px 12px rgb(0 0 0 / 0.5);
+}
+
+.slot {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  padding-top: 3.2rem;
+}
+
+.slot::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 1px;
+  height: calc(3.2rem - 6px);
+  background: rgb(255 255 255 / 0.35);
+}
+
+.tag {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+  width: 100%;
+  max-width: 17rem;
+  padding: 2rem 1.25rem 1.25rem;
+  border-radius: 0.9rem 0.9rem 0.9rem 0.9rem;
+  background: #f4f4f0;
+  color: var(--ink-950);
+  transform-origin: 50% -3.2rem;
+  box-shadow: 0 30px 50px -25px rgb(0 0 0 / 0.9);
+}
+
+.slot:nth-child(2n) .tag {
+  background: var(--lime);
+}
+
+.hole {
+  position: absolute;
+  top: 0.7rem;
+  left: 50%;
+  width: 0.7rem;
+  height: 0.7rem;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.5);
+}
+
+.tag b {
+  font-family: var(--ff-display);
+  font-size: clamp(2rem, 1.4rem + 1.8vw, 3.2rem);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+}
+
+.tag span {
+  font-size: var(--step--1);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.tag small {
+  margin-top: 0.4rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgb(5 5 5 / 0.25);
+  color: rgb(5 5 5 / 0.62);
+  font-family: var(--ff-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+}
+
+.channels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gutter);
+  margin: clamp(3rem, 6vw, 4.5rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.channels li {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.channels h3 {
+  font-size: var(--step-1);
+  letter-spacing: -0.02em;
+}
+
+.channels p {
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+.stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stack li {
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+}
+
+.cta {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 2rem var(--gutter);
+  align-items: end;
+  margin-top: clamp(3rem, 6vw, 4.5rem);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  background: var(--bg-raised);
+}
+
+.form {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.ctaTitle {
+  margin: 0;
+  font-family: var(--ff-display);
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.more {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: start;
+}
+
+.more a {
+  border-bottom: 1px solid var(--line);
+  font-size: var(--step-0);
+  transition:
+    border-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .more a:hover {
+    border-color: var(--lime);
+    color: var(--lime);
+  }
+}
+
+@media (max-width: 960px) {
+  .head,
+  .cta {
+    grid-template-columns: 1fr;
+  }
+
+  .rack {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 1rem;
+  }
+
+  .rack::before {
+    display: none;
+  }
+
+  .channels {
+    grid-template-columns: 1fr;
+  }
+}
