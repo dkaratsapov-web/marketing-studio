@@ -110,3 +110,36 @@ void main(){
   float a = clamp(max(col.r, max(col.g, col.b)), 0., 1.);
   gl_FragColor = vec4(col, a);
 }`;
+
+/** Ритейл техники: штрихкод во всю высоту медленно едет, розовый луч сканера ходит вверх-вниз и подсвечивает штрихи */
+export const SCAN = `
+void main(){
+  vec2 uv = gl_FragCoord.xy / uRes.y;
+  float asp = uRes.x / uRes.y;
+  float x = uv.x - 0.48 * asp;
+  vec3 col = vec3(0.);
+  // Штрихи разной толщины: ячейки по горизонтали, у каждой своя ширина и пропуск
+  float drift = uTime * 0.012 + (uPtr.x - 0.5) * 0.02;
+  float cell = (x + drift) * 46.;
+  float id = floor(cell);
+  float f = fract(cell);
+  float w = 0.18 + hash(vec2(id, 3.1)) * 0.6;
+  float on = step(0.32, hash(vec2(id, 9.7)));
+  float bar = on * smoothstep(w, w - 0.06, f) * step(0., x);
+  // Луч сканера: горизонтальная линия, ходит по синусу, по скроллу быстрее
+  float ly = 0.5 + 0.38 * sin(uTime * (0.55 + uProg * 0.8));
+  float d = abs(uv.y - ly);
+  float beam = exp(-d * 260.) * step(0., x);
+  float halo = exp(-d * 18.) * step(0., x);
+  vec3 pink = vec3(1., .3, .62);
+  col += vec3(1.) * bar * 0.07;
+  col += pink * bar * halo * 0.35;
+  col += pink * beam * 0.9 + pink * halo * 0.05;
+  // Сверху и снизу штрихи тают
+  col *= smoothstep(0., 0.18, uv.y) * smoothstep(1., 0.82, uv.y);
+  float side = smoothstep(0.3, 0.75, gl_FragCoord.x / uRes.x);
+  col *= 0.1 + 0.9 * side;
+  col = min(col, vec3(1.));
+  float a = clamp(max(col.r, max(col.g, col.b)), 0., 1.);
+  gl_FragColor = vec4(col, a);
+}`;

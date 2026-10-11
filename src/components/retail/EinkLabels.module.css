@@ -1,0 +1,170 @@
+/* Тёмный блок: полка с электронными ценниками, серый экран электронной бумаги в пластике */
+.section {
+  padding-block: var(--section-y);
+}
+
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: end;
+  gap: 1rem var(--gutter);
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 46ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Полка: ценники в ряд по четыре, под каждым рядом кромка полки */
+.shelf {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2.5rem 0.75rem;
+  margin: clamp(3rem, 7vh, 4.5rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.label {
+  position: relative;
+  padding: 0.5rem;
+  border-radius: 0.6rem;
+  background: #1d1e22;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.08) inset,
+    0 14px 0 -8px #2c2d33,
+    0 24px 30px -20px rgb(0 0 0 / 0.9);
+}
+
+/* Главный тариф: корпус салатовый */
+.label[data-main] {
+  background: var(--lime);
+}
+
+.screen {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  min-height: 11rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.3rem;
+  background: #d7d8d0;
+  color: #1a1a1a;
+}
+
+.name {
+  font-family: var(--ff-display);
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.note {
+  margin-top: 0.3rem;
+  color: #4a4b47;
+  font-size: 0.78rem;
+}
+
+.price {
+  align-self: end;
+  margin-top: 1rem;
+  font-family: var(--ff-display);
+  font-size: clamp(1.7rem, 1.2rem + 1.1vw, 2.4rem);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+}
+
+.unit {
+  margin-top: 0.25rem;
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+/* Обновление электронной бумаги: экран чернеет, белеет и проявляет новое содержимое */
+.shelf:not([data-on]) .screen > * {
+  opacity: 0;
+}
+
+.shelf[data-on] .screen {
+  animation: refresh 0.9s steps(1, end) both;
+  animation-delay: calc(var(--i) * 0.14s);
+}
+
+.shelf[data-on] .screen > * {
+  animation: ink 0.9s steps(1, end) both;
+  animation-delay: calc(var(--i) * 0.14s);
+}
+
+@keyframes refresh {
+  0% {
+    background: #1a1a1a;
+  }
+  25% {
+    background: #f2f2ec;
+  }
+  50% {
+    background: #1a1a1a;
+  }
+  75%,
+  100% {
+    background: #d7d8d0;
+  }
+}
+
+@keyframes ink {
+  0%,
+  74% {
+    opacity: 0;
+  }
+  75%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 1100px) {
+  .shelf {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .head {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .shelf {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+
+  .screen {
+    min-height: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shelf[data-on] .screen,
+  .shelf[data-on] .screen > * {
+    animation: none;
+  }
+
+  .shelf:not([data-on]) .screen > * {
+    opacity: 1;
+  }
+}

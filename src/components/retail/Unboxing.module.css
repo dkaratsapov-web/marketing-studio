@@ -1,0 +1,189 @@
+/* Светлый блок: слева комплектация и итоги, справа коробка, крышка поднимается по скроллу */
+.section {
+  padding-block: var(--section-y);
+  overflow: clip;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 3rem;
+  align-items: center;
+}
+
+.copy {
+  grid-column: 1 / span 6;
+  display: grid;
+  justify-items: start;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--accent);
+}
+
+.lead {
+  max-width: 40ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.kitName {
+  margin-top: 0.75rem;
+  color: var(--pink-deep);
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.kit {
+  display: grid;
+  gap: 0;
+  width: 100%;
+  max-width: 34rem;
+  margin: -0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: kit;
+}
+
+.kit li {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--step-0);
+  counter-increment: kit;
+}
+
+.kit li::before {
+  content: counter(kit, decimal-leading-zero);
+  color: #5c5c63;
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  line-height: 1.9;
+}
+
+.results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2.5rem;
+  margin: 0.5rem 0;
+}
+
+.results div {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.2rem;
+}
+
+.results dd {
+  margin: 0;
+  font-family: var(--ff-display);
+  font-size: var(--step-3);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.results dt {
+  max-width: 16ch;
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.35;
+}
+
+/* Коробка: белое дно с тенью, внутри экран; крышка накрывает всё и уезжает вверх */
+.box {
+  grid-column: 8 / -1;
+  position: relative;
+  justify-self: center;
+  width: min(100%, 22rem);
+  aspect-ratio: 9 / 15;
+  margin-top: 4rem;
+}
+
+.base {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 1.6rem;
+  background: #ececee;
+  box-shadow:
+    inset 0 0 0 0.6rem #f6f6f7,
+    inset 0 0 0 calc(0.6rem + 1px) rgb(5 5 5 / 0.08),
+    0 40px 60px -30px rgb(5 5 5 / 0.45);
+}
+
+.shot {
+  position: absolute;
+  inset: 1.4rem;
+  overflow: hidden;
+  border: 0.45rem solid var(--ink-950);
+  border-radius: 1.6rem;
+  background: var(--ink-950);
+}
+
+.img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 0;
+}
+
+.lid {
+  position: absolute;
+  inset: -0.35rem;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.6rem;
+  border-radius: 1.8rem;
+  background: linear-gradient(160deg, #ffffff 0%, #f1f1f3 100%);
+  box-shadow:
+    0 1px 0 #fff inset,
+    0 30px 50px -25px rgb(5 5 5 / 0.5),
+    0 0 0 1px rgb(5 5 5 / 0.08);
+  transform-origin: 50% 100%;
+}
+
+.lidName {
+  font-family: var(--ff-display);
+  font-size: clamp(2rem, 1.5rem + 1.6vw, 3rem);
+  font-weight: 650;
+  letter-spacing: -0.05em;
+}
+
+.lidCode {
+  color: var(--pink-deep);
+  font-family: var(--ff-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 960px) {
+  .copy,
+  .box {
+    grid-column: 1 / -1;
+  }
+
+  .box {
+    width: min(78%, 20rem);
+  }
+}
+
+/* Без анимации коробка сразу открыта */
+@media (prefers-reduced-motion: reduce) {
+  .lid {
+    display: none;
+  }
+}

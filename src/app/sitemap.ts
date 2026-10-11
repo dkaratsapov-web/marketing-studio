@@ -16,6 +16,7 @@ const PAGES: { path: string; priority: number; changeFrequency: "weekly" | "mont
   { path: "/otrasli/restorany/", priority: 0.8, changeFrequency: "monthly" },
   { path: "/otrasli/avtobiznes/", priority: 0.8, changeFrequency: "monthly" },
   { path: "/otrasli/proektirovanie-i-stroitelstvo/", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/otrasli/riteyl-tehniki/", priority: 0.8, changeFrequency: "monthly" },
   { path: "/kejsy/", priority: 0.8, changeFrequency: "monthly" },
   { path: "/kejsy/sfera/", priority: 0.7, changeFrequency: "monthly" },
   { path: "/kejsy/diauto69/", priority: 0.7, changeFrequency: "monthly" },

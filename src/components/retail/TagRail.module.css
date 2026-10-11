@@ -1,0 +1,236 @@
+/* Светлый блок: шесть ценников висят на двух рейках, переворачиваются */
+.section {
+  padding-block: var(--section-y);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--accent);
+}
+
+.lead {
+  max-width: 40ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Рейки: по три ценника на каждой, рейка рисуется линией над рядом */
+.rail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4.5rem var(--gutter);
+  margin: clamp(3rem, 7vh, 4.5rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slot {
+  position: relative;
+  padding-top: 2.6rem;
+  perspective: 1200px;
+}
+
+/* Рейка над каждым рядом: линия на всю ширину ячейки и шнурок к ценнику */
+.slot::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(var(--gutter) / -2);
+  right: calc(var(--gutter) / -2);
+  height: 4px;
+  border-radius: 2px;
+  background: #c9c9cc;
+}
+
+.slot::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  width: 1px;
+  height: 2.6rem;
+  background: rgb(5 5 5 / 0.35);
+}
+
+.tag {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transform-origin: 50% -2.6rem;
+}
+
+/* Ценники повисают по очереди и раскачиваются до остановки */
+.rail[data-on] .tag {
+  animation: hang 1.6s var(--ease-out) both;
+  animation-delay: calc(var(--i) * 0.12s);
+}
+
+.rail:not([data-on]) .tag {
+  opacity: 0;
+}
+
+@keyframes hang {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) rotate(-12deg);
+  }
+  25% {
+    opacity: 1;
+    transform: rotate(8deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+  75% {
+    transform: rotate(1.5deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+.inner {
+  position: relative;
+  display: grid;
+  min-height: 15rem;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+
+.tag[aria-pressed="true"] .inner {
+  transform: rotateY(180deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tag:hover .inner {
+    transform: rotateY(180deg);
+  }
+
+  .tag[aria-pressed="true"]:hover .inner {
+    transform: none;
+  }
+}
+
+.front,
+.back {
+  grid-area: 1 / 1;
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+  padding: 2.4rem 1.5rem 1.5rem;
+  border-radius: 0.9rem;
+  backface-visibility: hidden;
+}
+
+.front {
+  background: var(--ink-950);
+  color: var(--white);
+}
+
+.back {
+  background: var(--lime);
+  color: var(--ink-950);
+  transform: rotateY(180deg);
+}
+
+.hole {
+  position: absolute;
+  top: 0.9rem;
+  left: 50%;
+  width: 0.75rem;
+  height: 0.75rem;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+.lose {
+  font-family: var(--ff-display);
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.flip {
+  color: var(--pink-deep);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.fix {
+  font-size: var(--step-0);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.proof {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px dashed rgb(5 5 5 / 0.3);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+}
+
+.tag:focus-visible {
+  outline: none;
+}
+
+.tag:focus-visible .front,
+.tag:focus-visible .back {
+  outline: 2px solid var(--pink-deep);
+  outline-offset: 3px;
+}
+
+@media (max-width: 960px) {
+  .rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .rail {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .inner {
+    min-height: 12rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail[data-on] .tag {
+    animation: none;
+  }
+
+  .rail:not([data-on]) .tag {
+    opacity: 1;
+  }
+
+  .inner {
+    transition: none;
+  }
+}
