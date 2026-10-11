@@ -12,7 +12,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 type Data = (typeof SARA)["need"];
 
 /** Что приходится вбивать в обычную форму ради одной встречи (пример) */
-const VALUES = ["Глобал Стекло", "Созвон по медиаплану", "12 октября", "11:00", "Глобал Стекло", "Рабочее"];
+const VALUES = ["Каркаскомфорт", "Созвон по медиаплану", "12 октября", "11:00", "Каркаскомфорт", "Рабочее"];
 
 /**
  * Проблема наглядно: слева форма таск-менеджера печатает поле за полем, медленно,
@@ -89,7 +89,7 @@ export default function NeedVoice({ data }: { data: Data }) {
             </p>
             <p className={styles.done} data-done>
               <span className={styles.check} aria-hidden="true" />
-              Записано: встреча с Глобал Стекло, завтра в 11:00
+              Записано: встреча с Каркаскомфортом, завтра в 11:00
             </p>
             <p className={styles.enough}>{data.enough}</p>
           </figure>
