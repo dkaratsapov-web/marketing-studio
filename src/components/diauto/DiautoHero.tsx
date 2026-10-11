@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,67 +9,45 @@ import { useGSAP } from "@gsap/react";
 import HeroLead from "@/components/hero/HeroLead";
 import { CINEMATIC_MQ } from "@/components/service/SearchScene";
 import type { DIAUTO } from "@/content/diauto";
-import HubScene, { addHubSteps } from "./HubScene";
+import { ringState } from "./ringState";
 import styles from "./DiautoHero.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+const RingScene = dynamic(() => import("./RingScene"), { ssr: false });
 
 type Props = { data: typeof DIAUTO };
 
 const num = new Intl.NumberFormat("ru-RU");
 
 /**
- * Первый экран дела ДиАвто69. Справа сцена: пост канала разбирается в карточку каталога,
- * и она расходится по сайту, боту, MAX и рекламным площадкам. На десктопе экран закреплён
- * на время сцены, на телефоне сцена проигрывается сама, пока видна.
+ * Первый экран дела ДиАвто69. Справа WebGL-витрина: карточки из каталога клиента лежат
+ * колодой, по скроллу раздаются по кругу и поворачиваются. На десктопе экран закреплён
+ * на время сцены, на телефоне витрина крутится сама.
  */
 export default function DiautoHero({ data }: Props) {
   const root = useRef<HTMLElement>(null);
-  const scene = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      const el = scene.current!;
-      const section = root.current!;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        // Статичный кадр: карточка разошлась по всем витринам
-        const tl = addHubSteps(gsap.timeline({ paused: true }), el);
-        tl.progress(1);
-        return;
-      }
-
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       const mm = gsap.matchMedia();
+      // Десктоп: экран закреплён, скролл раздаёт колоду и поворачивает кольцо
       mm.add(CINEMATIC_MQ, () => {
-        const steps = addHubSteps(
-          gsap.timeline({ defaults: { ease: "power2.out" } }),
-          el,
-        );
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: "+=200%",
-            pin: true,
-            scrub: 0.8,
-            invalidateOnRefresh: true,
-          },
-        });
-        tl.add(steps).to({}, { duration: 0.6 });
-      });
-
-      mm.add(`not all and ${CINEMATIC_MQ}`, () => {
-        const loop = gsap.timeline({
-          repeat: -1,
-          repeatDelay: 1.4,
-          paused: true,
-        });
-        addHubSteps(loop, el);
+        ringState.auto = false;
+        ringState.progress = 0;
         ScrollTrigger.create({
-          trigger: el,
-          start: "top bottom",
-          end: "bottom top",
-          onToggle: (self) => (self.isActive ? loop.play() : loop.pause()),
+          trigger: root.current,
+          start: "top top",
+          end: "+=200%",
+          pin: true,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => (ringState.progress = self.progress),
         });
+      });
+      // Телефон и планшет: без закрепления, витрина крутится сама
+      mm.add(`not all and ${CINEMATIC_MQ}`, () => {
+        ringState.auto = true;
       });
     },
     { scope: root },
@@ -125,8 +104,8 @@ export default function DiautoHero({ data }: Props) {
         </div>
 
         <figure className={styles.stage}>
-          <HubScene ref={scene} hub={data.hero.hub} />
-          <figcaption className={styles.note}>{data.hero.hub.note}</figcaption>
+          <RingScene total={data.hero.ring.total} note={data.hero.ring.note} />
+          <figcaption className="visually-hidden">Карточки авто из каталога ДиАвто69 на вращающейся витрине</figcaption>
         </figure>
       </div>
     </section>
