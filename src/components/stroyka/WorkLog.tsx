@@ -28,9 +28,23 @@ export default function WorkLog({ data }: { data: Data }) {
       const brace = el.querySelector<HTMLElement>("[data-brace]")!;
       const plaster = el.querySelectorAll<HTMLElement>("[data-plaster]");
       const tl = gsap.timeline({
-        scrollTrigger: { trigger: el.querySelector("[data-book]"), start: "top 70%", end: "bottom 55%", scrub: 0.5 },
+        scrollTrigger: {
+          trigger: el.querySelector("[data-book]"),
+          start: "top 70%",
+          end: "bottom 55%",
+          scrub: 0.5,
+        },
       });
-      tl.fromTo(rows, { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1, stagger: 0.8, ease: "none" }).fromTo(
+      tl.fromTo(
+        rows,
+        { clipPath: "inset(0 100% 0 0)" },
+        {
+          clipPath: "inset(0 0% 0 0)",
+          duration: 1,
+          stagger: 0.8,
+          ease: "none",
+        },
+      ).fromTo(
         brace,
         { scaleY: 0, autoAlpha: 0 },
         { scaleY: 1, autoAlpha: 1, duration: 0.8, ease: "power2.out" },
@@ -44,7 +58,11 @@ export default function WorkLog({ data }: { data: Data }) {
           duration: 0.8,
           ease: "power2.in",
           stagger: 0.35,
-          scrollTrigger: { trigger: el.querySelector("[data-act]"), start: "top 65%", once: true },
+          scrollTrigger: {
+            trigger: el.querySelector("[data-act]"),
+            start: "top 65%",
+            once: true,
+          },
         },
       );
     },
@@ -52,7 +70,12 @@ export default function WorkLog({ data }: { data: Data }) {
   );
 
   return (
-    <section ref={root} className={styles.section} data-surface="light" aria-labelledby="log-title">
+    <section
+      ref={root}
+      className={styles.section}
+      data-surface="light"
+      aria-labelledby="log-title"
+    >
       <div className={`wrap ${styles.grid}`}>
         <header className={styles.head}>
           <h2 id="log-title" className={styles.title}>
@@ -70,7 +93,12 @@ export default function WorkLog({ data }: { data: Data }) {
           </p>
           <ol className={styles.entries}>
             {data.entries.map((e, i) => (
-              <li key={e.day} className={styles.entry} data-entry data-last={i === data.entries.length - 1 || undefined}>
+              <li
+                key={e.day}
+                className={styles.entry}
+                data-entry
+                data-last={i === data.entries.length - 1 || undefined}
+              >
                 <span className={styles.day}>{e.day}</span>
                 <span className={styles.what}>{e.what}</span>
                 <span className={styles.where}>{e.where}</span>
@@ -95,15 +123,30 @@ export default function WorkLog({ data }: { data: Data }) {
                   <p className={styles.defEffect}>{d.effect}</p>
                   <span className={styles.fixed}>{data.hidden.fixed}</span>
                 </div>
-                <span className={styles.plaster} data-plaster aria-hidden="true" />
+                <span
+                  className={styles.plaster}
+                  data-plaster
+                  aria-hidden="true"
+                />
               </li>
             ))}
           </ol>
-          <figure className={styles.shot}>
-            <Image src={data.hidden.shot} alt={data.hidden.shotAlt} className={styles.shotImg} sizes="(max-width: 960px) 90vw, 30vw" />
-            <figcaption>Раздел «Стык» в аналитике дела 004: суммы скрыты, цифры демонстрационные</figcaption>
-          </figure>
         </aside>
+
+        <figure className={styles.shot}>
+          <div className={styles.shotFrame}>
+            <Image
+              src={data.hidden.shot}
+              alt={data.hidden.shotAlt}
+              className={styles.shotImg}
+              sizes="(max-width: 960px) 92vw, 80vw"
+            />
+          </div>
+          <figcaption>
+            Раздел «Стык» в аналитике дела 004: суммы скрыты, цифры
+            демонстрационные
+          </figcaption>
+        </figure>
       </div>
     </section>
   );
