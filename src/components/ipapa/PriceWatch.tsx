@@ -6,7 +6,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import type { IPAPA } from "@/content/ipapa";
-import product from "@/assets/cases/ipapa/product.webp";
+import product from "@/assets/cases/ipapa/product-photo.webp";
 import styles from "./PriceWatch.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
