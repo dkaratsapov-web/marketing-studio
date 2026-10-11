@@ -36,7 +36,7 @@ export default function WindowSticker({ data, service }: { data: Data; service: 
       ease: "power2.out",
       onUpdate: () => {
         if (monthRef.current) monthRef.current.textContent = `${num.format(Math.round(v.m / 1000) * 1000)} ₽`;
-        if (onceRef.current) onceRef.current.textContent = v.o ? `${num.format(Math.round(v.o / 1000) * 1000)} ₽` : "—";
+        if (onceRef.current) onceRef.current.textContent = v.o ? `${num.format(Math.round(v.o / 1000) * 1000)} ₽` : "0 ₽";
       },
     });
     prev.current = { m: monthly, o: once };
@@ -91,7 +91,7 @@ export default function WindowSticker({ data, service }: { data: Data; service: 
               </div>
               <div>
                 <dt>{data.once}</dt>
-                <dd ref={onceRef}>{once ? `${num.format(once)} ₽` : "—"}</dd>
+                <dd ref={onceRef}>{once ? `${num.format(once)} ₽` : "0 ₽"}</dd>
               </div>
               {quote ? (
                 <div>

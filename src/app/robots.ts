@@ -7,7 +7,7 @@ export const dynamic = "force-static";
 export default function robots(): MetadataRoute.Robots {
   if (IS_MIRROR) return { rules: { userAgent: "*", disallow: "/" } };
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/_next/", "/404/"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/404/"] },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

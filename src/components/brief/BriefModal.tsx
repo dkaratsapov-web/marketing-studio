@@ -6,6 +6,7 @@ import { lenisRef } from "@/components/SmoothScroll";
 import { rememberUtm } from "@/lib/lead";
 import BriefForm from "./BriefForm";
 import styles from "./BriefModal.module.css";
+import { NEXT_CASE } from "@/content/cases";
 
 type OpenState = { service?: string; n: number } | null;
 
@@ -121,7 +122,7 @@ export default function BriefModal() {
         </button>
 
         <header className={styles.head}>
-          <p className="label">Дело 023</p>
+          <p className="label">Дело {NEXT_CASE}</p>
           <h2 id="brief-modal-title" className={styles.title}>
             Отправить бриф
           </h2>

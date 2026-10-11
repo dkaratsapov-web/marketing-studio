@@ -22,7 +22,7 @@ export function LogoMark({ className, size = "small" }: Props) {
 }
 
 /** Строка из песни Элджея «Корпорация»: по наведению на логотип она договаривается до названия */
-export const QUOTE = "У нас столько проектов — мы целая";
+export const QUOTE = "У нас столько проектов, мы целая";
 
 export function Logo({ className }: Props) {
   return (

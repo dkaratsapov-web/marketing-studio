@@ -146,3 +146,6 @@ export const CASES: Case[] = [
     ],
   },
 ];
+
+/** Номер следующего дела: на брифе клиент видит, что его дело будет следующим */
+export const NEXT_CASE = String(Math.max(...CASES.map((c) => Number(c.code))) + 1).padStart(3, "0");

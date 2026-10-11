@@ -156,7 +156,7 @@ export default function TestDriveBrief({ data, service }: { data: Data; service:
             </p>
             <p className={styles.tRow}>
               <span>Каналы</span>
-              <b>{where.length ? where.join(", ") : "—"}</b>
+              <b>{where.length ? where.join(", ") : "не выбрано"}</b>
             </p>
             <p className={styles.tRow}>
               <span>Инструктор</span>

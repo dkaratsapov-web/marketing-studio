@@ -6,7 +6,7 @@ import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { CASES, type Metric } from "@/content/cases";
+import { CASES, type Metric, NEXT_CASE } from "@/content/cases";
 import styles from "./Dossier.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -237,7 +237,7 @@ export default function Dossier() {
         ))}
 
         <aside className={styles.next}>
-          <p className="label">Дело 023</p>
+          <p className="label">Дело {NEXT_CASE}</p>
           <p className={styles.nextTitle}>Ваше дело следующее.</p>
           <a href="#brief" className="btn btn--primary">
             Открыть дело

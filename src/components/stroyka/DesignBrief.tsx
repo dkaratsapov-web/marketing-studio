@@ -153,7 +153,7 @@ export default function DesignBrief({ data, service }: { data: Data; service: st
           <dl className={styles.fields}>
             <div>
               <dt>Объекты</dt>
-              <dd>{objects.length ? objects.join(", ") : "—"}</dd>
+              <dd>{objects.length ? objects.join(", ") : "не выбрано"}</dd>
             </div>
             <div>
               <dt>Работы</dt>

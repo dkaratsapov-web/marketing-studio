@@ -150,7 +150,7 @@ export default function ParserBench({ data }: { data: Data }) {
               return (
                 <div key={f.key} className={styles.row} data-row={f.key} data-filled={v ? "1" : undefined}>
                   <dt>{f.label}</dt>
-                  <dd data-empty={!v || undefined}>{v || "—"}</dd>
+                  <dd data-empty={!v || undefined}>{v || "нет"}</dd>
                 </div>
               );
             })}
