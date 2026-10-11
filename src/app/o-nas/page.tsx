@@ -12,7 +12,7 @@ import VisitorPass from "@/components/about/VisitorPass";
 import { breadcrumbs, ORG_ID, pageMeta, SITE_URL } from "@/lib/seo";
 import { ABOUT } from "@/content/about";
 
-const TITLE = "О Корпорации: маркетинговое агентство Даниила Карацапова";
+const TITLE = "О Корпорации: маркетинговое агентство полного цикла";
 const DESCRIPTION =
   "Пять отделов под одной крышей: стратегия, контекст и карты, таргет, разработка и приёмная. В digital с 2019 года, 22 кейса с измеримым результатом, работаем по всей России.";
 const PATH = "/o-nas/";

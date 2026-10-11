@@ -64,9 +64,9 @@ export const ORGANIZATION = {
   logo: abs("/apple-icon.png"),
   image: abs("/og/home.jpg"),
   description:
-    "Маркетинговое агентство Даниила Карацапова: контекстная и таргетированная реклама, карты и геосервисы, сайты и сквозная аналитика.",
+    "Маркетинговое агентство полного цикла «Корпорация»: контекстная и таргетированная реклама, карты и геосервисы, сайты и сквозная аналитика.",
   telephone: PHONES.map((p) => p.href.replace("tel:", "")),
-  founder: { "@type": "Person", name: "Даниил Карацапов" },
+  founder: { "@type": "Person", name: "Даниил" },
   foundingDate: "2019",
   areaServed: { "@type": "Country", name: "Россия" },
   openingHoursSpecification: {

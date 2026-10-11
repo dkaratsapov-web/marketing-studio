@@ -139,7 +139,7 @@ export default function Footer() {
       <div className={`wrap ${styles.bottom}`}>
         <p>
           © {new Date().getFullYear()} Корпорация. Маркетинговое агентство
-          Даниила Карацапова
+          полного цикла
         </p>
         <p>Работаем онлайн по всей России</p>
       </div>

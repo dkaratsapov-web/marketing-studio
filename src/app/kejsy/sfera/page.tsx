@@ -34,7 +34,7 @@ const LD = [
     url: absoluteUrl(PATH),
     image: absoluteUrl("/og/sfera.jpg"),
     inLanguage: "ru-RU",
-    author: { "@type": "Person", name: "Даниил Карацапов" },
+    author: { "@type": "Person", name: "Даниил" },
     publisher: { "@id": ORG_ID },
     about: { "@type": "Organization", name: "Проектная компания «Сфера»" },
   },

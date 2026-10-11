@@ -19,7 +19,7 @@ export const DEPARTMENTS: Department[] = [
     short: "Стратегия",
     tagline: "находит, где теряются заявки",
     tone: "lime",
-    head: { name: "Даниил Карацапов", role: "основатель" },
+    head: { name: "Даниил", role: "основатель" },
     services: [
       "Аудит рекламы и сайта",
       "Маркетинг под ключ: стратегия и медиаплан",
@@ -34,7 +34,7 @@ export const DEPARTMENTS: Department[] = [
     short: "Разработка",
     tagline: "собирает сайт, который принимает заявки",
     tone: "pink",
-    head: { name: "Даниил Карацапов", role: "основатель" },
+    head: { name: "Даниил", role: "основатель" },
     launch: "Лендинг за 7–14 дней",
     services: [
       "Лендинги и корпоративные сайты",
@@ -50,7 +50,7 @@ export const DEPARTMENTS: Department[] = [
     short: "Контекст",
     tagline: "приводит тех, кто уже ищет",
     tone: "lime",
-    head: { name: "Даниил Карацапов", role: "основатель" },
+    head: { name: "Даниил", role: "основатель" },
     launch: "Запуск за 3–5 дней",
     services: [
       "Яндекс Директ: поиск, РСЯ, ретаргетинг",
