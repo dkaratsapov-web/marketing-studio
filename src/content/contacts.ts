@@ -17,3 +17,9 @@ export const TELEGRAMS = [
   TELEGRAM,
   { handle: "@smok1204", href: "https://t.me/smok1204" },
 ];
+
+/** Мессенджер MAX: кнопка в шапке, мобильном меню и подвале */
+export const MAX = {
+  handle: "MAX",
+  href: "https://max.ru/u/f9LHodD0cOJUi9Mm5ydOlaX3jNw8KsWVMll3jqzkTLjDs91vo3SdC70obtw",
+};

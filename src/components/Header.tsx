@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "./Logo";
-import { HOURS, PHONES, TELEGRAM } from "@/content/contacts";
+import { HOURS, MAX, PHONES, TELEGRAM } from "@/content/contacts";
+import MaxIcon from "@/components/MaxIcon";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import HomeLink from "@/components/HomeLink";
@@ -193,6 +194,16 @@ export default function Header() {
         >
           <TelegramIcon />
         </a>
+        <a
+          href={MAX.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.tg}
+          aria-label="Написать в MAX"
+          title="Написать в MAX"
+        >
+          <MaxIcon />
+        </a>
 
         <a href="#brief" className={`btn btn--primary ${styles.cta}`}>
           Отправить бриф
@@ -249,6 +260,10 @@ export default function Header() {
           >
             <TelegramIcon />
             Telegram {TELEGRAM.handle}
+          </a>
+          <a href={MAX.href} target="_blank" rel="noopener noreferrer" className={styles.sheetTg}>
+            <MaxIcon />
+            Написать в MAX
           </a>
         </div>
         <a href="#brief" className="btn btn--primary" onClick={() => setOpen(false)}>

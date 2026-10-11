@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { HOURS, PHONES, TELEGRAMS } from "@/content/contacts";
+import { HOURS, MAX, PHONES, TELEGRAMS } from "@/content/contacts";
 import { QUOTE } from "@/components/Logo";
 import Link from "next/link";
 import HomeLink from "@/components/HomeLink";
@@ -85,6 +85,9 @@ export default function Footer() {
               Telegram {t.handle}
             </a>
           ))}
+          <a href={MAX.href} target="_blank" rel="noopener noreferrer" className={styles.big}>
+            Написать в MAX
+          </a>
         </div>
         <nav className={styles.nav} aria-label="Разделы">
           {NAV.map((n) => (
