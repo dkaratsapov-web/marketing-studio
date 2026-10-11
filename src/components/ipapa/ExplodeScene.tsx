@@ -14,7 +14,7 @@ type Layer = { img: StaticImageData; name: string };
 const PW = 1.5;
 const PH = (PW * 844) / 390;
 const DEPTH = 0.16;
-const SPACING = 0.62;
+const SPACING = 0.5;
 const { clamp, smoothstep, damp, lerp } = THREE.MathUtils;
 const ease = (t: number) => 1 - Math.pow(1 - t, 3);
 
@@ -126,7 +126,8 @@ function Phone({ layers, still }: { layers: Layer[]; still: boolean }) {
       g.scale.setScalar(narrow ? 0.78 : 1);
       g.rotation.y = lerp(0, -0.72, turn) + s.px * 0.14 + (still ? 0 : Math.sin(time * 0.4) * 0.02);
       g.rotation.x = lerp(0, 0.18, turn) - s.py * 0.08;
-      g.position.x = lerp(0, narrow ? -0.35 : -0.8, turn);
+      // Слои выходят вперёд, после поворота это влево: сборка уезжает вправо, чтобы всё помещалось
+      g.position.x = lerp(0, narrow ? 0.45 : 0.6, turn);
       g.position.y = Math.sin(time * 0.8) * (still ? 0 : 0.03);
     }
 
@@ -196,7 +197,7 @@ export default function ExplodeScene({ layers }: { layers: Layer[] }) {
         className={styles.canvas}
         dpr={[1, 1.75]}
         frameloop={visible ? "always" : "never"}
-        camera={{ position: [0, 0, 7.2], fov: 34, near: 0.1, far: 40 }}
+        camera={{ position: [0, 0, 8.2], fov: 34, near: 0.1, far: 40 }}
         gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }}
         onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
         aria-hidden="true"
