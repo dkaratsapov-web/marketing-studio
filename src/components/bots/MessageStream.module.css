@@ -1,0 +1,29 @@
+/* Холст потока сообщений: шире и выше окна чата, стоит за ним */
+.host {
+  position: absolute;
+  inset: -22% -34%;
+  z-index: 0;
+  pointer-events: none;
+  /* Слева поток растворяется, не заходя на текст и форму; сверху и снизу тает без обреза */
+  -webkit-mask-image: linear-gradient(90deg, transparent 8%, #000 34%), linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent 8%, #000 34%), linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.canvas {
+  position: absolute !important;
+  inset: 0;
+}
+
+/* Телефон: чат во всю ширину, поэтому поток живёт полосой над окном чата */
+@media (max-width: 960px) {
+  .host {
+    inset: -2rem -6% auto;
+    height: 22rem;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 70%, transparent 100%);
+    -webkit-mask-composite: source-over;
+    mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 70%, transparent 100%);
+    mask-composite: add;
+  }
+}

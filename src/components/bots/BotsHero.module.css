@@ -198,6 +198,7 @@
 }
 
 .stage {
+  position: relative;
   grid-column: 7 / -1;
   grid-row: 2 / 4;
   align-self: center;
@@ -279,4 +280,32 @@
 
 .fact:first-child dd {
   color: var(--lime);
+}
+
+/* Окно чата над 3D-потоком */
+.chatWrap {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  width: 100%;
+}
+
+.note {
+  position: relative;
+  z-index: 1;
+}
+
+/* Текст и форма всегда над 3D-потоком */
+.top,
+.title,
+.leadWrap {
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 960px) {
+  .stage {
+    padding-top: 15rem;
+  }
 }

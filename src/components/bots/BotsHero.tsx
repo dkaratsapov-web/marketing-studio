@@ -1,12 +1,18 @@
+"use client";
+
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import HeroLead from "@/components/hero/HeroLead";
 import type { BOTS } from "@/content/bots";
 import BotDemo from "./BotDemo";
 import styles from "./BotsHero.module.css";
 
+const MessageStream = dynamic(() => import("./MessageStream"), { ssr: false });
+
 /**
  * Первый экран услуги «Боты». Заголовок набирается как сообщение, справа настоящий
- * интерфейс бота: можно нажать кнопку и получить ответ. Это и есть демонстрация услуги.
+ * интерфейс бота: можно нажать кнопку и получить ответ. Вокруг окна по спирали
+ * поднимается 3D-поток сообщений, и каждое сообщение из чата вылетает в этот поток.
  */
 export default function BotsHero({ data }: { data: typeof BOTS }) {
   return (
@@ -54,7 +60,10 @@ export default function BotsHero({ data }: { data: typeof BOTS }) {
         </div>
 
         <figure className={styles.stage}>
-          <BotDemo data={data.demo} />
+          <MessageStream phrases={data.demo.stream} />
+          <div className={styles.chatWrap}>
+            <BotDemo data={data.demo} />
+          </div>
           <figcaption className={styles.note}>{data.demo.note}</figcaption>
         </figure>
       </div>

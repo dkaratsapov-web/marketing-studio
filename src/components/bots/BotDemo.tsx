@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { BOTS } from "@/content/bots";
+import { botsState } from "./botsState";
 import styles from "./BotDemo.module.css";
 
 type Data = (typeof BOTS)["demo"];
@@ -21,18 +22,26 @@ export default function BotDemo({ data }: { data: Data }) {
   const timer = useRef<number | null>(null);
   const touched = useRef(false);
 
+  // Каждое сообщение чата вылетает из окна в 3D-поток вокруг него
+  const emit = (text: string, kind: "me" | "bot") => {
+    botsState.last = { text, kind };
+    botsState.sent += 1;
+  };
+
   const ask = (i: number) => {
     const r = data.replies[i];
     if (typing) return;
     touched.current = true;
     setAsked((a) => [...a, r.q]);
     setMsgs((m) => [...m, { from: "me", text: r.q }]);
+    emit(r.q, "me");
     setTyping(true);
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     timer.current = window.setTimeout(
       () => {
         setTyping(false);
         setMsgs((m) => [...m, { from: "bot", text: r.a, links: "links" in r ? r.links : undefined }]);
+        emit(r.tag, "bot");
       },
       still ? 0 : 900 + Math.min(r.a.length * 6, 900),
     );
