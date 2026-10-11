@@ -19,6 +19,7 @@ const PAGES: { path: string; priority: number; changeFrequency: "weekly" | "mont
   { path: "/kejsy/sfera/", priority: 0.7, changeFrequency: "monthly" },
   { path: "/kejsy/diauto69/", priority: 0.7, changeFrequency: "monthly" },
   { path: "/kejsy/ipapa/", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/kejsy/sara/", priority: 0.7, changeFrequency: "monthly" },
   { path: "/o-nas/", priority: 0.6, changeFrequency: "monthly" },
 ];
 

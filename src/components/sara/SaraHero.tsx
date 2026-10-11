@@ -45,8 +45,8 @@ export default function SaraHero({ data }: Props) {
       };
 
       const build = (tl: gsap.core.Timeline) => {
-        tl.set(words, { opacity: 0.12, y: 6 })
-          .set(words, { "--hl": 0 })
+        tl.set(words, { opacity: 0.12, y: 6, "--hl": 0 })
+          .set(bars, { "--played": 0 })
           .set(rows, { autoAlpha: 0, x: 18 })
           .set(saved, { autoAlpha: 0, scale: 0.8 })
           .set(v, { voice: 0, done: 0, onComplete: sync })
@@ -66,6 +66,11 @@ export default function SaraHero({ data }: Props) {
         build(gsap.timeline({ paused: true })).progress(1);
         return;
       }
+      // Стартовый кадр ставим сразу: таймлайн на нулевом прогрессе его не отрисует
+      gsap.set(words, { opacity: 0.12, y: 6, "--hl": 0 });
+      gsap.set(rows, { autoAlpha: 0, x: 18 });
+      gsap.set(saved, { autoAlpha: 0, scale: 0.8 });
+      gsap.set(bars, { "--played": 0 });
 
       const mm = gsap.matchMedia();
       mm.add(CINEMATIC_MQ, () => {
@@ -113,6 +118,7 @@ export default function SaraHero({ data }: Props) {
         </h1>
 
         <div className={styles.leadWrap}>
+          <div className={styles.lead}>
           <p className={styles.leadText}>{data.hero.lead}</p>
           <HeroLead source="service" service={`Кейс ${data.client}`} cta="Хочу такого ассистента" />
           <dl className={styles.facts}>
@@ -123,6 +129,7 @@ export default function SaraHero({ data }: Props) {
               </div>
             ))}
           </dl>
+          </div>
         </div>
 
         <figure className={styles.stage} data-stage>

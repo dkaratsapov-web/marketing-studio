@@ -1,0 +1,236 @@
+/* Светлый блок: два телефона, MAX и Telegram, между ними провод через общую базу */
+.section {
+  padding-block: var(--section-y);
+  overflow: hidden;
+}
+
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 1rem var(--gutter);
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+.title {
+  font-size: clamp(2.4rem, 1.1rem + 4vw, 5.6rem);
+  line-height: 0.94;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.dotMark {
+  color: var(--pink-deep);
+}
+
+.headSide {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+}
+
+.lead {
+  max-width: 48ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.replay {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: none;
+  color: var(--pink-deep);
+  font: inherit;
+  font-size: var(--step--1);
+  cursor: pointer;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 20rem) minmax(6rem, 1fr) minmax(0, 20rem);
+  justify-content: center;
+  align-items: center;
+}
+
+.phone {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.app {
+  justify-self: center;
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  background: var(--ink-950);
+  color: var(--white);
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.phone[data-app="tg"] .app {
+  background: #2aabee;
+}
+
+.screen {
+  height: 26rem;
+  overflow: hidden;
+  border: 8px solid var(--ink-950);
+  border-radius: 2.4rem;
+  background: #eef0ea;
+  box-shadow: 0 40px 70px -40px rgb(5 5 5 / 0.5);
+}
+
+.chatHead {
+  margin: 0;
+  padding: 1.6rem 1rem 0.8rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--white);
+  font-weight: 700;
+  text-align: center;
+}
+
+.feed {
+  display: grid;
+  align-content: end;
+  gap: 0.6rem;
+  height: calc(100% - 4rem);
+  padding: 1rem 0.8rem;
+}
+
+.out,
+.in {
+  max-width: 88%;
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.out {
+  justify-self: end;
+  display: grid;
+  gap: 0.4rem;
+  border-bottom-right-radius: 0.3rem;
+  background: #dff5a8;
+}
+
+.wave {
+  height: 1rem;
+  background: repeating-linear-gradient(90deg, rgb(5 5 5 / 0.55) 0 2px, transparent 2px 5px);
+  mask: linear-gradient(90deg, #000 70%, transparent);
+  clip-path: polygon(0 40%, 6% 10%, 12% 50%, 18% 0, 26% 60%, 34% 20%, 42% 70%, 50% 10%, 58% 55%, 66% 25%, 74% 65%, 82% 30%, 90% 50%, 100% 40%, 100% 100%, 0 100%);
+}
+
+.in {
+  justify-self: start;
+  border-bottom-left-radius: 0.3rem;
+  background: var(--white);
+}
+
+.tasks {
+  display: grid;
+  margin: 0;
+  padding: 0.5rem 0.8rem;
+  list-style: none;
+}
+
+.tasks li {
+  --hl: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: rgb(196 245 66 / calc(var(--hl) * 0.55));
+  font-size: 0.85rem;
+}
+
+.tasks em {
+  color: var(--pink-deep);
+  font-size: 0.75rem;
+  font-style: normal;
+}
+
+.box {
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid rgb(5 5 5 / 0.4);
+  border-radius: 0.3rem;
+}
+
+/* Провод через базу: импульс бежит слева направо, база вспыхивает */
+.wire {
+  position: relative;
+  height: 2px;
+  margin-inline: 0.5rem;
+  background: repeating-linear-gradient(90deg, var(--ink-950) 0 8px, transparent 8px 14px);
+}
+
+.pulse {
+  --x: 0;
+  position: absolute;
+  top: 50%;
+  left: calc(var(--x) * 100%);
+  width: 0.9rem;
+  height: 0.9rem;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: var(--pink-deep);
+  box-shadow: 0 0 0 5px rgb(209 0 106 / 0.2);
+}
+
+.db {
+  --on: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 4.6rem;
+  height: 4.6rem;
+  translate: -50% -50%;
+  border: 2px solid var(--ink-950);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--lime) calc(var(--on) * 100%), var(--white));
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+.db b {
+  max-width: 3.5rem;
+  line-height: 1.15;
+}
+
+@media (max-width: 960px) {
+  .head {
+    grid-template-columns: 1fr;
+  }
+
+  .pair {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    row-gap: 0;
+  }
+
+  .phone {
+    width: min(100%, 20rem);
+  }
+
+  .wire {
+    width: 2px;
+    height: 7rem;
+    margin: 0.75rem 0;
+    background: repeating-linear-gradient(180deg, var(--ink-950) 0 8px, transparent 8px 14px);
+  }
+
+  .pulse {
+    top: calc(var(--x) * 100%);
+    left: 50%;
+  }
+}

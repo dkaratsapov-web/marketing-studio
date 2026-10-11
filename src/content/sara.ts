@@ -3,6 +3,7 @@
  * и снимки мини-приложения от Даниила. Все данные на снимках демонстрационные.
  * Цифры только из материалов. Что иллюстрирует механику, подписано как пример.
  */
+import cover from "@/assets/cases/sara/cover.webp";
 import homeLight from "@/assets/cases/sara/home-light.webp";
 import homeDark from "@/assets/cases/sara/home-dark.webp";
 import tasksLight from "@/assets/cases/sara/tasks-light.webp";
@@ -24,7 +25,7 @@ export const SARA = {
   client: "Сара",
   sector: "Ассистенты и боты",
   geo: "голосовой ассистент маркетолога в Telegram и MAX",
-  cover: { site: homeLight, phone: homeDark, alt: "Мини-приложение Сары: день одним экраном" },
+  cover: { site: cover, phone: homeDark, alt: "Мини-приложение Сары: задачи, день одним экраном и календарь" },
 
   hero: {
     title: ["Скажите", "Саре"],

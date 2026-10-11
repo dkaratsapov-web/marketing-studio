@@ -8,6 +8,7 @@ import sferaSite from "@/assets/cases/sfera/glavnaya-desktop.webp";
 import sferaPhone from "@/assets/cases/sfera/glavnaya-phone.webp";
 import { DIAUTO } from "@/content/diauto";
 import { IPAPA } from "@/content/ipapa";
+import { SARA } from "@/content/sara";
 
 export type Metric = {
   /** Число для отсчёта; знак и единицы задаются через prefix/suffix */
@@ -86,6 +87,23 @@ export const CASES: Case[] = [
       { value: 53, prefix: "+", suffix: "%", label: "продаж" },
       { value: 45, prefix: "−", suffix: "%", label: "стоимость заявки" },
       { value: 33, suffix: "%", label: "лидов с карточки в Яндекс Бизнесе" },
+    ],
+  },
+  {
+    code: SARA.code,
+    sector: SARA.sector,
+    client: "Сара, голосовой ассистент маркетолога",
+    services: "Telegram-бот · MAX-бот · Мини-приложение · YandexGPT · SpeechKit",
+    title: "Задачи, встречи и клиенты заводятся одной фразой голосом",
+    task: "Десяток клиентов, бюджеты, отчёты и созвоны. Таск-менеджер просит заполнять поля, и на бегу задача не записывается вовсе.",
+    solution: "Голосовой ассистент в Telegram и MAX на одной базе: сам понимает тип записи, срок и клиента, мини-приложение с задачами, календарём и клиентами.",
+    lead: "Даниил",
+    href: "/kejsy/sara/",
+    cover: SARA.cover,
+    metrics: [
+      { text: "96/96", label: "голосовых команд разбираются без ИИ" },
+      { value: 139, label: "модульных тестов" },
+      { value: 2, label: "мессенджера, одна база" },
     ],
   },
   {

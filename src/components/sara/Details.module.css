@@ -1,0 +1,351 @@
+/* Тёмный блок: четыре детали сеткой два на два, у каждой своё мини-демо */
+.section {
+  padding-block: var(--section-y);
+}
+
+.title {
+  font-size: clamp(2.4rem, 1.1rem + 4vw, 5.6rem);
+  line-height: 0.94;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gutter);
+  margin: clamp(2rem, 4vw, 3rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  background: var(--bg-raised);
+}
+
+.card h3 {
+  margin-top: 0.5rem;
+  font-size: var(--step-1);
+  letter-spacing: -0.02em;
+}
+
+.card p {
+  max-width: 48ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+/* Окно демо: светлое, как экран приложения, одной высоты у всех карточек */
+.demo {
+  position: relative;
+  display: grid;
+  align-content: center;
+  height: 11rem;
+  padding: 1rem 1.25rem;
+  overflow: hidden;
+  border-radius: 0.9rem;
+  background: #f4f4f0;
+  color: var(--ink-950);
+}
+
+.raw {
+  margin: 0;
+  color: #8a8a92;
+  font-family: var(--ff-mono);
+  font-size: 0.85rem;
+}
+
+/* Имя клиента уходит в ярлык */
+.dedup {
+  display: grid;
+  gap: 1rem;
+}
+
+.dedup .raw {
+  position: relative;
+  justify-self: start;
+}
+
+.dedup .raw::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 52%;
+  width: 100%;
+  height: 1.5px;
+  background: var(--pink-deep);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.6rem;
+  background: var(--white);
+  font-weight: 600;
+  opacity: 0;
+}
+
+.box {
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid rgb(5 5 5 / 0.4);
+  border-radius: 0.3rem;
+}
+
+.tag {
+  margin-left: auto;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: rgb(255 77 157 / 0.18);
+  color: var(--pink-deep);
+  font-size: 0.75rem;
+}
+
+.card[data-play] .dedup .raw::after {
+  animation: strike 0.5s var(--ease-out) 0.3s forwards;
+}
+
+.card[data-play] .row {
+  animation: rise 0.5s var(--ease-out) 0.9s forwards;
+}
+
+@keyframes strike {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Грамматика: волнистое подчёркивание, затем исправленная строка */
+.grammar {
+  display: grid;
+  gap: 1rem;
+}
+
+.typo {
+  text-decoration: underline wavy transparent;
+  text-underline-offset: 3px;
+}
+
+.card[data-play] .typo {
+  animation: wavy 0.4s var(--ease-out) 0.3s forwards;
+}
+
+@keyframes wavy {
+  to {
+    text-decoration-color: #e5262b;
+  }
+}
+
+.fixed {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.6rem;
+  background: var(--white);
+  font-weight: 600;
+  opacity: 0;
+}
+
+.card[data-play] .fixed {
+  animation: rise 0.5s var(--ease-out) 1s forwards;
+}
+
+/* Тонкие строки: средняя разворачивается в карточку с кнопками */
+.rows {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.rows li {
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.5rem;
+  background: var(--white);
+}
+
+.open {
+  display: grid;
+  grid-template-rows: auto 0fr;
+  transition: grid-template-rows 0.5s var(--ease-out);
+}
+
+.btns {
+  display: flex;
+  gap: 0.35rem;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.btns i {
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 0.4rem;
+  background: #ececee;
+  font-size: 0.72rem;
+  font-style: normal;
+}
+
+.btns i:first-child {
+  background: var(--lime);
+}
+
+.card[data-play] .open {
+  grid-template-rows: auto 1fr;
+  transition-delay: 0.6s;
+}
+
+/* Обучение: подсветка переезжает к кнопке, появляется подсказка */
+.tour {
+  position: relative;
+  height: 100%;
+}
+
+.tabs,
+.list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.tabs {
+  top: 0;
+}
+
+.tabs i {
+  flex: 1;
+  height: 1.1rem;
+  border-radius: 0.4rem;
+  background: #dcdce0;
+}
+
+.list {
+  top: 1.8rem;
+  flex-direction: column;
+}
+
+.list i {
+  height: 1.6rem;
+  border-radius: 0.4rem;
+  background: var(--white);
+}
+
+.add {
+  position: absolute;
+  right: 0.4rem;
+  bottom: 0.2rem;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: var(--ink-950);
+  color: var(--white);
+  font-size: 1.3rem;
+}
+
+/* Затемнение вокруг круглой подсветки через огромную тень */
+.spot {
+  position: absolute;
+  left: 0;
+  top: -0.2rem;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  box-shadow: 0 0 0 999px rgb(5 5 5 / 0.55);
+  opacity: 0;
+}
+
+.tip {
+  position: absolute;
+  right: 3.4rem;
+  bottom: 0.6rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.5rem;
+  background: var(--lime);
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0;
+}
+
+.card[data-play] .spot {
+  animation: spot 1.6s var(--ease-out) 0.3s forwards;
+}
+
+.card[data-play] .tip {
+  animation: rise 0.4s var(--ease-out) 1.9s forwards;
+}
+
+@keyframes spot {
+  0% {
+    opacity: 0;
+    left: 0;
+    top: -0.2rem;
+  }
+  25% {
+    opacity: 1;
+    left: 0;
+    top: -0.2rem;
+  }
+  100% {
+    opacity: 1;
+    left: calc(100% - 3rem);
+    top: calc(100% - 3rem);
+  }
+}
+
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card .row,
+  .card .fixed,
+  .card .tip {
+    opacity: 1;
+    animation: none !important;
+  }
+
+  .card .spot {
+    opacity: 1;
+    left: calc(100% - 3rem);
+    top: calc(100% - 3rem);
+    animation: none !important;
+  }
+
+  .card .typo {
+    text-decoration-color: #e5262b;
+    animation: none !important;
+  }
+}
