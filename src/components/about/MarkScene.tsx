@@ -12,7 +12,67 @@ import styles from "./MarkScene.module.css";
 type Floors = (typeof ABOUT)["building"]["floors"];
 
 const SCALE = 0.032;
-const DEPTH = 0.42;
+const DEPTH = 0.62;
+/** Шаг этажей большого знака: брусок 6,98 и зазор 4,65 в единицах знака */
+const PITCH = 11.628 * SCALE;
+/** Сетка окон: 8 окон по ширине на один повтор текстуры, 9 этажей по высоте */
+const WIN_W = 0.15;
+const COLS = 8;
+const ROWS = 9;
+
+/**
+ * Фасад: окна по сетке этажей. Карта цвета — светлая стена и тёмное стекло, карта свечения —
+ * часть окон горит тёплым светом, как вечером в офисе. Рисуется один раз на холсте.
+ */
+function facadeTextures() {
+  const cw = 64;
+  const ch = 64;
+  const make = () => {
+    const c = document.createElement("canvas");
+    c.width = cw * COLS;
+    c.height = ch * ROWS;
+    return c;
+  };
+  const base = make();
+  const glow = make();
+  const b = base.getContext("2d")!;
+  const g = glow.getContext("2d")!;
+  b.fillStyle = "#f1f1ec";
+  b.fillRect(0, 0, base.width, base.height);
+  g.fillStyle = "#000";
+  g.fillRect(0, 0, glow.width, glow.height);
+  const rnd = mulberry32(7);
+  for (let r = 0; r < ROWS; r++)
+    for (let k = 0; k < COLS; k++) {
+      // Окно по центру ячейки: этаж занимает 60% шага, окно чуть меньше этажа
+      const x = k * cw + cw * 0.22;
+      const y = r * ch + ch * 0.3;
+      const w = cw * 0.56;
+      const h = ch * 0.4;
+      const glass = b.createLinearGradient(x, y, x + w, y + h);
+      glass.addColorStop(0, "#2a2d33");
+      glass.addColorStop(1, "#15171b");
+      b.fillStyle = glass;
+      b.fillRect(x, y, w, h);
+      b.fillStyle = "rgba(255,255,255,0.18)";
+      b.fillRect(x + w * 0.48, y, 2, h);
+      if (rnd() < 0.42) {
+        g.fillStyle = rnd() < 0.8 ? "#ffd9a0" : "#e8f7c0";
+        g.fillRect(x, y, w, h);
+      }
+    }
+  const toTex = (c: HTMLCanvasElement, srgb: boolean) => {
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    // Координаты крышек экструзии равны координатам фигуры: период — этаж по высоте и окно по ширине
+    t.repeat.set(1 / (WIN_W * COLS), 1 / (PITCH * ROWS));
+    t.offset.y = 0.5 / ROWS;
+    if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = 4;
+    return t;
+  };
+  return { map: toTex(base, true), glow: toTex(glow, true) };
+}
 const { clamp, smoothstep, lerp, damp } = THREE.MathUtils;
 const easeOutBack = (t: number) => 1 + 2.2 * Math.pow(t - 1, 3) + 1.2 * Math.pow(t - 1, 2);
 
@@ -67,6 +127,7 @@ function Mark({ still }: { still: boolean }) {
   const group = useRef<THREE.Group>(null);
   const meshes = useRef<(THREE.Mesh | null)[]>([]);
   const glow = useRef<THREE.PointLight>(null);
+  const roof = useRef<THREE.Group>(null);
   const smooth = useRef({ p: still ? 1 : 0, px: 0, py: 0 });
   const pointer = useRef({ x: 0, y: 0 });
   const tmp = useMemo(() => new THREE.Vector3(), []);
@@ -96,19 +157,26 @@ function Mark({ still }: { still: boolean }) {
     return [...make(MARK.large.ink, false), ...make(MARK.large.lime, true)];
   }, []);
 
-  const mats = useMemo(
-    () => ({
-      ink: new THREE.MeshPhysicalMaterial({ color: "#d9d9d4", roughness: 0.32, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.06, envMapIntensity: 0.7 }),
-      lime: new THREE.MeshPhysicalMaterial({ color: "#c4f542", emissive: "#9fd61f", emissiveIntensity: 0, roughness: 0.2, clearcoat: 1, toneMapped: false }),
-    }),
-    [],
-  );
+  const mats = useMemo(() => {
+    const tex = facadeTextures();
+    return {
+      tex,
+      // Лицевая сторона этажа с окнами и боковины без окон
+      facade: new THREE.MeshPhysicalMaterial({ map: tex.map, emissiveMap: tex.glow, emissive: "#ffffff", emissiveIntensity: 0, roughness: 0.4, clearcoat: 0.6, clearcoatRoughness: 0.1, envMapIntensity: 0.7 }),
+      side: new THREE.MeshPhysicalMaterial({ color: "#d4d4cf", roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.06, envMapIntensity: 0.7 }),
+      lime: new THREE.MeshPhysicalMaterial({ color: "#c4f542", map: tex.map, emissive: "#9fd61f", emissiveIntensity: 0, roughness: 0.25, clearcoat: 1, toneMapped: false }),
+      limeSide: new THREE.MeshPhysicalMaterial({ color: "#c4f542", emissive: "#9fd61f", emissiveIntensity: 0, roughness: 0.2, clearcoat: 1, toneMapped: false }),
+      plinth: new THREE.MeshStandardMaterial({ color: "#1b1b1f", roughness: 0.8 }),
+      mast: new THREE.MeshStandardMaterial({ color: "#d9d9d4", roughness: 0.4 }),
+    };
+  }, []);
 
   useEffect(
     () => () => {
       parts.forEach((p) => p.geo.dispose());
-      mats.ink.dispose();
-      mats.lime.dispose();
+      mats.tex.map.dispose();
+      mats.tex.glow.dispose();
+      [mats.facade, mats.side, mats.lime, mats.limeSide, mats.plinth, mats.mast].forEach((m) => m.dispose());
     },
     [parts, mats],
   );
@@ -154,7 +222,15 @@ function Mark({ still }: { still: boolean }) {
     // Салатовый этаж разгорается, когда собран
     const limeOn = still ? 1 : smoothstep(s.p, 0.42, 0.6);
     const limeMesh = meshes.current[parts.length - 1];
-    if (limeMesh) (limeMesh.material as THREE.MeshPhysicalMaterial).emissiveIntensity = 0.1 + limeOn * 1.6;
+    if (limeMesh) for (const m of limeMesh.material as THREE.MeshPhysicalMaterial[]) m.emissiveIntensity = 0.1 + limeOn * 1.6;
+    // Окна загораются вслед за сборкой, к концу горит весь вечерний офис
+    const inkMesh = meshes.current[0];
+    if (inkMesh) (inkMesh.material as THREE.MeshPhysicalMaterial[])[0].emissiveIntensity = 0.05 + smoothstep(s.p, 0.2, 0.95) * 0.9;
+    if (roof.current) {
+      const r = still ? 1 : easeOutBack(clamp((s.p - 0.86) / 0.12, 0, 1));
+      roof.current.scale.set(1, Math.max(r, 0.001), 1);
+      roof.current.visible = r > 0.002;
+    }
     if (glow.current) glow.current.intensity = limeOn * 6;
 
     // Подписи отделов: справа от знака на высоте своей волны
@@ -175,8 +251,25 @@ function Mark({ still }: { still: boolean }) {
   return (
     <group ref={group}>
       {parts.map((pc, i) => (
-        <mesh key={i} ref={(m) => void (meshes.current[i] = m)} geometry={pc.geo} material={pc.lime ? mats.lime : mats.ink} />
+        <mesh key={i} ref={(m) => void (meshes.current[i] = m)} geometry={pc.geo} material={pc.lime ? [mats.lime, mats.limeSide] : [mats.facade, mats.side]} />
       ))}
+      {/* Фундамент: стоит с самого начала, этажи садятся на него */}
+      <mesh position={[0, -MARK.h / 2 * SCALE - 0.09, 0]} material={mats.plinth}>
+        <boxGeometry args={[MARK.w * SCALE + 0.5, 0.14, DEPTH + 0.5]} />
+      </mesh>
+      {/* Крыша: техэтаж и антенна над левой колонной, появляются последними */}
+      <group ref={roof} position={[(-MARK.w / 2 + 14.4) * SCALE, (MARK.h / 2) * SCALE, 0]}>
+        <mesh position={[0, 0.09, 0]} material={mats.side}>
+          <boxGeometry args={[0.5, 0.18, DEPTH * 0.7]} />
+        </mesh>
+        <mesh position={[0.1, 0.48, 0]} material={mats.mast}>
+          <cylinderGeometry args={[0.012, 0.018, 0.62, 8]} />
+        </mesh>
+        <mesh position={[0.1, 0.8, 0]}>
+          <sphereGeometry args={[0.028, 12, 12]} />
+          <meshBasicMaterial color="#ff4d9d" toneMapped={false} />
+        </mesh>
+      </group>
       <pointLight ref={glow} position={[0, 0, 1.2]} color="#c4f542" distance={4} intensity={0} />
     </group>
   );
@@ -233,7 +326,7 @@ export default function MarkScene({ floors }: { floors: Floors }) {
             <span className={styles.text}>
               <b>{f.name}</b>
               <span>
-                {f.who} · {f.does}
+                {f.does}
               </span>
             </span>
           </li>
