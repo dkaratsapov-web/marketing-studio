@@ -75,7 +75,8 @@
   margin-top: clamp(0.5rem, 2.5vh, 1.75rem);
   margin-left: -0.05em;
   /* «Останавливаем» длинное слово: кегль от ширины колонки и от высоты окна */
-  font-size: min(clamp(3rem, 0.4rem + 6vw, 8rem), 14svh);
+  /* Кегль упирается в ширину колонки: «маркетплейса» самое длинное слово */
+  font-size: min(clamp(3rem, 0.4rem + 6vw, 7rem), 14svh);
   font-weight: 650;
   line-height: 0.88;
   letter-spacing: -0.055em;
@@ -89,8 +90,10 @@
 }
 
 /* Строки проявляются за лучом сканера: сверху вниз, по краю идёт розовая линия */
+/* Раскрытие делает clip-path строки, маска не режет слово по ширине */
 .mask {
   position: relative;
+  overflow: visible;
 }
 
 .line {

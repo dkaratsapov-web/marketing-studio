@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -37,6 +37,38 @@ function Arrow() {
 export default function Dossier() {
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
+
+  // Карточка высотой в экран: если длинный заголовок выталкивает заметки за край,
+  // заголовок, цифры и заметки уменьшаются шагами (--fit), пока карточка не влезет
+  useEffect(() => {
+    const cards = [...root.current!.querySelectorAll<HTMLElement>(`.${styles.case}`)];
+    const fit = () =>
+      cards.forEach((card) => {
+        const notes = card.querySelector<HTMLElement>(`.${styles.notes}`)!;
+        const over = () => {
+          const pad = parseFloat(getComputedStyle(card).paddingBottom);
+          return notes.getBoundingClientRect().bottom > card.getBoundingClientRect().bottom - pad + 1;
+        };
+        let f = 1;
+        card.style.setProperty("--fit", "1");
+        while (over() && f > 0.4) {
+          f -= 0.05;
+          card.style.setProperty("--fit", f.toFixed(2));
+        }
+      });
+    let t = 0;
+    const onResize = () => {
+      window.clearTimeout(t);
+      t = window.setTimeout(fit, 150);
+    };
+    fit();
+    document.fonts?.ready.then(fit);
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
 
   useGSAP(
     () => {
