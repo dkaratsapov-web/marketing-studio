@@ -103,7 +103,7 @@ export default function Departments() {
                       onClick={() => go(i)}
                     >
                       <span className={`label ${styles.owner}`}>
-                        Ведёт {d.head.name.split(" ")[0]}
+                        Ведёт {d.head.owner ?? d.head.name.split(" ")[0]}
                       </span>
                       <span className={styles.name}>
                         <span className={styles.nameText}>{d.name}</span>
@@ -126,8 +126,8 @@ export default function Departments() {
                           {d.outcome}
                         </p>
                         <p className={styles.headMobile}>
-                          <span className="label">Руководитель</span>
-                          {d.head.name}, {d.head.role}
+                          <span className="label">Ведёт</span>
+                          {d.head.owner ?? d.head.name}, {d.head.role}
                         </p>
                       </div>
                     </div>

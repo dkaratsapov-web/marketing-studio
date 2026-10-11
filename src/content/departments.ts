@@ -6,7 +6,7 @@ export type Department = {
   short: string;
   tagline: string;
   tone: "lime" | "pink";
-  head: { name: string; role: string };
+  head: { name: string; role: string; owner?: string };
   launch?: string;
   services: string[];
   outcome: string;
@@ -66,7 +66,7 @@ export const DEPARTMENTS: Department[] = [
     short: "Таргет",
     tagline: "находит тех, кто ещё не ищет",
     tone: "pink",
-    head: { name: "Евгения", role: "руководитель отдела" },
+    head: { name: "Руководитель отдела", role: "таргет и Авито", owner: "руководитель отдела" },
     launch: "Запуск за 4–6 дней",
     services: ["VK Ads", "Telegram Ads", "Avito Ads", "Креативы и A/B-тесты объявлений"],
     outcome: "Заявки из соцсетей и Авито, а не просто охваты.",
