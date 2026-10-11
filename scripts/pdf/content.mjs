@@ -7,7 +7,7 @@
 
 const CONTACTS = {
   phones: ["+7 996 347-00-65", "+7 919 069-00-27"],
-  tg: ["@Daniil_065", "@smok1204"],
+  tg: ["@Daniil_065"],
   max: "https://max.ru/u/f9LHodD0cOJUi9Mm5ydOlaX3jNw8KsWVMll3jqzkTLjDs91vo3SdC70obtw",
   hours: "ежедневно с 10 до 21",
 };

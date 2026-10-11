@@ -200,10 +200,12 @@ const B = {
   limits: (b) => `<div class="limits">${b.items.map(([v, t]) => `<div><b>${nb(v)}</b><p>${esc(t)}</p></div>`).join("")}</div>`,
 };
 
-function blocks(list, ctx) {
+function blocks(list, ctx, top = false) {
   // Надзаголовок, заголовок и вводный абзац держатся вместе, зазоры подгонки их не разносят
   const n = list[0]?.type === "kicker" && list[1]?.type === "h2" ? (list[2]?.type === "p" ? 3 : 2) : 0;
   const head = n ? `<div class="head">${render1(list.slice(0, n), ctx)}</div>` : "";
+  // На альбомном листе заголовок слайда стоит колонкой слева, содержимое справа
+  if (top && n) return `${head}<div class="main">${render1(list.slice(n), ctx)}</div>`;
   return head + render1(list.slice(n), ctx);
 }
 
@@ -230,7 +232,7 @@ export function render(d, MARK) {
       <span class="mono soft">${esc(d.sector)}</span>
       <span class="mono">${pad(i + 1)} / ${pad(total)}</span>
     </header>
-    <div class="body">${blocks(pg.blocks, ctx)}</div>
+    <div class="body">${blocks(pg.blocks, ctx, true)}</div>
     <footer class="foot mono soft">
       <a href="https://${SITE}${d.path}">${SITE}${esc(d.path)}</a>
       <span>Маркетинговое агентство «Корпорация»</span>
@@ -264,17 +266,19 @@ document.fonts.ready.then(async () => {
   for (const pg of document.querySelectorAll(".page:not(.is-cover)")) {
     const body = pg.querySelector(".body");
     const fits = () => body.scrollHeight <= body.clientHeight + 1;
-    let lo = 1, hi = 1.24;
+    let lo = 0.6, hi = 1.2;
     body.style.setProperty("--z", hi);
     if (!fits()) {
       for (let k = 0; k < 9; k++) { const z = (lo + hi) / 2; body.style.setProperty("--z", z); fits() ? (lo = z) : (hi = z); }
       body.style.setProperty("--z", lo);
     } else lo = hi;
     if (pg.querySelector(".contact")) continue;
-    const kids = [...body.children];
+    const col = body.querySelector(":scope > .main") ?? body;
+    const kids = [...col.children];
+    if (kids.length < 2) continue;
     const free = body.getBoundingClientRect().bottom - kids.at(-1).getBoundingClientRect().bottom;
     const add = free / lo / (kids.length - 1);
-    if (add > 0) body.style.gap = Math.min(4.4 * mm + add, 12 * mm) + "px";
+    if (add > 0) col.style.rowGap = Math.min(4.4 * mm + add, 12 * mm) + "px";
   }
   window.__fitted = true;
 });`;
@@ -284,7 +288,7 @@ const GRAIN = `url("data:image/svg+xml,${encodeURIComponent(
 )}")`;
 
 const CSS = `
-@page { size: A4; margin: 0; }
+@page { size: A4 landscape; margin: 0; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { background: #777; }
 body { -webkit-print-color-adjust: exact; print-color-adjust: exact; font-family: "Golos Text", sans-serif; font-size: 9.6pt; line-height: 1.45; }
@@ -293,8 +297,8 @@ ul, ol { list-style: none; }
 
 .page {
   --lime: #c4f542; --pink: #ff4d9d; --pink-deep: #d1006a;
-  position: relative; width: 210mm; height: 297mm; overflow: hidden;
-  padding: 11mm 14mm 9mm; display: flex; flex-direction: column;
+  position: relative; width: 297mm; height: 210mm; overflow: hidden;
+  padding: 9mm 14mm 7mm; display: flex; flex-direction: column;
   break-after: page; background: var(--bg); color: var(--fg);
 }
 .page:last-child { break-after: auto; }
@@ -311,7 +315,7 @@ ul, ol { list-style: none; }
 .light .dot { color: var(--pink-deep); }
 
 /* Шапка и подвал */
-.top { display: flex; align-items: center; justify-content: space-between; gap: 6mm; padding-bottom: 3.5mm; border-bottom: 1px solid var(--line); margin-bottom: 7mm; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 6mm; padding-bottom: 3mm; border-bottom: 1px solid var(--line); margin-bottom: 6mm; }
 .brand { display: inline-flex; align-items: center; gap: 2.2mm; font-family: Geologica, sans-serif; font-size: 10pt; letter-spacing: -.01em; }
 .brand-mark { width: 5.4mm; height: 5.4mm; }
 .mk-ink { fill: var(--fg); } .mk-lime { fill: var(--lime); }
@@ -324,6 +328,10 @@ h2 { font-family: Geologica, sans-serif; font-weight: 600; font-size: 25pt; line
 h3 { font-family: Geologica, sans-serif; font-weight: 600; font-size: 12.5pt; letter-spacing: -.015em; line-height: 1.15; margin-top: 1.5mm; }
 .p { max-width: 168mm; text-wrap: pretty; }
 .head { display: flex; flex-direction: column; gap: 4.4mm; }
+.body:has(> .main) { flex-direction: row; gap: 11mm; }
+.body > .head { flex: none; width: 78mm; }
+.body > .head h2 { font-size: 23pt; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4.4mm; }
 .head .kicker { margin-bottom: -1.5mm; }
 .split .table td:first-child { font-family: inherit; font-size: inherit; color: var(--soft); width: 44%; }
 .kicker { display: flex; align-items: center; gap: 2mm; font-family: "IBM Plex Mono", monospace; font-size: 7.6pt; color: var(--soft); margin-bottom: -1.5mm; }
@@ -339,11 +347,11 @@ b { font-weight: 600; }
 
 /* Обложка */
 .is-cover .body { gap: 0; }
-.cover { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 12mm; position: relative; }
+.cover { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 8mm; position: relative; }
 .cover-sector { font-family: "IBM Plex Mono", monospace; font-size: 8.4pt; color: var(--lime); margin-bottom: 6mm; }
-.cover-title { font-family: Geologica, sans-serif; font-weight: 600; font-size: 54pt; line-height: .95; letter-spacing: -.045em; max-width: 160mm; }
-.cover-lead { font-size: 12pt; line-height: 1.45; max-width: 140mm; margin-top: 8mm; color: rgb(244 244 240 / .82); }
-.cover-mark { position: absolute; right: -4mm; top: 8mm; width: 82mm; height: 82mm; opacity: .95; }
+.cover-title { font-family: Geologica, sans-serif; font-weight: 600; font-size: 58pt; line-height: .95; letter-spacing: -.045em; max-width: 190mm; }
+.cover-lead { font-size: 12pt; line-height: 1.45; max-width: 150mm; margin-top: 7mm; color: rgb(244 244 240 / .82); }
+.cover-mark { position: absolute; right: 0; top: 0; width: 92mm; height: 92mm; opacity: .95; }
 .cover-mark .mk-ink { fill: #1d1d20; }
 .facts { border-top: 1px solid var(--line); padding-top: 5mm; }
 .facts-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; margin-top: 4mm; }
@@ -412,7 +420,7 @@ b { font-weight: 600; }
 .m4-row { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); }
 .m4-row > div { padding: 3.6mm 4mm; border-right: 1px solid var(--line); }
 .m4-row > div:last-child { border-right: 0; }
-.m4-row b { display: block; font-family: Geologica, sans-serif; font-size: 19pt; line-height: 1; letter-spacing: -.035em; color: var(--acc); }
+.m4-row b { display: block; white-space: nowrap; font-family: Geologica, sans-serif; font-size: 16pt; line-height: 1; letter-spacing: -.035em; color: var(--acc); }
 .m4-row span { display: block; margin-top: 1.6mm; font-size: 8.4pt; color: var(--soft); }
 .callout { padding: 5mm; background: var(--pink); color: #050505; height: 100%; }
 .callout b { display: block; font-family: Geologica, sans-serif; font-size: 46pt; line-height: .9; letter-spacing: -.05em; }

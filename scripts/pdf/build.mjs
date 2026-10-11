@@ -1,5 +1,5 @@
 /**
- * PDF для рассылок по отраслевым решениям. Собирает HTML-страницы A4 в стиле сайта и печатает их
+ * PDF для рассылок по отраслевым решениям. Собирает альбомные листы A4 в стиле сайта и печатает их
  * в PDF через Chromium. Шрифты и картинки берутся из готовой сборки сайта.
  *
  * Запуск: npm run build; (cd out && python3 -m http.server 8088) в соседнем окне;
@@ -48,9 +48,9 @@ for (const d of INDUSTRIES.filter((x) => !only || x.slug === only)) {
   fs.writeFileSync(path.join(OUT, `${d.slug}.html`), render(d, MARK));
   await p.goto(`${HOST}/pdf-src/${d.slug}.html`, { waitUntil: "networkidle" });
   await p.waitForFunction(() => window.__fitted === true);
-  await p.pdf({ path: path.join(ROOT, `public/pdf/korporaciya-${d.slug}.pdf`), format: "A4", printBackground: true, preferCSSPageSize: true });
+  await p.pdf({ path: path.join(ROOT, `public/pdf/korporaciya-${d.slug}.pdf`), format: "A4", landscape: true, printBackground: true, preferCSSPageSize: true });
   if (process.env.PREVIEW) {
-    await p.setViewportSize({ width: 794, height: 1123 });
+    await p.setViewportSize({ width: 1123, height: 794 });
     await p.screenshot({ path: path.join(process.env.PREVIEW, `pdf-${d.slug}.png`), fullPage: true });
   }
   console.log("ok", d.slug);

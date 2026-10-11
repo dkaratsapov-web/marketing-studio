@@ -12,11 +12,8 @@ export const TELEGRAM = {
   href: "https://t.me/Daniil_065",
 };
 
-/** Все контакты в Telegram: первый основной (на него ведут формы), второй в подвале рядом */
-export const TELEGRAMS = [
-  TELEGRAM,
-  { handle: "@smok1204", href: "https://t.me/smok1204" },
-];
+/** Все контакты в Telegram для подвала: первый основной, на него ведут формы */
+export const TELEGRAMS = [TELEGRAM];
 
 /** Мессенджер MAX: кнопка в шапке, мобильном меню и подвале */
 export const MAX = {
