@@ -133,10 +133,44 @@ button.card:focus-visible {
   letter-spacing: -0.01em;
 }
 
-/* Открытая карточка: крупнее, с ответом */
+/* Карточка, которая сейчас в колонке ответа: бледнеет и получает пометку */
+.moved {
+  display: none;
+  justify-self: start;
+  color: var(--accent);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+}
+
+button.card[aria-pressed="true"] {
+  border-style: dashed;
+  border-color: rgb(5 5 5 / 0.25);
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+button.card[aria-pressed="true"] .q {
+  color: var(--muted);
+}
+
+button.card[aria-pressed="true"] .moved {
+  display: block;
+}
+
+/* Открытая карточка: крупнее, с ответом, въезжает слева */
 .open {
   gap: 0.9rem;
   padding: 1.5rem;
+  animation: cardIn 0.45s var(--ease-out);
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateX(-24px) rotate(-1deg);
+  }
 }
 
 .open .q {
@@ -151,7 +185,7 @@ button.card:focus-visible {
   color: #4f4f56;
   font-size: var(--step-0);
   line-height: 1.6;
-  animation: aIn 0.5s var(--ease-out) 0.35s both;
+  animation: aIn 0.45s var(--ease-out) 0.15s both;
 }
 
 @keyframes aIn {
@@ -172,6 +206,10 @@ button.card:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .open {
+    animation: none;
+  }
+
   .a {
     animation: none;
   }

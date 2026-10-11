@@ -1,0 +1,240 @@
+/* Тёмный блок: слева выбор комплектации, справа лист на тонированном стекле */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2rem;
+  align-items: center;
+}
+
+.head {
+  grid-column: 1 / span 5;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 46ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.trims {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.trim {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.25s var(--ease-out),
+    background-color 0.25s var(--ease-out);
+}
+
+.trim b {
+  font-size: var(--step-1);
+}
+
+.trim span {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.trim:hover {
+  border-color: rgb(255 255 255 / 0.35);
+}
+
+.trim[aria-pressed="true"] {
+  border-color: var(--lime);
+  background: rgb(196 245 66 / 0.08);
+}
+
+.trim:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
+}
+
+/* Стекло: тёмная тонировка с бликом, на нём белый лист */
+.glass {
+  grid-column: 7 / -1;
+  grid-row: 1 / span 2;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border-radius: 24px 60px 24px 24px;
+  background:
+    linear-gradient(120deg, transparent 30%, rgb(255 255 255 / 0.07) 38%, transparent 46%),
+    linear-gradient(180deg, #1c2128, #0d1014);
+  box-shadow: inset 0 0 0 1px #2a3038;
+}
+
+.sticker {
+  position: relative;
+  padding: 1.25rem 1.4rem 1.4rem;
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--ink-950);
+  box-shadow: 0 20px 40px -20px rgb(0 0 0 / 0.8);
+  rotate: -1deg;
+}
+
+.stTop {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0.6rem;
+  border-bottom: 3px solid var(--ink-950);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.stModel {
+  margin: 0.8rem 0;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.items {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid #dcdce0;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 1.1rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid #ececef;
+  color: #a5a5ab;
+  font-size: var(--step--1);
+  transition: color 0.3s var(--ease-out);
+}
+
+.item[data-on] {
+  color: var(--ink-950);
+}
+
+.box {
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid #cfcfd4;
+  border-radius: 3px;
+  transition:
+    background-color 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out);
+}
+
+.item[data-on] .box {
+  border-color: var(--ink-950);
+  background: var(--ink-950) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='m3.5 8.5 3 3 6-7' fill='none' stroke='%23c4f542' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 90% no-repeat;
+}
+
+.itemPrice {
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.totals {
+  display: grid;
+  gap: 0.4rem;
+  margin: 1rem 0 0;
+}
+
+.totals div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.totals dt {
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.totals dd {
+  margin: 0;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.totals div:first-child dd {
+  color: var(--pink-deep);
+}
+
+.barcode {
+  display: block;
+  height: 1.6rem;
+  margin-top: 1rem;
+  background: repeating-linear-gradient(90deg, var(--ink-950) 0 2px, transparent 2px 4px, var(--ink-950) 4px 5px, transparent 5px 8px, var(--ink-950) 8px 11px, transparent 11px 13px);
+}
+
+.cta {
+  grid-column: 1 / span 5;
+  justify-self: start;
+}
+
+@media (max-width: 960px) {
+  .head,
+  .glass,
+  .cta {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .item {
+    grid-template-columns: 1.1rem minmax(0, 1fr);
+  }
+
+  .itemPrice {
+    grid-column: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item,
+  .box,
+  .trim {
+    transition: none;
+  }
+}

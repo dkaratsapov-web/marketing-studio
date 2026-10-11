@@ -6,6 +6,7 @@
 import type { StaticImageData } from "next/image";
 import sferaSite from "@/assets/cases/sfera/glavnaya-desktop.webp";
 import sferaPhone from "@/assets/cases/sfera/glavnaya-phone.webp";
+import { DIAUTO } from "@/content/diauto";
 
 export type Metric = {
   /** Число для отсчёта; знак и единицы задаются через prefix/suffix */
@@ -50,6 +51,23 @@ export const CASES: Case[] = [
       { value: 121, label: "страница сайта под спрос" },
       { value: 251, label: "вопрос в базе ИИ-ассистента" },
       { value: 8, label: "разделов своей аналитики" },
+    ],
+  },
+  {
+    code: DIAUTO.code,
+    sector: DIAUTO.sector,
+    client: "ДиАвто69, импорт авто из Кореи, Китая и Японии, Тверь",
+    services: "Сайт · Telegram-бот · CRM · Яндекс Директ · Аналитика",
+    title: "Превратили Telegram-канал импортёра авто в систему продаж",
+    task: "Каталог заносили на сайт руками, заявки терялись между мессенджерами, рекламу было нечем измерить.",
+    solution: "Каталог на автопилоте из постов канала, бот с мини-приложением, своя CRM, фиды на четыре площадки и сквозная аналитика.",
+    lead: "Даниил Карацапов",
+    href: "/kejsy/diauto69/",
+    cover: DIAUTO.cover,
+    metrics: [
+      { value: 284, label: "авто в каталоге без ручного ввода" },
+      { value: 5547, label: "визитов за 90 дней" },
+      { value: 4, label: "рекламные площадки на одном фиде" },
     ],
   },
   {

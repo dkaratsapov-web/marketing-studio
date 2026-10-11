@@ -13,7 +13,9 @@ const PAGES: { path: string; priority: number; changeFrequency: "weekly" | "mont
   { path: "/uslugi/razrabotka-sajtov/", priority: 0.9, changeFrequency: "monthly" },
   { path: "/uslugi/skvoznaya-analitika/", priority: 0.9, changeFrequency: "monthly" },
   { path: "/otrasli/restorany/", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/otrasli/avtobiznes/", priority: 0.8, changeFrequency: "monthly" },
   { path: "/kejsy/sfera/", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/kejsy/diauto69/", priority: 0.7, changeFrequency: "monthly" },
   { path: "/o-nas/", priority: 0.6, changeFrequency: "monthly" },
 ];
 

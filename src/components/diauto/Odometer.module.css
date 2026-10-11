@@ -1,0 +1,194 @@
+/* Тёмный финал дела: одометр итогов, надёжность, стек и ссылки дальше */
+.section {
+  padding-block: var(--section-y);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.period {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+/* Приборная панель: четыре счётчика */
+.panel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #2a2a30;
+  border-radius: 20px;
+  background: #2a2a30;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  background: radial-gradient(120% 100% at 50% 0%, #17171b, #0b0b0d);
+}
+
+.label {
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.35;
+}
+
+.value {
+  margin: 0;
+}
+
+.drums {
+  display: inline-flex;
+  gap: 3px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #000;
+  box-shadow: inset 0 0 0 1px #2e2e34;
+}
+
+/* Окошко барабана: видна одна цифра, сверху и снизу затенение, как у механического счётчика */
+.cell {
+  position: relative;
+  height: clamp(2.6rem, 1.8rem + 2.2vw, 3.8rem);
+  width: clamp(1.8rem, 1.2rem + 1.5vw, 2.6rem);
+  overflow: hidden;
+  border-radius: 4px;
+  background: #121215;
+}
+
+.cell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0.6), transparent 30%, transparent 70%, rgb(0 0 0 / 0.6));
+  pointer-events: none;
+}
+
+.cell[data-last] {
+  background: var(--lime);
+}
+
+.drum {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.drum span {
+  display: grid;
+  place-items: center;
+  height: clamp(2.6rem, 1.8rem + 2.2vw, 3.8rem);
+  color: var(--white);
+  font-family: var(--ff-mono);
+  font-size: clamp(1.6rem, 1.1rem + 1.4vw, 2.4rem);
+  font-weight: 700;
+}
+
+.cell[data-last] .drum span {
+  color: var(--ink-950);
+}
+
+.reliability {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gutter);
+  margin: clamp(2rem, 4vw, 3rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reliability li {
+  display: grid;
+  gap: 0.3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.reliability b {
+  color: var(--lime);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-3);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.reliability span {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stack li {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+}
+
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 2rem;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+.more {
+  color: var(--lime);
+  font-size: var(--step-0);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  text-decoration-color: rgb(196 245 66 / 0.4);
+}
+
+.more:hover {
+  text-decoration-color: currentColor;
+}
+
+@media (max-width: 1100px) {
+  .panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .panel,
+  .reliability {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

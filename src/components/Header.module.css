@@ -475,8 +475,7 @@ a.menuLink:hover .menuArrow {
   }
 }
 
-/* Ниже этой ширины пункты меню не помещаются: шапка переходит на бургер */
-@media (max-width: 1060px) {
+@media (max-width: 860px) {
   .nav,
   .cta {
     display: none;

@@ -1,0 +1,270 @@
+/* Светлый блок: каналы, цепь замера и кольцо слива */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: clamp(2rem, 4vw, 3rem);
+  align-items: start;
+}
+
+.head {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 1.25rem;
+  max-width: 58rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--accent);
+}
+
+.lead {
+  max-width: 58ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.channels {
+  grid-column: 1 / span 4;
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.channels li {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.channels b {
+  font-size: var(--step-1);
+  letter-spacing: -0.02em;
+}
+
+.channels span {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.chainBox {
+  grid-column: 5 / -1;
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border-radius: 18px;
+  background: #f3f3f4;
+}
+
+.boxTitle {
+  font-size: var(--step-2);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.boxText {
+  max-width: 56ch;
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+/* Цепь: звено из двух половинок, --w от 0 (разорвано) до 1 (сварено) */
+.chain {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link {
+  --w: 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+}
+
+.halves {
+  position: relative;
+  display: flex;
+  width: 8rem;
+  height: 3.6rem;
+}
+
+.halves i {
+  flex: 1;
+  border: 5px solid color-mix(in srgb, var(--ink-950) calc(var(--w) * 100%), #b9b9c0);
+  transition: none;
+}
+
+.halves i:first-child {
+  border-right: 0;
+  border-radius: 2rem 0 0 2rem;
+  transform: translateX(calc((1 - var(--w)) * -0.9rem)) rotate(calc((1 - var(--w)) * -10deg));
+}
+
+.halves i:nth-child(2) {
+  border-left: 0;
+  border-radius: 0 2rem 2rem 0;
+  transform: translateX(calc((1 - var(--w)) * 0.9rem)) rotate(calc((1 - var(--w)) * 10deg));
+}
+
+/* Искра сварки: вспыхивает в момент, когда половинки сходятся */
+.spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.2rem;
+  height: 2.2rem;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--lime) 0 20%, rgb(196 245 66 / 0.5) 35%, transparent 70%);
+  opacity: min(clamp(0, calc((var(--w) - 0.8) * 6.7), 1), clamp(0, calc((1 - var(--w)) * 20), 1));
+  pointer-events: none;
+}
+
+.linkName {
+  color: color-mix(in srgb, var(--fg) calc(var(--w) * 100%), var(--muted));
+  font-size: var(--step--1);
+  font-weight: 650;
+  text-align: center;
+}
+
+/* Слив: кольцо доли трафика */
+.leak {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  border: 1px solid var(--ink-950);
+  border-radius: 18px;
+}
+
+.ring {
+  position: relative;
+  width: clamp(10rem, 8rem + 8vw, 15rem);
+  aspect-ratio: 1;
+}
+
+.ring svg {
+  width: 100%;
+  height: 100%;
+  rotate: -90deg;
+}
+
+.ringBase {
+  fill: none;
+  stroke: #ececef;
+  stroke-width: 18;
+}
+
+.ringArc {
+  fill: none;
+  stroke: var(--pink-deep);
+  stroke-width: 18;
+}
+
+.ringValue {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  grid-auto-flow: column;
+  align-items: baseline;
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 650;
+}
+
+.ringValue b {
+  font-size: var(--step-4);
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.leakText {
+  display: grid;
+  gap: 1rem;
+}
+
+.leakTitle {
+  max-width: 34ch;
+  font-size: var(--step-2);
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.leakFacts {
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+}
+
+.leakFacts div {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.leakFacts dt {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.leakFacts dd {
+  margin: 0;
+  color: var(--pink-deep);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-3);
+  font-weight: 650;
+  line-height: 1;
+}
+
+@media (max-width: 960px) {
+  .channels,
+  .chainBox {
+    grid-column: 1 / -1;
+  }
+
+  .leak {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+  }
+}
+
+@media (max-width: 640px) {
+  .chain {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .link {
+    grid-template-columns: auto minmax(0, 1fr);
+    justify-items: start;
+    align-items: center;
+  }
+
+  .halves {
+    width: 6rem;
+    height: 2.8rem;
+  }
+}

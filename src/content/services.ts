@@ -229,4 +229,5 @@ export const SERVICE_MENU: { name: string; note: string; href: string | null }[]
 /** Отраслевые решения: второй раздел того же меню */
 export const INDUSTRY_MENU: { name: string; note: string; href: string | null }[] = [
   { name: "Рестораны", note: "Брони из карт и поиска по поводам", href: "/otrasli/restorany/" },
+  { name: "Автобизнес", note: "Каталог, фиды, бот и CRM для продажи авто", href: "/otrasli/avtobiznes/" },
 ];

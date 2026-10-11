@@ -9,12 +9,10 @@ import HomeLink from "@/components/HomeLink";
 import { INDUSTRY_MENU, SERVICE_MENU } from "@/content/services";
 import styles from "./Header.module.css";
 
+/** В шапке только то, что ведёт на страницы: меню отделов, меню отраслей и «О нас». Якоря главной живут в подвале */
 const NAV = [
-  { href: "#dossier", label: "Досье" },
   { href: "#departments", label: "Отделы" },
   { href: "#industries", label: "Отрасли" },
-  { href: "#protocol", label: "Протокол" },
-  { href: "#contract", label: "Контракт" },
 ];
 
 function TelegramIcon() {
@@ -96,14 +94,14 @@ export default function Header() {
             item.href === "#departments" ? (
               // «Отделы» раскрываются меню страниц отделов: по наведению и по фокусу с клавиатуры
               <div key={item.href} className={styles.navItem}>
-                <HomeLink hash={item.href} className={styles.link} aria-haspopup="true">
+                <button type="button" className={`${styles.link} ${styles.linkButton}`} aria-haspopup="true">
                   <span className={styles.linkText} data-text={item.label}>
                     {item.label}
                   </span>
                   <svg className={styles.chevron} viewBox="0 0 10 6" aria-hidden="true">
                     <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.4" />
                   </svg>
-                </HomeLink>
+                </button>
                 <div className={styles.menu} data-surface="dark">
                   <p className={`label ${styles.menuLabel}`}>Страницы отделов</p>
                   <ul className={styles.menuList}>
@@ -168,13 +166,7 @@ export default function Header() {
                   </ul>
                 </div>
               </div>
-            ) : (
-              <HomeLink key={item.href} hash={item.href} className={styles.link}>
-                <span className={styles.linkText} data-text={item.label}>
-                  {item.label}
-                </span>
-              </HomeLink>
-            ),
+            ) : null,
           )}
           <Link href="/o-nas/" className={styles.link} aria-current={pathname === "/o-nas/" ? "page" : undefined}>
             <span className={styles.linkText} data-text="О нас">
@@ -225,13 +217,7 @@ export default function Header() {
             const subs = item.href === "#departments" ? SERVICE_MENU : item.href === "#industries" ? INDUSTRY_MENU : [];
             return (
               <div key={item.href} className={styles.sheetItem}>
-                {item.href === "#industries" ? (
-                  <span className={styles.sheetLink}>{item.label}</span>
-                ) : (
-                  <HomeLink hash={item.href} className={styles.sheetLink} onClick={() => setOpen(false)}>
-                    {item.label}
-                  </HomeLink>
-                )}
+                <span className={styles.sheetLink}>{item.label}</span>
                 {subs
                   .filter((s) => s.href)
                   .map((s) => (

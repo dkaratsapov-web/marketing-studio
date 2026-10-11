@@ -1,0 +1,247 @@
+/* Тёмный блок: текст слева, телефон с чатом и мини-приложением справа */
+.section {
+  padding-block: var(--section-y);
+  overflow: hidden;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 3rem;
+  align-items: center;
+}
+
+.text {
+  grid-column: 1 / span 6;
+  display: grid;
+  gap: 1.25rem;
+  justify-items: start;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 52ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.lines {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+}
+
+.lines b {
+  color: var(--lime);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-4);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.lines span {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.functions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.functions li {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: var(--step--1);
+}
+
+.max {
+  max-width: 52ch;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.maxTag {
+  display: inline-block;
+  margin-right: 0.6rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  background: #2b2b6e;
+  color: #c9c9ff;
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+}
+
+.replay {
+  padding: 0.45rem 0;
+  border: 0;
+  background: none;
+  color: var(--lime);
+  font: inherit;
+  font-family: var(--ff-mono);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.replay:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
+}
+
+/* Телефон: шапка чата, переписка, мини-приложение поверх */
+.phone {
+  grid-column: 8 / span 4;
+  position: relative;
+  justify-self: center;
+  width: min(100%, 22rem);
+  aspect-ratio: 9 / 18.5;
+  overflow: hidden;
+  border: 8px solid #1b1b1f;
+  border-radius: 2.4rem;
+  background: #0e1621;
+  box-shadow:
+    0 0 0 1px #34343a,
+    0 60px 100px -50px rgb(0 0 0 / 0.95);
+}
+
+.chatTop {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.8rem 0.9rem;
+  background: #17212b;
+  font-size: 0.8rem;
+}
+
+.chatTop b {
+  display: block;
+  font-weight: 650;
+}
+
+.chatTop small {
+  color: #6c7883;
+  font-size: 0.68rem;
+}
+
+.ava {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c62828, #7f1010);
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.9rem 0.75rem;
+}
+
+.msg {
+  max-width: 82%;
+  padding: 0.5rem 0.7rem;
+  border-radius: 12px 12px 12px 4px;
+  background: #182533;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.msg[data-from="user"] {
+  align-self: flex-end;
+  border-radius: 12px 12px 4px 12px;
+  background: #2b5278;
+}
+
+.typing {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.6rem 0.7rem;
+  align-self: flex-start;
+  border-radius: 12px;
+  background: #182533;
+}
+
+.typing i {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: #6c7883;
+  animation: dot 1s infinite;
+}
+
+.typing i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes dot {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.openBtn {
+  align-self: flex-start;
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  background: #2b5278;
+  color: var(--white);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* Мини-приложение выезжает снизу на весь экран */
+.app {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 1.8rem;
+  background: #111;
+}
+
+.appImg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (max-width: 960px) {
+  .text,
+  .phone {
+    grid-column: 1 / -1;
+  }
+
+  .phone {
+    width: min(100%, 19rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing i {
+    animation: none;
+  }
+}

@@ -49,7 +49,7 @@ export default function TorchCases({ data }: { data: Data }) {
 
         // Сам по себе луч обходит плитки по кругу
         const wander = gsap.timeline({ repeat: -1, paused: true });
-        [0, 1, 2, 5, 4, 3].forEach((k) => {
+        [0, 1, 2, 5, 4, 3, 6].forEach((k) => {
           const t = tiles[k];
           if (t) wander.to(torch, { x: () => centre(t).x, y: () => centre(t).y, duration: 1.6, ease: "sine.inOut", onUpdate: draw }).to({}, { duration: 0.5 });
         });
@@ -123,7 +123,7 @@ export default function TorchCases({ data }: { data: Data }) {
           <ul className={styles.tiles}>
             {CASES.map((c) => {
               const m = c.metrics[0];
-              const href = data.links[c.code];
+              const href = data.links[c.code] ?? c.href;
               return (
                 <li key={c.code} className={styles.tile} data-tile>
                   <p className={styles.code}>Дело {c.code}</p>

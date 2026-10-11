@@ -1,0 +1,126 @@
+/* Приборная панель первого экрана: шкала, лампы неисправностей, табло */
+.scene {
+  display: grid;
+  justify-items: center;
+  gap: 1.25rem;
+  width: min(100%, 40rem);
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  border-radius: 28px 28px 18px 18px;
+  background: radial-gradient(120% 90% at 50% 0%, #19191d, #0b0b0d);
+  box-shadow:
+    inset 0 0 0 1px #2a2a30,
+    0 60px 100px -50px rgb(0 0 0 / 0.95);
+}
+
+.gauge {
+  width: 100%;
+  height: auto;
+}
+
+.arc {
+  fill: none;
+  stroke: #2e2e34;
+  stroke-width: 3;
+}
+
+.tick {
+  stroke: #45454d;
+  stroke-width: 1.5;
+}
+
+.tickMain {
+  stroke: var(--white);
+  stroke-width: 3;
+}
+
+.scaleText {
+  fill: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.needle {
+  fill: var(--pink);
+  filter: drop-shadow(0 0 6px rgb(255 77 157 / 0.7));
+}
+
+.hub {
+  fill: #1f1f24;
+  stroke: var(--pink);
+  stroke-width: 3;
+}
+
+/* Лампы: жёлтые, пока горят (--off 0), гаснут с салатовой галочкой (--off 1) */
+.lamps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.6rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lamp {
+  --off: 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  text-align: center;
+}
+
+.bulb {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, #1a1a1e calc(var(--off) * 100%), rgb(255 176 32 / 0.18));
+  box-shadow: 0 0 calc((1 - var(--off)) * 18px) rgb(255 176 32 / calc((1 - var(--off)) * 0.7));
+}
+
+.bulb svg {
+  width: 1.3rem;
+  fill: none;
+  stroke: color-mix(in srgb, #3a3a40 calc(var(--off) * 100%), #ffb020);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lampText {
+  color: color-mix(in srgb, #5c5c63 calc(var(--off) * 100%), var(--fg));
+  font-size: clamp(0.62rem, 0.5rem + 0.3vw, 0.75rem);
+  line-height: 1.25;
+  text-decoration: line-through;
+  text-decoration-color: rgb(196 245 66 / var(--off));
+  text-decoration-thickness: 1.5px;
+}
+
+/* Табло: загорается, когда погасла последняя лампа */
+.ready {
+  --ok: 0;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--lime) calc(var(--ok) * 100%), #2a2a30);
+  border-radius: 8px;
+  background: color-mix(in srgb, rgb(196 245 66 / 0.12) calc(var(--ok) * 100%), #0e0e10);
+  color: color-mix(in srgb, var(--lime) calc(var(--ok) * 100%), #3a3a40);
+  font-family: var(--ff-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 0 calc(var(--ok) * 12px) rgb(196 245 66 / 0.6);
+}
+
+@media (max-width: 520px) {
+  .lamps {
+    gap: 0.3rem;
+  }
+
+  .bulb {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+}

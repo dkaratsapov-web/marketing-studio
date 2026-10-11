@@ -1,0 +1,253 @@
+/* Тёмный блок: дорога с остановками, машина едет скроллом. Блок держится на время поездки */
+.track {
+  height: 300svh;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: clamp(1rem, 3vh, 2rem);
+  height: 100svh;
+  padding-block: 5.5rem 2rem;
+}
+
+.head {
+  display: grid;
+  gap: 1rem;
+  max-width: 60rem;
+}
+
+.title {
+  font-size: clamp(2.4rem, 1rem + 4vw, 5.6rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 56ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+.road {
+  position: relative;
+  align-self: center;
+  width: 100%;
+  aspect-ratio: 1200 / 420;
+  max-height: 100%;
+  margin-inline: auto;
+}
+
+.road[data-road="tall"] {
+  display: none;
+  aspect-ratio: 400 / 1200;
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.asphalt {
+  fill: none;
+  stroke: #1f1f24;
+  stroke-width: 46;
+  stroke-linecap: round;
+}
+
+.dash {
+  fill: none;
+  stroke: #3a3a40;
+  stroke-width: 2;
+  stroke-dasharray: 14 16;
+}
+
+/* Пройденная часть дороги подсвечивается */
+.done {
+  fill: none;
+  stroke: rgb(196 245 66 / 0.35);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+/* Остановка: булавка на дороге и подпись над ней или под ней */
+.stop {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.pin {
+  position: absolute;
+  left: -0.55rem;
+  top: -0.55rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 3px solid #3a3a40;
+  border-radius: 50%;
+  background: var(--ink-950);
+  transition:
+    border-color 0.3s var(--ease-out),
+    background-color 0.3s var(--ease-out);
+}
+
+.stop[data-on] .pin {
+  border-color: var(--lime);
+  background: var(--lime);
+  box-shadow: 0 0 14px rgb(196 245 66 / 0.6);
+}
+
+.label {
+  position: absolute;
+  left: 0;
+  display: grid;
+  gap: 0.25rem;
+  width: max-content;
+  max-width: 13rem;
+  translate: -50% 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #2a2a30;
+  border-radius: 12px;
+  background: #121215;
+  opacity: 0.45;
+  transition:
+    opacity 0.35s var(--ease-out),
+    border-color 0.35s var(--ease-out);
+}
+
+.stop[data-side="a"] .label {
+  bottom: 2.4rem;
+}
+
+.stop[data-side="b"] .label {
+  top: 2.4rem;
+}
+
+.stop[data-on] .label {
+  opacity: 1;
+  border-color: rgb(196 245 66 / 0.5);
+}
+
+.label b {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  font-size: var(--step-0);
+}
+
+.no {
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+}
+
+.label > span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+/* Машина на дороге: позиция и поворот из точки кривой */
+.car {
+  position: absolute;
+  width: 3.4rem;
+  translate: -50% -50%;
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.6));
+}
+
+.car svg {
+  display: block;
+  width: 100%;
+}
+
+.carBody {
+  fill: var(--pink);
+}
+
+.carRoof {
+  fill: #b8005f;
+}
+
+.carGlass {
+  fill: #ffd1e6;
+}
+
+@media (max-width: 760px) {
+  .track {
+    height: 260svh;
+  }
+
+  .road[data-road="wide"] {
+    display: none;
+  }
+
+  .road[data-road="tall"] {
+    display: block;
+    height: 100%;
+    width: auto;
+  }
+
+  .label {
+    max-width: 9.5rem;
+    padding: 0.5rem 0.6rem;
+  }
+
+  .stop[data-side="a"] .label,
+  .stop[data-side="b"] .label {
+    top: -1.2rem;
+    bottom: auto;
+    translate: 0 0;
+  }
+
+  .stop[data-side="a"] .label {
+    left: 1.3rem;
+  }
+
+  .stop[data-side="b"] .label {
+    left: auto;
+    right: 1.3rem;
+  }
+
+  .label b {
+    font-size: 0.85rem;
+  }
+
+  .label > span {
+    font-size: 0.7rem;
+  }
+
+  .car {
+    width: 2.6rem;
+  }
+
+  .lead {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    height: auto;
+  }
+
+  .sticky {
+    position: static;
+    height: auto;
+    padding-block: var(--section-y);
+  }
+
+  .pin,
+  .label {
+    transition: none;
+  }
+}

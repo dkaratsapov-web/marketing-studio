@@ -1,0 +1,285 @@
+/* Тёмный блок: вкладки сценариев, пост → поля → результат */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.head {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 58rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 58ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tab {
+  min-height: 2.9rem;
+  padding: 0.55rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--step--1);
+  cursor: pointer;
+  transition:
+    color 0.25s var(--ease-out),
+    background-color 0.25s var(--ease-out),
+    border-color 0.25s var(--ease-out);
+}
+
+.tab:hover {
+  border-color: rgb(255 255 255 / 0.35);
+  color: var(--fg);
+}
+
+.tab[aria-pressed="true"] {
+  border-color: var(--lime);
+  background: var(--lime);
+  color: var(--ink-950);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
+}
+
+.bench {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) auto minmax(0, 1fr) minmax(0, 0.8fr);
+  align-items: center;
+  gap: clamp(1rem, 2.5vw, 2.5rem);
+}
+
+/* Пост канала */
+.post {
+  padding: 1rem 1.15rem 1.2rem;
+  border: 1px solid #2a2a30;
+  border-radius: 16px 16px 16px 4px;
+  background: #16161a;
+}
+
+.channel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  color: #6fb6ff;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.channel i {
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c62828, #7f1010);
+}
+
+.postText {
+  font-size: var(--step-0);
+  line-height: 1.6;
+}
+
+/* Распознанный кусок: маркер заливается слева направо (--hl от 0 до 1) */
+.mark {
+  --hl: 0;
+  padding: 0.05em 0.15em;
+  margin: 0 -0.15em;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgb(196 245 66 / 0.28) calc(var(--hl) * 100%), transparent 0);
+  box-shadow: inset 0 -2px 0 rgb(196 245 66 / calc(var(--hl) * 0.9));
+  color: inherit;
+}
+
+.arrow {
+  color: var(--lime);
+  font-size: var(--step-3);
+}
+
+/* Таблица полей */
+.fields {
+  display: grid;
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+
+.row {
+  --bad: 0;
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.row dt {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.row dd {
+  margin: 0;
+  color: color-mix(in srgb, var(--pink) calc(var(--bad) * 100%), var(--fg));
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.row dd[data-empty] {
+  color: #4a4a52;
+}
+
+.statusRow dd {
+  color: var(--lime);
+}
+
+.statusRow[data-kind="typo"] dd {
+  color: var(--pink);
+}
+
+.statusRow[data-kind="sold"] dd {
+  color: var(--muted);
+}
+
+/* Результат: карточка каталога */
+.out {
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+}
+
+.cardWrap {
+  position: relative;
+  width: min(100%, 15rem);
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.card[data-kind="new"] {
+  box-shadow:
+    0 0 0 2px var(--lime),
+    0 24px 50px -20px rgb(196 245 66 / 0.35);
+}
+
+.cardImg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.stamp {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 42%;
+  translate: -50% -50%;
+  padding: 0.5rem 0.9rem;
+  border: 3px solid var(--pink);
+  border-radius: 8px;
+  color: var(--pink);
+  background: rgb(5 5 5 / 0.75);
+  font-family: var(--ff-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.strike {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: 38%;
+  padding: 0.45rem 0;
+  background: var(--ink-950);
+  color: var(--white);
+  font-family: var(--ff-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-align: center;
+  text-transform: uppercase;
+  rotate: -8deg;
+  transform-origin: 0 50%;
+}
+
+.result {
+  max-width: 22ch;
+  color: var(--lime);
+  font-size: var(--step--1);
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.result[data-kind="typo"] {
+  color: var(--pink);
+}
+
+.result[data-kind="sold"] {
+  color: var(--fg);
+}
+
+.note {
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 1100px) {
+  .bench {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .arrow {
+    display: none;
+  }
+
+  .out {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .bench {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .row {
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+  }
+}

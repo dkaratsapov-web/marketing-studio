@@ -1,0 +1,182 @@
+/* Светлый блок: доска, на ней три стикера с проблемами поверх карточек с решениями */
+.section {
+  padding-block: var(--section-y);
+  overflow: hidden;
+}
+
+.head {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 54rem;
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--accent);
+}
+
+.lead {
+  max-width: 50ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2.5vw, 2.5rem);
+  margin: 0;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  list-style: none;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 1px 1px, rgb(5 5 5 / 0.08) 1px, transparent 0) 0 0 / 18px 18px,
+    #f3f3f4;
+}
+
+.slot {
+  position: relative;
+  display: grid;
+  min-height: 19rem;
+}
+
+/* Решение под стикером */
+.fix {
+  display: grid;
+  align-content: end;
+  gap: 0.6rem;
+  padding: 1.5rem;
+  border: 1px solid var(--ink-950);
+  border-radius: 14px;
+  background: var(--white);
+}
+
+.fixKicker {
+  color: var(--accent);
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fixName {
+  font-size: var(--step-2);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.fixText {
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.45;
+}
+
+/* Стикер: квадрат бумаги с булавкой, лежит поверх решения */
+.note {
+  --tone: var(--lime);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+  padding: 2rem 1.5rem 1.25rem;
+  border: 0;
+  border-radius: 4px;
+  background: var(--tone);
+  color: var(--ink-950);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transform-origin: 50% 0.9rem;
+  box-shadow:
+    0 2px 0 rgb(5 5 5 / 0.06),
+    0 22px 30px -18px rgb(5 5 5 / 0.45);
+  transition: box-shadow 0.25s var(--ease-out);
+}
+
+.note[data-tone="pink"] {
+  --tone: #ff8fc0;
+}
+
+.note:hover {
+  box-shadow:
+    0 2px 0 rgb(5 5 5 / 0.06),
+    0 30px 40px -18px rgb(5 5 5 / 0.5);
+}
+
+.note:focus-visible {
+  outline: 2px solid var(--ink-950);
+  outline-offset: 4px;
+}
+
+.pin {
+  position: absolute;
+  top: 0.55rem;
+  left: 50%;
+  width: 0.8rem;
+  height: 0.8rem;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ff6b6b, #a01010);
+  box-shadow: 0 2px 3px rgb(5 5 5 / 0.4);
+}
+
+.problem {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 650;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+.problemText {
+  font-size: var(--step--1);
+  line-height: 1.45;
+}
+
+.tear {
+  align-self: end;
+  margin-top: auto;
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 960px) {
+  .board {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .slot {
+    min-height: 15rem;
+  }
+}
+
+/* Без анимации: стикер и решение стопкой, ничего не перекрывается */
+@media (prefers-reduced-motion: reduce) {
+  .slot {
+    gap: 0.75rem;
+    min-height: 0;
+  }
+
+  .note {
+    position: relative;
+    inset: auto;
+    rotate: none !important;
+    order: -1;
+    cursor: default;
+  }
+
+  .tear {
+    display: none;
+  }
+}
