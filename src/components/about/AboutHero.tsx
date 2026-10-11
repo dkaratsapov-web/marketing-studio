@@ -76,7 +76,7 @@ export default function AboutHero({ data }: Props) {
           </nav>
           <p className={`label ${styles.kicker}`}>
             {data.sector}{" "}
-            <span className={styles.tools}>· маркетинговое агентство Даниила Карацапова</span>
+            <span className={styles.tools}>· маркетинговое агентство полного цикла</span>
           </p>
         </div>
 
