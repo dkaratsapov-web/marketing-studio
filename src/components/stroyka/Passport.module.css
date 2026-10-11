@@ -1,0 +1,137 @@
+/* Светлый блок: профнастил забора, на нём щит паспорта объекта на четырёх болтах */
+.section {
+  padding-block: var(--section-y);
+}
+
+.fence {
+  padding-block: clamp(2rem, 5vw, 4rem);
+  border-radius: 18px;
+  background:
+    repeating-linear-gradient(90deg, #d9dade 0 18px, #c7c9ce 18px 22px, #e6e7ea 22px 40px, #c7c9ce 40px 44px),
+    #d9dade;
+}
+
+.board {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  grid-template-areas:
+    "title title"
+    "rows specs"
+    "more specs";
+  column-gap: clamp(1.5rem, 4vw, 4rem);
+  row-gap: 1.5rem;
+  width: min(100%, 64rem);
+  margin-inline: auto;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 3px solid var(--ink-950);
+  background: var(--ink-950);
+  color: var(--white);
+  box-shadow: 0 30px 50px -30px rgb(5 5 5 / 0.7);
+}
+
+.bolt {
+  position: absolute;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f2f2f2, #8a8a90 60%, #4a4a50);
+}
+
+.bolt[data-c="tl"] { top: 0.8rem; left: 0.8rem; }
+.bolt[data-c="tr"] { top: 0.8rem; right: 0.8rem; }
+.bolt[data-c="bl"] { bottom: 0.8rem; left: 0.8rem; }
+.bolt[data-c="br"] { bottom: 0.8rem; right: 0.8rem; }
+
+.title {
+  grid-area: title;
+  padding: 0.6rem 1rem;
+  background: var(--lime);
+  color: var(--ink-950);
+  font-size: clamp(1.8rem, 1rem + 2.6vw, 3.6rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-align: center;
+}
+
+.rows {
+  grid-area: rows;
+  display: grid;
+  margin: 0;
+}
+
+.rows div {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgb(255 255 255 / 0.18);
+}
+
+.rows dt {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.rows dd {
+  margin: 0;
+  font-size: var(--step-0);
+  font-weight: 600;
+}
+
+.specs {
+  grid-area: specs;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  align-self: start;
+  background: rgb(255 255 255 / 0.18);
+}
+
+.specs div {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  padding: 1rem;
+  background: var(--ink-950);
+}
+
+.specs dt {
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.3;
+}
+
+.specs dd {
+  margin: 0;
+  color: var(--lime);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-4);
+  font-weight: 650;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.more {
+  grid-area: more;
+  justify-self: start;
+  align-self: end;
+}
+
+@media (max-width: 860px) {
+  .board {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "title"
+      "rows"
+      "specs"
+      "more";
+  }
+
+  .rows div {
+    grid-template-columns: 7rem minmax(0, 1fr);
+  }
+}

@@ -1,0 +1,242 @@
+/* Тёмный блок: сетка лотов слева, папка заявки справа */
+.section {
+  padding-block: var(--section-y);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 2.5rem;
+  align-items: start;
+}
+
+.head {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 1.25rem;
+  max-width: 58rem;
+}
+
+.title {
+  font-size: clamp(2.6rem, 1.2rem + 4.4vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.dotMark {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 58ch;
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.lots {
+  grid-column: 1 / span 8;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lots li:last-child {
+  grid-column: 1 / -1;
+}
+
+.lot {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+  padding: 1.25rem 1.25rem 1.1rem;
+  border: 1px solid #2a2a30;
+  border-radius: 14px;
+  background: #121215;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.25s var(--ease-out),
+    background-color 0.25s var(--ease-out);
+}
+
+.lot:hover {
+  border-color: #4a4a52;
+}
+
+.lot[aria-pressed="true"] {
+  border-color: var(--lime);
+  background: rgb(196 245 66 / 0.06);
+}
+
+.lot[data-main] {
+  background: #17170f;
+}
+
+.lot:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
+}
+
+.lotNo {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.lotName {
+  font-size: var(--step-1);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.lotText {
+  max-width: 44ch;
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.45;
+}
+
+.lotPrice {
+  margin-top: 0.4rem;
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.lotPrice b {
+  color: var(--lime);
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 650;
+}
+
+/* Скрепка: в правом верхнем углу, показывает, лежит ли лот в заявке */
+.clip {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid #3a3a40;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.lot[aria-pressed="true"] .clip {
+  border-color: var(--lime);
+  background: var(--lime);
+  color: var(--ink-950);
+  font-weight: 650;
+}
+
+/* Папка заявки */
+.folder {
+  grid-column: 9 / -1;
+  position: sticky;
+  top: 7rem;
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 4px 18px 18px 18px;
+  background: #e9dfc6;
+  color: var(--ink-950);
+  box-shadow: 0 30px 50px -30px rgb(0 0 0 / 0.9);
+}
+
+.folder::before {
+  content: "";
+  position: absolute;
+  top: -0.9rem;
+  left: 0;
+  width: 8rem;
+  height: 1rem;
+  border-radius: 8px 8px 0 0;
+  background: #e9dfc6;
+}
+
+.folderHead {
+  font-family: var(--ff-display);
+  font-variation-settings: "SHRP" 100;
+  font-size: var(--step-2);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.chosen {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgb(5 5 5 / 0.2);
+}
+
+.chosen li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgb(5 5 5 / 0.12);
+  font-size: var(--step--1);
+  animation: slipIn 0.35s var(--ease-out);
+}
+
+.chosen b {
+  white-space: nowrap;
+}
+
+@keyframes slipIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+}
+
+.empty {
+  color: rgb(5 5 5 / 0.6);
+  font-size: var(--step--1);
+}
+
+.cta {
+  justify-self: start;
+}
+
+.cta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 960px) {
+  .lots,
+  .folder {
+    grid-column: 1 / -1;
+  }
+
+  .folder {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .lots {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chosen li {
+    animation: none;
+  }
+
+  .lot {
+    transition: none;
+  }
+}

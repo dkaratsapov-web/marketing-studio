@@ -85,18 +85,18 @@
   grid-column: 7 / -1;
   position: relative;
   display: grid;
-  place-items: center;
-  min-height: 34rem;
+  place-items: end center;
+  min-height: 30rem;
+  padding-bottom: 2rem;
   perspective: 2000px;
 }
 
 .tower {
   position: relative;
-  width: min(22rem, 70%);
+  width: min(20rem, 70%);
   aspect-ratio: 1;
   transform: rotateX(58deg) rotateZ(-38deg);
   transform-style: preserve-3d;
-  margin-top: 8rem;
 }
 
 .slab {
@@ -119,20 +119,9 @@
   background: rgb(255 77 157 / 0.3);
 }
 
-.slab b {
-  color: var(--white);
-  font-family: var(--ff-mono);
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  rotate: 38deg;
-  opacity: 0.85;
-}
-
 .total {
   position: absolute;
-  top: 0;
+  top: 1rem;
   right: 0;
   padding: 0.5rem 0.9rem;
   border: 1px solid var(--lime);
@@ -151,11 +140,10 @@
   }
 
   .iso {
-    min-height: 26rem;
+    min-height: 22rem;
   }
 
   .tower {
-    width: min(16rem, 70%);
-    margin-top: 6rem;
+    width: min(14rem, 62%);
   }
 }

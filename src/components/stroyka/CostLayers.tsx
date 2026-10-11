@@ -12,9 +12,9 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 type Data = (typeof STROYKA)["layers"];
 
 /**
- * Цена за квадрат врёт. Изометрическая стопка плит: сначала лежит одна «Коробка», это и есть
- * цена за квадрат. По скроллу сверху падают остальные статьи затрат из калькулятора дела 004,
- * легенда слева отмечает каждую. В конце стопка подписывается как бюджет объекта.
+ * Цена за квадрат врёт. Изометрическая стопка плит: сначала лежит одна розовая «Коробка», это
+ * и есть цена за квадрат. По скроллу сверху падают остальные статьи затрат из калькулятора
+ * дела 004, в легенде слева загорается каждая. В конце стопка подписывается как бюджет объекта.
  */
 export default function CostLayers({ data }: { data: Data }) {
   const root = useRef<HTMLElement>(null);
@@ -72,9 +72,7 @@ export default function CostLayers({ data }: { data: Data }) {
         <div className={styles.iso} data-iso aria-hidden="true">
           <div className={styles.tower}>
             {parts.map((p, i) => (
-              <span key={p} className={styles.slab} data-slab data-box={i === 0 || undefined} style={{ "--z": i * STEP, "--i": i } as React.CSSProperties}>
-                <b>{p}</b>
-              </span>
+              <span key={p} className={styles.slab} data-slab data-box={i === 0 || undefined} style={{ "--z": i * STEP, "--i": i } as React.CSSProperties} />
             ))}
           </div>
           <p className={styles.total} data-total>

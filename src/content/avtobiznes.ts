@@ -2,7 +2,7 @@
  * Отраслевое решение «Автобизнес»: импорт авто, автосалоны, продажа авто с пробегом.
  * Цифры только из дела 023 (ДиАвто69) и прайса. Каталог, бот и CRM считаются по смете: цены в прайсе нет.
  */
-import { CARS, DIAUTO } from "@/content/diauto";
+import { DIAUTO } from "@/content/diauto";
 import siteMain from "@/assets/cases/diauto/site-main.webp";
 import quiz from "@/assets/cases/diauto/quiz.webp";
 import miniapp from "@/assets/cases/diauto/miniapp.webp";
