@@ -230,3 +230,82 @@ test('OSM: посёлок без границы — около 10 км вокр�
   const { bbox } = await osmArea('Лесной Городок', fetchImpl);
   assert.ok(bbox[2] - bbox[0] > 0.15 && bbox[3] - bbox[1] > 0.25, JSON.stringify(bbox));
 });
+
+test('Яндекс Поиск: сайты компаний из выдачи без справочников и соцсетей, ключ с ID каталога', async () => {
+  const { parseSearchXml } = await import('../src/parser/sources.js');
+  const xml = `<?xml version="1.0"?><yandexsearch><response><results><grouping>
+    <group><doc><url>https://rolf-odintsovo.ru/cars/new</url><title>Автосалон <hlword>Рольф</hlword> в Одинцово — официальный дилер</title><passages><passage>Новые авто</passage></passages></doc></group>
+    <group><doc><url>https://www.avito.ru/odintsovo/avtomobili</url><title>Авито</title></doc></group>
+    <group><doc><url>https://yandex.ru/maps/org/1</url><title>Яндекс Карты</title></doc></group>
+    <group><doc><url>https://major-auto.ru/</url><title>Major Auto | Одинцово</title></doc></group>
+  </grouping></results></response></yandexsearch>`;
+  assert.deepEqual(parseSearchXml(xml).map((d) => d.host), ['rolf-odintsovo.ru', 'major-auto.ru']);
+  assert.throws(() => parseSearchXml('<yandexsearch><response><error code="2">Неверный ключ</error></response></yandexsearch>'), /Яндекс Поиск: Неверный ключ/);
+  assert.deepEqual(parseSearchXml('<yandexsearch><response><error code="15">Ничего не найдено</error></response></yandexsearch>'), []);
+
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    calls.push({ url, init });
+    return res(200, { rawData: Buffer.from(xml).toString('base64') });
+  };
+  const db = openDb(':memory:').raw;
+  const parser = createParser({ db, fetchImpl, siteFetch: async () => res(200, '<a href="tel:+79001112233">x</a>', { 'content-type': 'text/html' }), lookup: publicDns });
+  await assert.rejects(parser.setKey('yandexweb', 'AQVNkey0123456789'), /ID каталога/);
+  const s = await parser.setKey('yandexweb', 'AQVNkey0123456789', { name: 'Админ' }, 'b1gfolder123456');
+  assert.deepEqual([s.ready, s.tail, s.needsFolder], [true, '6789', true]);
+  assert.equal(calls[0].init.headers.authorization, 'Api-Key AQVNkey0123456789');
+  const sent = JSON.parse(calls[0].init.body);
+  assert.equal(sent.folderId, 'b1gfolder123456');
+  assert.equal(sent.groupSpec.groupMode, 'GROUP_MODE_DEEP');
+
+  const job = parser.create({ query: 'автосалон', geo: 'Одинцово', sources: ['yandexweb'], perSource: 50 });
+  await parser.settle();
+  const list = parser.places(job.id);
+  assert.deepEqual(list.map((p) => [p.name, p.website, p.city]), [['Автосалон Рольф в Одинцово', 'https://rolf-odintsovo.ru', 'Одинцово'], ['Major Auto', 'https://major-auto.ru', 'Одинцово']]);
+  assert.deepEqual(list[0].phones, ['+7 (900) 111-22-33'], 'телефон — с сайта компании');
+});
+
+test('Кнопка «В CRM»: список создаётся по имени, дубль дополняется, ключ сотрудника', async () => {
+  const db = openDb(':memory:');
+  db.raw.prepare("INSERT INTO admin_users (id, email, name, role) VALUES (7, 'm@korp.test', 'Менеджер', 'manager')").run();
+  const parser = createParser({ db: db.raw, siteFetch: async () => res(200, '<a href="mailto:hi@salon.ru">почта</a>', { 'content-type': 'text/html' }), lookup: publicDns });
+  const user = { id: 7, name: 'Менеджер' };
+  const token = parser.issueToken(user);
+  assert.match(token, /^korp_/);
+  assert.deepEqual(parser.userByToken(token), { id: 7, name: 'Менеджер', role: 'manager' });
+  assert.equal(parser.userByToken('korp_wrongwrongwrongwrongwrong'), null);
+
+  const card = { source: 'yandex', orgId: '123456', link: 'https://yandex.ru/maps/org/123456/', name: 'Салон Лотос', category: 'Салон красоты', address: 'Одинцово, Можайское шоссе, 4', phones: ['+7 (495) 123-45-67'], website: 'https://salon.ru/?utm=1' };
+  const a = parser.addManual({ listName: 'Салоны Одинцово', place: card }, user);
+  assert.equal(a.duplicate, false);
+  assert.equal(a.place.city, 'Одинцово');
+  const b = parser.addManual({ listId: a.list.id, place: { ...card, phones: ['84951234567', '+7 916 000-00-00'] } }, user);
+  assert.equal(b.duplicate, true);
+  assert.deepEqual(parser.lists().map((l) => [l.name, l.count]), [['Салоны Одинцово', 1]]);
+  assert.deepEqual(b.place.phones, ['+7 (495) 123-45-67', '+7 (916) 000-00-00']);
+  assert.throws(() => parser.addManual({ listId: a.list.id, place: { source: 'yandex' } }, user), /Нет названия/);
+  // почта с сайта подтягивается в фоне
+  await new Promise((r) => setTimeout(r, 50));
+  assert.deepEqual(parser.places(a.list.id)[0].emails, ['hi@salon.ru']);
+  assert.equal(parser.job(a.list.id).sources[0], 'manual');
+
+  const t = parser.tokens(user);
+  assert.equal(t.length, 1);
+  parser.revokeToken(t[0].id, user);
+  assert.equal(parser.userByToken(token), null);
+});
+
+test('Архив расширения: манифест с адресом кабинета и личный ключ', async () => {
+  const { extensionZip } = await import('../src/parser/extension.js');
+  const { execFileSync } = await import('node:child_process');
+  const { mkdtempSync, writeFileSync, readFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const dir = mkdtempSync(`${tmpdir()}/ext-`);
+  writeFileSync(`${dir}/x.zip`, extensionZip({ base: 'https://crm.marketing-studio.pro/admin', token: 'korp_abc' }));
+  execFileSync('unzip', ['-q', `${dir}/x.zip`, '-d', dir]);
+  const manifest = JSON.parse(readFileSync(`${dir}/korp-crm/manifest.json`, 'utf8'));
+  assert.deepEqual(manifest.host_permissions, ['https://crm.marketing-studio.pro/*']);
+  assert.equal(manifest.manifest_version, 3);
+  assert.match(readFileSync(`${dir}/korp-crm/config.js`, 'utf8'), /"token":"korp_abc"/);
+  assert.match(readFileSync(`${dir}/korp-crm/content.js`, 'utf8'), /В CRM/);
+});

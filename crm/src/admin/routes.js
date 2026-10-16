@@ -2,7 +2,7 @@
 // Сессия — httpOnly-cookie с SameSite=Strict; изменения принимаются только JSON-запросами.
 
 import { adStatsRoutes } from './adstats-routes.js';
-import { parserRoutes } from './parser-routes.js';
+import { parserRoutes, parserExtRoutes } from './parser-routes.js';
 import cookie from '@fastify/cookie';
 import fastifyStatic from '@fastify/static';
 import { randomBytes } from 'node:crypto';
@@ -111,13 +111,16 @@ export async function adminRoutes(app, { config, auth, reports, db, scenarioSour
       if (!user) return reply.code(404).send({ error: 'Календарь не найден' });
       const day = 24 * 3600_000;
       const meetings = calendar.meetingsForUser(user.id, new Date(Date.now() - 60 * day), new Date(Date.now() + 365 * day));
-      const host = config.publicUrl ? new URL(config.publicUrl).hostname : 'soroka-assistant';
+      const host = config.publicUrl ? new URL(config.publicUrl).hostname : 'korp-cabinet';
       return reply
         .header('content-type', 'text/calendar; charset=utf-8')
         .header('cache-control', 'no-cache')
         .send(meetingsIcs(meetings, { name: `Встречи — ${user.name}`, host }));
     });
   }
+
+  // Расширение «В CRM» с карт: свой вход по личному ключу сотрудника
+  if (parser) await app.register(parserExtRoutes, { parser });
 
   app.addHook('onSend', async (req, reply, payload) => {
     if (req.url.startsWith('/admin')) {
@@ -486,7 +489,7 @@ export async function adminRoutes(app, { config, auth, reports, db, scenarioSour
     if (mediaplans) await api.register(mediaplanRoutes, { mediaplans, brand });
     if (crm) await api.register(crmRoutes, { crm, auth, db, scenarioSource, kb, files, money });
     if (adstats) await api.register(adStatsRoutes, { adstats });
-    if (parser) await api.register(parserRoutes, { parser });
+    if (parser) await api.register(parserRoutes, { parser, config });
 
     // ---------- уведомления (колокольчик) ----------
     // after — только новые (для всплывающих окон): опрос раз в 20 секунд

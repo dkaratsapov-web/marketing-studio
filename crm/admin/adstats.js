@@ -421,23 +421,37 @@ const fmtDate = (d) => new Date(`${d}T12:00:00Z`).toLocaleDateString('ru-RU', { 
 
 /** График по дням: столбцы — расход, линия — конверсии (или достижения целей, если Директа нет). */
 function chart(days) {
-  const W = 960;
   const H = 240;
   const pad = { l: 8, r: 8, t: 16, b: 28 };
   const maxCost = Math.max(1, ...days.map((x) => x.cost));
   const conv = days.map((x) => x.conversions || x.goals);
   const maxConv = Math.max(1, ...conv);
-  const bw = (W - pad.l - pad.r) / days.length;
-  const y = (v, max) => pad.t + (H - pad.t - pad.b) * (1 - v / max);
-  const bars = days.map((x, i) => `<rect x="${pad.l + i * bw + bw * 0.15}" y="${y(x.cost, maxCost)}" width="${Math.max(1, bw * 0.7)}" height="${H - pad.b - y(x.cost, maxCost)}" rx="2" class="ads-bar"><title>${x.date}: ${Math.round(x.cost)} ₽</title></rect>`).join('');
   // нет ни конверсий, ни целей — линию не рисуем, чтобы не казалось, что их ноль
   const hasConv = conv.some(Boolean);
-  const line = hasConv ? conv.map((v, i) => `${i ? 'L' : 'M'}${pad.l + i * bw + bw / 2},${y(v, maxConv)}`).join(' ') : '';
-  const dots = conv.map((v, i) => (v ? `<circle cx="${pad.l + i * bw + bw / 2}" cy="${y(v, maxConv)}" r="3" class="ads-dot"><title>${days[i].date}: ${v}</title></circle>` : '')).join('');
-  const step = Math.ceil(days.length / 10);
-  const labels = days.map((x, i) => (i % step === 0 ? `<text x="${pad.l + i * bw + bw / 2}" y="${H - 8}" text-anchor="middle" class="ads-label">${Number(x.date.slice(8))}.${x.date.slice(5, 7)}</text>` : '')).join('');
   const box = h('div', { class: 'ads-chart' });
-  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Расход и конверсии по дням" preserveAspectRatio="none">${bars}<path d="${line}" class="ads-line" fill="none"/>${dots}${labels}</svg>`;
+
+  // SVG рисуется в реальную ширину блока: при растягивании через viewBox подписи дат «размазывались»
+  function draw(W) {
+    const bw = (W - pad.l - pad.r) / days.length;
+    const y = (v, max) => pad.t + (H - pad.t - pad.b) * (1 - v / max);
+    const bars = days.map((x, i) => `<rect x="${pad.l + i * bw + bw * 0.15}" y="${y(x.cost, maxCost)}" width="${Math.max(1, bw * 0.7)}" height="${H - pad.b - y(x.cost, maxCost)}" rx="2" class="ads-bar"><title>${x.date}: ${Math.round(x.cost)} ₽</title></rect>`).join('');
+    const line = hasConv ? conv.map((v, i) => `${i ? 'L' : 'M'}${pad.l + i * bw + bw / 2},${y(v, maxConv)}`).join(' ') : '';
+    const dots = conv.map((v, i) => (v ? `<circle cx="${pad.l + i * bw + bw / 2}" cy="${y(v, maxConv)}" r="3" class="ads-dot"><title>${days[i].date}: ${v}</title></circle>` : '')).join('');
+    // подписи — не теснее ~56 px друг от друга
+    const step = Math.max(1, Math.ceil(56 / Math.max(1, bw)));
+    const labels = days.map((x, i) => (i % step === 0 ? `<text x="${pad.l + i * bw + bw / 2}" y="${H - 8}" text-anchor="middle" class="ads-label">${Number(x.date.slice(8))}.${x.date.slice(5, 7)}</text>` : '')).join('');
+    box.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Расход и конверсии по дням">${bars}<path d="${line}" class="ads-line" fill="none"/>${dots}${labels}</svg>`;
+  }
+  let last = 0;
+  const ro = new ResizeObserver(([e]) => {
+    const w = Math.round(e.contentRect.width);
+    if (!w || w === last) return;
+    if (!box.isConnected) return ro.disconnect();
+    last = w;
+    draw(w);
+  });
+  ro.observe(box);
+  draw(960);
   return h('div', {}, box, h('p', { class: 'ads-legend muted small' }, h('span', { class: 'ads-key bar' }), 'Расход', hasConv ? [h('span', { class: 'ads-key line' }), days.some((x) => x.conversions) ? 'Конверсии в Директе' : 'Достижения целей в Метрике'] : h('span', { class: 'muted' }, ' · конверсий нет: выберите цели в «Настроить»')));
 }
 
@@ -607,6 +621,11 @@ export async function renderAdClient(params) {
             [a.direct_enabled ? `Директ${a.direct_login ? `: ${a.direct_login}` : ''}` : null, a.metrika_counter ? `Метрика: ${a.metrika_counter}` : null, a.goals ? `цели: ${a.goals.replace(/,/g, ', ')}` : 'цели не выбраны', a.synced_at ? `обновлено ${new Date(`${a.synced_at.replace(' ', 'T')}Z`).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow' })}` : 'ещё не загружено'].filter(Boolean).join(' · '),
           ),
           a.error ? h('p', { class: 'ads-error' }, `Ошибка загрузки: ${a.error}`) : null,
+          !a.metrika_counter
+            ? h('p', { class: 'ads-note' }, 'Метрика не подключена, поэтому визиты, отказы и цели пустые, а конверсий нет. Нажмите «Настроить», укажите номер счётчика, «Загрузить цели», отметьте нужные и сохраните. Отдельный токен не нужен: подойдёт тот же, что для Директа.')
+            : !a.goals
+              ? h('p', { class: 'ads-note' }, 'Цели не выбраны: конверсии и их цена не считаются. Нажмите «Настроить» → «Загрузить цели» и отметьте нужные.')
+              : null,
           tiles(d.total),
           h('section', { class: 'panel' }, h('h2', {}, 'По дням'), chart(d.days)),
           slicesPanel(id, per, a),

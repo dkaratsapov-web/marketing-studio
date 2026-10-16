@@ -602,6 +602,17 @@ const MIGRATIONS = [
 
   // Парсер: условия сбора — только с телефоном, без сайта и т. п. (JSON { phone, site, email, social: 'yes' | 'no' })
   `ALTER TABLE parse_jobs ADD COLUMN filters TEXT;`,
+
+  // Ключи расширения «В CRM» (кнопка на Яндекс Картах и 2ГИС): у каждого сотрудника свои, хранится хеш
+  `CREATE TABLE ext_tokens (
+     id           INTEGER PRIMARY KEY,
+     user_id      INTEGER NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+     token_hash   TEXT NOT NULL UNIQUE,
+     tail         TEXT NOT NULL,
+     revoked      INTEGER NOT NULL DEFAULT 0,
+     created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+     last_used_at TEXT
+   );`,
 ];
 
 /** Номер текущей версии схемы базы. */

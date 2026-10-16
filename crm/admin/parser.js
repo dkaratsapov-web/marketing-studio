@@ -47,6 +47,7 @@ function openKeysDialog(onChange) {
       h('p', { class: 'muted small' }, 'OpenStreetMap работает без ключа. Для остальных нужен ключ API: он хранится на сервере кабинета, здесь видны только последние 4 символа.'),
       sources.filter((s) => s.needsKey).map((s) => {
         const input = h('input', { type: 'text', class: 'input secret-input', autocomplete: 'off', 'data-lpignore': 'true', 'data-1p-ignore': 'true', 'data-bwignore': 'true', 'data-form-type': 'other', maxlength: 300, placeholder: 'Ключ API', spellcheck: 'false', 'aria-label': `Ключ ${s.label}` });
+        const folder = s.needsFolder ? h('input', { class: 'input', maxlength: 60, placeholder: 'ID каталога (b1g…)', autocomplete: 'off', 'data-lpignore': 'true', 'data-1p-ignore': 'true', spellcheck: 'false', 'aria-label': 'ID каталога Yandex Cloud' }) : null;
         const save = h('button', { type: 'submit', class: 'btn btn-primary btn-s' }, 'Проверить и сохранить');
         return h(
           'section',
@@ -68,7 +69,7 @@ function openKeysDialog(onChange) {
                 save.disabled = true;
                 save.textContent = 'Проверяю…';
                 try {
-                  await api(`/admin/api/parser/sources/${s.id}/key`, { method: 'PUT', body: { key: input.value } });
+                  await api(`/admin/api/parser/sources/${s.id}/key`, { method: 'PUT', body: { key: input.value, ...(folder ? { folderId: folder.value } : {}) } });
                   toast(`${s.label}: ключ подключён`);
                   draw();
                 } catch (err) {
@@ -78,6 +79,7 @@ function openKeysDialog(onChange) {
                 }
               },
             },
+            folder,
             input,
             save,
           ),
@@ -88,16 +90,80 @@ function openKeysDialog(onChange) {
   draw().catch((err) => fill(list, h('p', { class: 'error' }, err.message)));
 }
 
+/** «Кнопка для карт»: скачать расширение с личным ключом, как установить, отозвать старые ключи. */
+function openExtensionDialog() {
+  const tokens = h('div', { class: 'parser-tokens' });
+  const download = h('button', { type: 'button', class: 'btn btn-primary', onclick: async () => {
+    download.disabled = true;
+    try {
+      const res = await fetch('/admin/api/parser/extension', { method: 'POST', credentials: 'same-origin' });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `Ошибка ${res.status}`);
+      const url = URL.createObjectURL(await res.blob());
+      const a = h('a', { href: url, download: 'korp-crm.zip' });
+      document.body.append(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
+      drawTokens();
+    } catch (err) {
+      toast(err.message);
+    } finally {
+      download.disabled = false;
+    }
+  } }, 'Скачать расширение');
+  const dlg = h(
+    'dialog',
+    { class: 'dialog parser-keys-dialog', 'aria-labelledby': 'parser-ext-title' },
+    h('h2', { id: 'parser-ext-title' }, 'Кнопка «В CRM» для Яндекс Карт и 2ГИС'),
+    h('p', { class: 'muted small' }, 'Вы сами ищете и открываете карточку организации, кнопка одним кликом переносит название, телефоны, сайт и адрес в список здесь, в «Парсере». Почта и соцсети подтянутся с сайта компании.'),
+    h(
+      'ol',
+      { class: 'ads-steps' },
+      h('li', {}, 'Нажмите «Скачать расширение» и распакуйте архив korp-crm.zip в постоянную папку (не удаляйте её потом).'),
+      h('li', {}, 'В Chrome или Яндекс Браузере откройте страницу расширений (chrome://extensions или browser://extensions) и включите «Режим разработчика».'),
+      h('li', {}, 'Нажмите «Загрузить распакованное» и выберите папку korp-crm.'),
+      h('li', {}, 'Откройте Яндекс Карты, найдите организацию, откройте её карточку и нажмите «＋ В CRM» внизу слева.'),
+    ),
+    h('div', { class: 'work-actions' }, download),
+    h('p', { class: 'muted small' }, 'В архиве ваш личный ключ: не пересылайте его. Каждое скачивание создаёт новый ключ, ненужные можно отозвать ниже.'),
+    tokens,
+    h('div', { class: 'work-actions' }, h('button', { type: 'button', class: 'btn', onclick: () => dlg.close() }, 'Закрыть')),
+  );
+  dlg.addEventListener('close', () => dlg.remove());
+  document.body.append(dlg);
+  dlg.showModal();
+
+  async function drawTokens() {
+    try {
+      const r = await api('/admin/api/parser/extension');
+      fill(
+        tokens,
+        r.tokens.length
+          ? h('ul', { class: 'ads-off-list' }, r.tokens.map((t) => h('li', {}, h('span', { class: 'ads-off-name' }, `Ключ …${t.tail}`, h('span', { class: 'muted small' }, ` выдан ${fmtWhen(t.created_at)}${t.last_used_at ? `, работал ${fmtWhen(t.last_used_at)}` : ', ещё не использовался'}`)), h('button', { type: 'button', class: 'btn btn-s', onclick: async () => {
+              if (!(await confirmDialog('Отозвать ключ? Расширение с ним перестанет сохранять карточки.', { ok: 'Отозвать' }))) return;
+              await api(`/admin/api/parser/extension/tokens/${t.id}`, { method: 'DELETE' });
+              drawTokens();
+            } }, 'Отозвать'))))
+          : null,
+      );
+    } catch (err) {
+      fill(tokens, h('p', { class: 'error' }, err.message));
+    }
+  }
+  drawTokens();
+}
+
 function sourceChips(job) {
   return h('span', { class: 'ads-sources' }, job.sources.map((id) => {
     const p = job.progress.sources?.[id];
+    if (id === 'manual') return h('span', { class: 'ads-src' }, 'Вручную с карт');
     const label = sourcesCache?.find((s) => s.id === id)?.label ?? id;
     return h('span', { class: `ads-src parser-src${p?.status === 'error' ? ' bad' : ''}`, title: p?.error ?? '' }, p?.status === 'done' ? `${label}: ${p.found}` : label);
   }));
 }
 
 export async function renderParser() {
-  const head = h('div', { class: 'page-head' }, h('h1', {}, 'Парсер'), h('span', { class: 'spacer' }), ctx.me.role === 'admin' ? h('button', { type: 'button', class: 'btn', onclick: () => openKeysDialog(drawForm) }, 'Ключи источников') : null);
+  const head = h('div', { class: 'page-head' }, h('h1', {}, 'Парсер'), h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'btn', onclick: openExtensionDialog }, 'Кнопка для карт'), ctx.me.role === 'admin' ? h('button', { type: 'button', class: 'btn', onclick: () => openKeysDialog(drawForm) }, 'Ключи источников') : null);
   const form = h('section', { class: 'panel parser-form' }, h('p', { class: 'muted' }, 'Загружаю…'));
   const jobs = h('section', { class: 'parser-jobs' });
   fill(app, shell('parser', [head, form, jobs]));
@@ -190,7 +256,7 @@ export async function renderParser() {
                     'tr',
                     { onclick: () => navigate('parsejob', new URLSearchParams({ id: String(j.id) })) },
                     h('td', {}, h('a', { class: 'row-link company', href: `#/parsejob?id=${j.id}` }, j.query), condText(j.filters) ? h('span', { class: 'muted small parser-cond-note' }, condText(j.filters)) : null),
-                    h('td', {}, j.geo),
+                    h('td', {}, j.sources[0] === 'manual' ? h('span', { class: 'muted' }, 'список') : j.geo),
                     h('td', {}, sourceChips(j)),
                     h('td', { class: 'num' }, busy(j) ? '' : String(j.places)),
                     h('td', {}, h('span', { class: `parser-status ps-${j.status}` }, STATUS[j.status]), j.error ? h('span', { class: 'ads-error', title: j.error }, j.error) : null),
@@ -250,10 +316,10 @@ export async function renderParserJob(params) {
   fill(
     head,
     h('a', { class: 'back', href: '#/parser' }, 'Парсер'),
-    h('h1', { class: 'ads-title' }, `${job.query}, ${job.geo}`),
+    h('h1', { class: 'ads-title' }, job.sources[0] === 'manual' ? job.query : `${job.query}, ${job.geo}`),
     h('span', { class: 'spacer' }),
     !busy(job) && places.length ? h('a', { class: 'btn btn-primary', href: `/admin/api/parser/jobs/${id}/csv`, download: '' }, 'Скачать CSV') : null,
-    !busy(job) ? h('button', { type: 'button', class: 'btn', onclick: again }, 'Собрать заново') : null,
+    !busy(job) && job.sources[0] !== 'manual' ? h('button', { type: 'button', class: 'btn', onclick: again }, 'Собрать заново') : null,
     !busy(job)
       ? h('button', { type: 'button', class: 'btn', onclick: async () => {
           if (!(await confirmDialog('Удалить сбор и найденные компании?', { ok: 'Удалить' }))) return;
@@ -280,6 +346,14 @@ export async function renderParserJob(params) {
     job.progress.sites?.total ? h('div', { class: 'parser-bar' }, h('span', { style: `width:${Math.round((job.progress.sites.done / job.progress.sites.total) * 100)}%` })) : null,
     job.error ? h('p', { class: 'ads-error' }, job.error) : null,
   );
+  if (job.sources[0] === 'manual') {
+    fill(
+      body,
+      h('p', { class: 'muted small' }, `Список пополняется кнопкой «В CRM» на Яндекс Картах и 2ГИС${job.createdBy ? ` · создал ${job.createdBy}` : ''}. Почта и соцсети с сайта компании подтягиваются сами через минуту после сохранения.`),
+      places.length ? results(places) : h('div', { class: 'panel empty' }, h('strong', {}, 'Список пуст'), 'Откройте карточку организации на Яндекс Картах и нажмите «＋ В CRM» внизу слева.'),
+    );
+    return;
+  }
   if (busy(job)) {
     fill(body, meta, progress, h('p', { class: 'muted' }, 'Сбор идёт в фоне: можно уйти со страницы, результат сохранится. Страница обновляется сама.'));
     setTimeout(() => body.isConnected && renderParserJob(params), 3000);

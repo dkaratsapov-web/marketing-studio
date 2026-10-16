@@ -16,6 +16,12 @@ export const SOURCES = {
   yandex: { label: 'Яндекс Карты', key: true, hint: 'Ключ «API Поиска по организациям» в кабинете разработчика Яндекса (developer.tech.yandex.ru).' },
   '2gis': { label: '2ГИС', key: true, hint: 'Ключ Catalog API 2ГИС (platform.2gis.ru). Контакты компаний отдаются на платном ключе.' },
   google: { label: 'Google Maps', key: true, hint: 'Ключ Places API (New) в Google Cloud Console.' },
+  yandexweb: {
+    label: 'Яндекс Поиск: сайты',
+    key: true,
+    folder: true,
+    hint: 'Yandex Cloud, Search API: находит сайты компаний по запросу, контакты берутся с самих сайтов. Нужны API-ключ сервисного аккаунта с ролью search-api.webSearch.user и ID каталога.',
+  },
 };
 
 /** Компания в общем виде; пустые поля — null и пустые списки. */
@@ -374,7 +380,80 @@ async function searchGoogle({ query, geo, limit, key, fetchImpl, wait = sleep })
   return out.slice(0, limit);
 }
 
-const SEARCH = { osm: searchOsm, yandex: searchYandex, '2gis': searchGis, google: searchGoogle };
+// ---------- Яндекс Поиск (Yandex Cloud, Search API): сайты компаний ----------
+
+// справочники, отзовики, маркетплейсы и соцсети — не сайт компании
+const NOT_COMPANY = /(^|\.)(yandex\.\w+|ya\.ru|2gis\.\w+|google\.\w+|avito\.ru|auto\.ru|drom\.ru|zoon\.ru|yell\.ru|flamp\.ru|vk\.com|vk\.ru|ok\.ru|t\.me|instagram\.com|youtube\.com|dzen\.ru|rutube\.ru|wikipedia\.org|hh\.ru|superjob\.ru|rusprofile\.ru|list-org\.com|checko\.ru|zachestnyibiznes\.ru|spark-interfax\.ru|audit-it\.ru|orgpage\.ru|spravker\.ru|tripadvisor\.\w+|restoclub\.ru|prodoctorov\.ru|napopravku\.ru|otzovik\.com|irecommend\.ru|kudago\.com|afisha\.ru|tiu\.ru|pulscen\.ru|blizko\.ru|cataloxy\.ru|mapcarta\.com|mail\.ru|rambler\.ru|ozon\.ru|wildberries\.ru|sravni\.ru|banki\.ru|cian\.ru|domclick\.ru|ria\.ru|tass\.ru|rbc\.ru|gosuslugi\.ru|nalog\.ru|kinopoisk\.ru|pikabu\.ru|youla\.ru|uslugi\.yandex\.ru|profi\.ru|sbermegamarket\.ru|megamarket\.ru|tiktok\.com|facebook\.com|twitter\.com|x\.com)$/i;
+
+const xmlText = (s) =>
+  String(s ?? '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .trim();
+
+/** Выдача Яндекса (XML) → сайты компаний: по одному на домен, без справочников и соцсетей. */
+export function parseSearchXml(xml) {
+  const err = /<error[^>]*code="(\d+)"[^>]*>([\s\S]*?)<\/error>/.exec(xml);
+  if (err && err[1] !== '15') throw new SourceError(`Яндекс Поиск: ${xmlText(err[2]) || `ошибка ${err[1]}`}`);
+  const out = [];
+  for (const [, doc] of xml.matchAll(/<doc\b[^>]*>([\s\S]*?)<\/doc>/g)) {
+    const url = xmlText(/<url>([\s\S]*?)<\/url>/.exec(doc)?.[1]);
+    let host;
+    try {
+      host = new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+      continue;
+    }
+    if (NOT_COMPANY.test(host)) continue;
+    const title = xmlText(/<title>([\s\S]*?)<\/title>/.exec(doc)?.[1]);
+    const passage = xmlText(/<passage>([\s\S]*?)<\/passage>/.exec(doc)?.[1]);
+    out.push({ url, host, title, passage });
+  }
+  return out;
+}
+
+async function searchYandexWeb({ query, geo, limit, key, fetchImpl }) {
+  const [folderId, apiKey] = [key.slice(0, key.indexOf(':')), key.slice(key.indexOf(':') + 1)];
+  if (!folderId || !apiKey) throw new SourceError('Яндекс Поиск: нужны ID каталога и API-ключ');
+  const seen = new Set();
+  const out = [];
+  // GROUP_MODE_DEEP — по одному результату с сайта; до 100 сайтов на страницу, не больше 5 страниц
+  for (let page = 0; out.length < limit && page < 5; page++) {
+    const body = await getJson(
+      fetchImpl,
+      'https://searchapi.api.cloud.yandex.net/v2/web/search',
+      {
+        method: 'POST',
+        headers: { authorization: `Api-Key ${apiKey}`, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          query: { searchType: 'SEARCH_TYPE_RU', queryText: `${query} ${geo}`.slice(0, 400), familyMode: 'FAMILY_MODE_MODERATE', page: String(page) },
+          groupSpec: { groupMode: 'GROUP_MODE_DEEP', groupsOnPage: '100', docsInGroup: '1' },
+          maxPassages: '1',
+          responseFormat: 'FORMAT_XML',
+          folderId,
+        }),
+      },
+      'Яндекс Поиск',
+    );
+    const xml = Buffer.from(body.rawData ?? '', 'base64').toString('utf8');
+    const docs = parseSearchXml(xml);
+    for (const d of docs) {
+      if (seen.has(d.host)) continue;
+      seen.add(d.host);
+      // название — первая часть заголовка: «Автосалон Рольф в Одинцово — официальный дилер» → «Автосалон Рольф в Одинцово»
+      const name = d.title.split(/\s+[|—–:-]\s+|\s*[|—–]\s*/)[0].slice(0, 120) || d.host;
+      out.push(place({ source: 'yandexweb', sourceId: d.host, name, category: query, address: null, city: null, website: d.url.replace(/^(https?:\/\/[^/]+).*$/, '$1'), link: d.url }));
+    }
+    if (!/<doc\b/.test(xml)) break;
+  }
+  return out.slice(0, limit);
+}
+
+const SEARCH = { osm: searchOsm, yandex: searchYandex, '2gis': searchGis, google: searchGoogle, yandexweb: searchYandexWeb };
 
 /** Компании из одного источника. */
 export async function searchSource(source, opts) {

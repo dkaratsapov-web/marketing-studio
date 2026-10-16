@@ -1,7 +1,8 @@
 // «Парсер»: сбор компаний по запросу и городу из открытых карт, склейка дублей между источниками,
 // контакты с сайтов компаний, выгрузка в CSV. Сборы идут в фоне по одному, история хранится в базе.
 
-import { SOURCES, SourceError, searchSource, normUrl } from './sources.js';
+import { createHash, randomBytes } from 'node:crypto';
+import { SOURCES, SourceError, searchSource, normUrl, place } from './sources.js';
 import { siteContacts } from './site.js';
 
 export class ParserError extends Error {}
@@ -194,15 +195,20 @@ export function createParser({ db, fetchImpl = fetch, siteFetch = null, lookup =
   function sources() {
     return Object.entries(SOURCES).map(([id, s]) => {
       const k = s.key ? q.key.get(KEY_PREFIX + id) : null;
-      return { id, label: s.label, hint: s.hint, needsKey: s.key, ready: !s.key || Boolean(k?.value), tail: k?.value ? k.value.slice(-4) : null, updatedBy: k?.updated_by ?? null, updatedAt: k?.updated_at ?? null };
+      return { id, label: s.label, hint: s.hint, needsKey: s.key, needsFolder: Boolean(s.folder), manual: false, ready: !s.key || Boolean(k?.value), tail: k?.value ? k.value.slice(-4) : null, updatedBy: k?.updated_by ?? null, updatedAt: k?.updated_at ?? null };
     });
   }
 
   /** Ключ проверяется пробным поиском: неверный не сохраняем. */
-  async function setKey(source, value, user) {
+  async function setKey(source, value, user, folderId = null) {
     if (!SOURCES[source]?.key) throw new ParserError('Этому источнику ключ не нужен');
-    const key = String(value ?? '').trim();
+    let key = String(value ?? '').trim();
     if (!KEY_RE.test(key)) throw new ParserError('Это не похоже на ключ API: скопируйте его целиком');
+    if (SOURCES[source].folder) {
+      const folder = String(folderId ?? '').trim();
+      if (!/^[a-z0-9]{10,40}$/.test(folder)) throw new ParserError('Укажите ID каталога Yandex Cloud: строка вида b1g… со страницы каталога');
+      key = `${folder}:${key}`;
+    }
     try {
       await searchSource(source, { query: 'кафе', geo: 'Москва', limit: 1, key, fetchImpl, wait });
     } catch (err) {
@@ -348,5 +354,115 @@ export function createParser({ db, fetchImpl = fetch, siteFetch = null, lookup =
     return pump();
   }
 
-  return { sources, setKey, clearKey, create, job, list, places, remove, csv, resume, settle: () => running ?? Promise.resolve() };
+  // ---------- списки, которые пополняются вручную кнопкой «В CRM» на картах ----------
+
+  const m = {
+    lists: db.prepare("SELECT j.id, j.query AS name, (SELECT COUNT(*) FROM parse_places p WHERE p.job_id = j.id) AS count FROM parse_jobs j WHERE j.sources = 'manual' ORDER BY j.id DESC"),
+    list: db.prepare("SELECT * FROM parse_jobs WHERE id = ? AND sources = 'manual'"),
+    byName: db.prepare("SELECT * FROM parse_jobs WHERE sources = 'manual' AND lower(query) = lower(?)"),
+    newList: db.prepare("INSERT INTO parse_jobs (query, geo, sources, per_source, enrich, status, progress, created_by, finished_at) VALUES (?, '', 'manual', 0, 0, 'done', '{}', ?, datetime('now'))"),
+    rows: db.prepare('SELECT id, data FROM parse_places WHERE job_id = ?'),
+    update: db.prepare('UPDATE parse_places SET name = ?, data = ? WHERE id = ?'),
+    touch: db.prepare("UPDATE parse_jobs SET finished_at = datetime('now') WHERE id = ?"),
+  };
+  const lists = () => m.lists.all();
+
+  /** Компания с открытой карточки на картах — в список (новый список создаётся по имени). Дубль — дополняется. */
+  function addManual({ listId = null, listName = null, place: raw = {} }, user) {
+    let list = listId ? m.list.get(Number(listId)) : null;
+    if (listId && !list) throw new ParserError('Список не найден');
+    if (!list) {
+      const name = String(listName ?? '').trim().slice(0, 120) || 'С карт вручную';
+      list = m.byName.get(name) ?? m.list.get(Number(m.newList.run(name, user?.name ?? null).lastInsertRowid));
+    }
+    const source = ['yandex', '2gis', 'google'].includes(raw.source) ? raw.source : 'yandex';
+    const p = place({
+      source,
+      sourceId: raw.orgId || raw.link || raw.name,
+      name: String(raw.name ?? '').slice(0, 200),
+      category: String(raw.category ?? '').slice(0, 200),
+      address: String(raw.address ?? '').slice(0, 300),
+      city: raw.city ? String(raw.city).slice(0, 100) : null,
+      lat: Number(raw.lat),
+      lon: Number(raw.lon),
+      phones: (raw.phones ?? []).slice(0, 10).map((x) => String(x).slice(0, 40)),
+      emails: (raw.emails ?? []).slice(0, 10).map((x) => String(x).slice(0, 120)).filter((x) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x)),
+      website: raw.website ? String(raw.website).slice(0, 300) : null,
+      socials: Object.fromEntries(Object.entries(raw.socials ?? {}).filter(([k, v]) => /^(vk|telegram|whatsapp|instagram|ok|youtube|dzen)$/.test(k) && /^https?:\/\//.test(String(v))).map(([k, v]) => [k, String(v).slice(0, 300)])),
+      hours: raw.hours ? String(raw.hours).slice(0, 300) : null,
+      rating: raw.rating != null && raw.rating !== '' ? Number(raw.rating) : null,
+      reviews: raw.reviews != null && raw.reviews !== '' ? Number(raw.reviews) : null,
+      link: /^https?:\/\//.test(String(raw.link ?? '')) ? String(raw.link).slice(0, 500) : null,
+    });
+    if (!raw.name || p.name === 'Без названия') throw new ParserError('Нет названия компании: откройте карточку организации');
+    const rows = m.rows.all(list.id).map((r) => ({ id: r.id, data: JSON.parse(r.data) }));
+    // склеиваем с тем, что уже есть в списке: тот же телефон, сайт, карточка или название в той же точке
+    const merged = mergePlaces([...rows.map((r) => r.data).flatMap(asPlaces), p]);
+    const target = merged.find((x) => x.sources.some((s) => s.source === p.source && s.id === p.sourceId));
+    const dupRow = rows.find((r) => target.sources.some((s) => r.data.sources.some((o) => o.source === s.source && o.id === s.id)));
+    target.city = cityOf(target, target.city ?? '');
+    if (target.city === '') target.city = null;
+    let id;
+    if (dupRow) {
+      target.emails = [...new Set([...dupRow.data.emails, ...target.emails])];
+      m.update.run(target.name, JSON.stringify({ ...dupRow.data, ...target }), dupRow.id);
+      id = dupRow.id;
+    } else {
+      id = Number(q.addPlace.run(list.id, target.name, JSON.stringify(target)).lastInsertRowid);
+    }
+    m.touch.run(list.id);
+    // почта и соцсети с сайта — в фоне, ответ кнопке не задерживаем
+    if (target.website && !target.siteChecked) enrichRow(id).catch((err) => log?.warn({ err: err.message }, 'Парсер: сайт не разобран'));
+    return { list: { id: list.id, name: list.query }, place: target, duplicate: Boolean(dupRow) };
+  }
+
+  // сохранённая компания обратно в вид «из источников», чтобы склеить с новой
+  function asPlaces(d) {
+    return d.sources.map((s, i) => place({ ...d, source: s.source, sourceId: s.id, link: s.link, phones: i === 0 ? d.phones : [], emails: i === 0 ? d.emails : [], socials: i === 0 ? d.socials : {} }));
+  }
+
+  async function enrichRow(id) {
+    const row = db.prepare('SELECT data FROM parse_places WHERE id = ?').get(id);
+    if (!row) return;
+    const d = JSON.parse(row.data);
+    const site = await siteContacts(normUrl(d.website), { fetchImpl: siteFetch, lookup }).catch(() => null);
+    const fresh = db.prepare('SELECT data FROM parse_places WHERE id = ?').get(id);
+    if (!fresh) return;
+    const cur = JSON.parse(fresh.data);
+    cur.siteChecked = true;
+    if (site) {
+      cur.emails = [...new Set([...cur.emails, ...site.emails])];
+      addPhones(cur, site.phones);
+      for (const [k, v] of Object.entries(site.socials)) cur.socials[k] ??= v;
+    } else cur.siteDown = true;
+    m.update.run(cur.name, JSON.stringify(cur), id);
+  }
+
+  // ---------- ключи расширения «В CRM»: свои у каждого сотрудника, хранится только хеш ----------
+
+  const sha = (t) => createHash('sha256').update(t).digest('hex');
+  const t = {
+    insert: db.prepare('INSERT INTO ext_tokens (user_id, token_hash, tail) VALUES (?, ?, ?)'),
+    user: db.prepare('SELECT t.id AS token_id, u.id, u.name, u.role FROM ext_tokens t JOIN admin_users u ON u.id = t.user_id WHERE t.token_hash = ? AND t.revoked = 0 AND u.disabled = 0'),
+    used: db.prepare("UPDATE ext_tokens SET last_used_at = datetime('now') WHERE id = ?"),
+    list: db.prepare('SELECT id, tail, created_at, last_used_at FROM ext_tokens WHERE user_id = ? AND revoked = 0 ORDER BY id DESC'),
+    revoke: db.prepare('UPDATE ext_tokens SET revoked = 1 WHERE id = ? AND user_id = ?'),
+  };
+  function issueToken(user) {
+    const token = `korp_${randomBytes(24).toString('base64url')}`;
+    t.insert.run(user.id, sha(token), token.slice(-4));
+    return token;
+  }
+  function userByToken(token) {
+    if (!/^korp_[\w-]{20,64}$/.test(String(token ?? ''))) return null;
+    const u = t.user.get(sha(token));
+    if (u) t.used.run(u.token_id);
+    return u ? { id: u.id, name: u.name, role: u.role } : null;
+  }
+  const tokens = (user) => t.list.all(user.id);
+  function revokeToken(id, user) {
+    if (!t.revoke.run(Number(id), user.id).changes) throw new ParserError('Ключ не найден');
+  }
+
+  return { sources, setKey, clearKey, create, job, list, places, remove, csv, resume, settle: () => running ?? Promise.resolve(), lists, addManual, enrichRow, issueToken, userByToken, tokens, revokeToken };
 }

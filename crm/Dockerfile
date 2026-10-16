@@ -14,6 +14,7 @@ COPY admin ./admin
 COPY scripts ./scripts
 COPY brand ./brand
 COPY templates ./templates
+COPY extension ./extension
 RUN mkdir -p /app/data && chown node:node /app/data
 VOLUME /app/data
 EXPOSE 3000
