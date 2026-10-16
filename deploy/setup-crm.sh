@@ -142,7 +142,9 @@ server_ip="$(curl -4 -fsS --max-time 10 https://api.ipify.org || true)"
 domain_ip="$(getent ahostsv4 "${DOMAIN}" 2>/dev/null | awk 'NR==1 {print $1}' || true)"
 if certbot certificates 2>/dev/null | grep -qE "Domains:.*\b${DOMAIN//./\\.}\b"; then
   echo "    Сертификат для ${DOMAIN} уже есть"
-elif [ -n "${domain_ip}" ] && [ "${domain_ip}" = "${server_ip}" ]; then
+elif [ -n "${domain_ip}" ]; then
+  # Свой IP сервер узнаёт через внешний сервис, который бывает недоступен: пробуем выпустить
+  # сертификат, как только домен резолвится, а certbot сам проверит, что он ведёт сюда
   certbot --nginx -d "${DOMAIN}" --non-interactive --agree-tos --register-unsafely-without-email --redirect \
     || echo "    ! Сертификат не выпущен. Повторите позже: certbot --nginx -d ${DOMAIN} --redirect"
 else
