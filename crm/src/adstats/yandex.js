@@ -121,10 +121,18 @@ export function parseDirectTsv(text) {
   return parseTsvRows(text).map((r) => ({ date: r.Date, impressions: num(r.Impressions), clicks: num(r.Clicks), cost: num(r.Cost), conversions: r.Conversions }));
 }
 
-/** Метрика по дням: визиты, отказы (визиты × доля отказов) и достижения выбранных целей. */
+/**
+ * Правило кабинета: из Метрики берём только визиты, которые автоматическая модель атрибуции
+ * относит к Яндекс Директу. Так визиты, отказы и цели считаются по той же рекламе, что расход
+ * и конверсии Директа (там тоже AttributionModels: AUTO), а SEO, соцсети и прямые заходы
+ * в статистику рекламы не попадают. Касается всех запросов к отчётам Метрики.
+ */
+export const METRIKA_DIRECT_ONLY = { attribution: 'automatic', filters: "ym:s:<attribution>AdvEngine=='ya_direct'" };
+
+/** Метрика по дням: визиты из Директа, отказы (визиты × доля отказов) и достижения выбранных целей. */
 export async function metrikaDaily({ token, counter, from, to, goals = [], fetchImpl = fetch }) {
   const metrics = ['ym:s:visits', 'ym:s:bounceRate', ...goals.slice(0, 18).map((g) => `ym:s:goal${g}reaches`)];
-  const qs = new URLSearchParams({ ids: String(counter), metrics: metrics.join(','), dimensions: 'ym:s:date', date1: from, date2: to, limit: '1000', accuracy: 'full' });
+  const qs = new URLSearchParams({ ids: String(counter), metrics: metrics.join(','), dimensions: 'ym:s:date', date1: from, date2: to, limit: '1000', accuracy: 'full', ...METRIKA_DIRECT_ONLY });
   const res = await fetchImpl(`${METRIKA_URL}/stat/v1/data?${qs}`, { headers: { Authorization: `OAuth ${token}` } });
   if (!res.ok) throw new AdApiError(`Метрика: ${await metrikaError(res)}`);
   const json = await res.json();
@@ -139,10 +147,10 @@ export async function metrikaDaily({ token, counter, from, to, goals = [], fetch
   });
 }
 
-/** Метрика: отчёт со срезом (источники, страницы входа, устройства, регионы, UTM) за период. */
+/** Метрика: срез визитов из Директа (UTM, страницы входа, устройства, регионы) за период. */
 export async function metrikaReport({ token, counter, from, to, goals = [], dimensions, limit = 200, fetchImpl = fetch }) {
   const metrics = ['ym:s:visits', 'ym:s:users', 'ym:s:bounceRate', 'ym:s:pageDepth', 'ym:s:avgVisitDurationSeconds', ...goals.slice(0, 15).map((g) => `ym:s:goal${g}reaches`)];
-  const qs = new URLSearchParams({ ids: String(counter), metrics: metrics.join(','), dimensions: dimensions.join(','), date1: from, date2: to, limit: String(limit), sort: '-ym:s:visits', accuracy: 'full' });
+  const qs = new URLSearchParams({ ids: String(counter), metrics: metrics.join(','), dimensions: dimensions.join(','), date1: from, date2: to, limit: String(limit), sort: '-ym:s:visits', accuracy: 'full', ...METRIKA_DIRECT_ONLY });
   const res = await fetchImpl(`${METRIKA_URL}/stat/v1/data?${qs}`, { headers: { Authorization: `OAuth ${token}` } });
   if (!res.ok) throw new AdApiError(`Метрика: ${await metrikaError(res)}`);
   const json = await res.json();

@@ -80,8 +80,8 @@ function tiles(t, p) {
     tile('цена клика', money2(t.cpc), delta(t.cpc, p?.cpc, { inverse: true })),
     tile('конверсий в Директе', int(t.conversions), delta(t.conversions, p?.conversions)),
     tile('цена конверсии', money2(t.cpa), delta(t.cpa, p?.cpa, { inverse: true })),
-    tile('визитов в Метрике', int(t.visits), delta(t.visits, p?.visits)),
-    tile('достижений целей', int(t.goals), delta(t.goals, p?.goals)),
+    tile('визитов из Директа по Метрике', int(t.visits), delta(t.visits, p?.visits)),
+    tile('целей из Директа по Метрике', int(t.goals), delta(t.goals, p?.goals)),
   );
 }
 
@@ -337,7 +337,7 @@ export async function renderAdStats(params) {
       return;
     }
     refresh.hidden = !d.token;
-    const cols = ['Клиент', 'Расход', 'Показы', 'Клики', 'CTR', 'Цена клика', 'Конверсии', 'Цена конверсии', 'Визиты', 'Отказы', 'Цели', 'Конверсия сайта'];
+    const cols = ['Клиент', 'Расход с НДС', 'Показы', 'Клики', 'CTR', 'Цена клика', 'Конверсии', 'Цена конверсии', 'Визиты', 'Отказы', 'Цели', 'Конверсия сайта'];
     const row = (r) =>
       h(
         'tr',
@@ -382,7 +382,7 @@ export async function renderAdStats(params) {
             ),
           )
         : h('div', { class: 'panel empty' }, h('strong', {}, 'Ни один клиент ещё не подключён'), 'Нажмите «Подключить» у клиента ниже: укажите кабинет Директа и счётчик Метрики.'),
-      h('p', { class: 'muted small' }, `Период ${fmtDate(d.period.from)} - ${fmtDate(d.period.to)}; сравнение с ${fmtDate(d.prev.from)} - ${fmtDate(d.prev.to)}. Расход с НДС. Конверсии считаются по выбранным целям Метрики.`),
+      h('p', { class: 'muted small' }, `Период ${fmtDate(d.period.from)} - ${fmtDate(d.period.to)}; сравнение с ${fmtDate(d.prev.from)} - ${fmtDate(d.prev.to)}. Расход с НДС. Конверсии считаются по выбранным целям Метрики. Визиты, отказы и цели — только из Директа по автоматической атрибуции Метрики.`),
       d.notConnected.length || d.hidden.length
         ? h(
             'section',
@@ -419,28 +419,42 @@ export async function renderAdStats(params) {
 
 const fmtDate = (d) => new Date(`${d}T12:00:00Z`).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', timeZone: 'UTC' }).replace('.', '');
 
-/** График по дням: столбцы — расход, линия — конверсии (или достижения целей, если Директа нет). */
+/** «Круглый» шаг шкалы: 1, 2, 2,5 или 5 × 10ⁿ, чтобы подписи читались сразу. */
+function niceScale(max, ticks = 4, integer = false) {
+  const raw = Math.max(max, integer ? ticks : 1) / ticks;
+  const pow = 10 ** Math.floor(Math.log10(raw));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * pow).find((v) => v >= raw && (!integer || Number.isInteger(v))) ?? 10 * pow;
+  return { step, top: step * Math.ceil(Math.max(max, 1e-9) / step) };
+}
+const axisMoney = (v) => (v >= 1e6 ? `${nf1.format(v / 1e6)} млн` : v >= 1e3 ? `${nf1.format(v / 1e3)} тыс` : nf0.format(v));
+
+/** График по дням: столбцы — расход (шкала слева), линия — конверсии или цели (шкала справа). */
 function chart(days) {
-  const H = 240;
-  const pad = { l: 8, r: 8, t: 16, b: 28 };
-  const maxCost = Math.max(1, ...days.map((x) => x.cost));
+  const H = 260;
   const conv = days.map((x) => x.conversions || x.goals);
-  const maxConv = Math.max(1, ...conv);
-  // нет ни конверсий, ни целей — линию не рисуем, чтобы не казалось, что их ноль
+  // нет ни конверсий, ни целей — линию и правую шкалу не рисуем, чтобы не казалось, что их ноль
   const hasConv = conv.some(Boolean);
+  const pad = { l: 60, r: hasConv ? 44 : 12, t: 26, b: 28 };
+  const costScale = niceScale(Math.max(0, ...days.map((x) => x.cost)));
+  const convScale = niceScale(Math.max(0, ...conv), 4, true);
   const box = h('div', { class: 'ads-chart' });
 
   // SVG рисуется в реальную ширину блока: при растягивании через viewBox подписи дат «размазывались»
   function draw(W) {
     const bw = (W - pad.l - pad.r) / days.length;
-    const y = (v, max) => pad.t + (H - pad.t - pad.b) * (1 - v / max);
-    const bars = days.map((x, i) => `<rect x="${pad.l + i * bw + bw * 0.15}" y="${y(x.cost, maxCost)}" width="${Math.max(1, bw * 0.7)}" height="${H - pad.b - y(x.cost, maxCost)}" rx="2" class="ads-bar"><title>${x.date}: ${Math.round(x.cost)} ₽</title></rect>`).join('');
-    const line = hasConv ? conv.map((v, i) => `${i ? 'L' : 'M'}${pad.l + i * bw + bw / 2},${y(v, maxConv)}`).join(' ') : '';
-    const dots = conv.map((v, i) => (v ? `<circle cx="${pad.l + i * bw + bw / 2}" cy="${y(v, maxConv)}" r="3" class="ads-dot"><title>${days[i].date}: ${v}</title></circle>` : '')).join('');
+    const y = (v, top) => pad.t + (H - pad.t - pad.b) * (1 - v / top);
+    const ticks = [0, 1, 2, 3, 4];
+    const grid = ticks.map((k) => `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y(k * costScale.step, costScale.top)}" y2="${y(k * costScale.step, costScale.top)}" class="ads-grid"/>`).join('');
+    const left = ticks.map((k) => `<text x="${pad.l - 8}" y="${y(k * costScale.step, costScale.top) + 4}" text-anchor="end" class="ads-label">${axisMoney(k * costScale.step)}</text>`).join('');
+    const right = hasConv ? ticks.map((k) => `<text x="${W - pad.r + 8}" y="${y(k * convScale.step, convScale.top) + 4}" text-anchor="start" class="ads-label ads-label-line">${nf0.format(k * convScale.step)}</text>`).join('') : '';
+    const units = `<text x="${pad.l - 8}" y="12" text-anchor="end" class="ads-unit">₽ с НДС</text>${hasConv ? `<text x="${W - pad.r + 8}" y="12" text-anchor="start" class="ads-unit ads-label-line">${days.some((x) => x.conversions) ? 'конв.' : 'цели'}</text>` : ''}`;
+    const bars = days.map((x, i) => `<rect x="${pad.l + i * bw + bw * 0.15}" y="${y(x.cost, costScale.top)}" width="${Math.max(1, bw * 0.7)}" height="${H - pad.b - y(x.cost, costScale.top)}" rx="2" class="ads-bar"><title>${x.date}: ${Math.round(x.cost)} ₽ с НДС</title></rect>`).join('');
+    const line = hasConv ? conv.map((v, i) => `${i ? 'L' : 'M'}${pad.l + i * bw + bw / 2},${y(v, convScale.top)}`).join(' ') : '';
+    const dots = conv.map((v, i) => (v ? `<circle cx="${pad.l + i * bw + bw / 2}" cy="${y(v, convScale.top)}" r="3" class="ads-dot"><title>${days[i].date}: ${v}</title></circle>` : '')).join('');
     // подписи — не теснее ~56 px друг от друга
     const step = Math.max(1, Math.ceil(56 / Math.max(1, bw)));
     const labels = days.map((x, i) => (i % step === 0 ? `<text x="${pad.l + i * bw + bw / 2}" y="${H - 8}" text-anchor="middle" class="ads-label">${Number(x.date.slice(8))}.${x.date.slice(5, 7)}</text>` : '')).join('');
-    box.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Расход и конверсии по дням">${bars}<path d="${line}" class="ads-line" fill="none"/>${dots}${labels}</svg>`;
+    box.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Расход и конверсии по дням">${grid}${units}${left}${right}${bars}<path d="${line}" class="ads-line" fill="none"/>${dots}${labels}</svg>`;
   }
   let last = 0;
   const ro = new ResizeObserver(([e]) => {
@@ -452,7 +466,7 @@ function chart(days) {
   });
   ro.observe(box);
   draw(960);
-  return h('div', {}, box, h('p', { class: 'ads-legend muted small' }, h('span', { class: 'ads-key bar' }), 'Расход', hasConv ? [h('span', { class: 'ads-key line' }), days.some((x) => x.conversions) ? 'Конверсии в Директе' : 'Достижения целей в Метрике'] : h('span', { class: 'muted' }, ' · конверсий нет: выберите цели в «Настроить»')));
+  return h('div', {}, box, h('p', { class: 'ads-legend muted small' }, h('span', { class: 'ads-key bar' }), 'Расход с НДС', hasConv ? [h('span', { class: 'ads-key line' }), days.some((x) => x.conversions) ? 'Конверсии в Директе' : 'Достижения целей в Метрике'] : h('span', { class: 'muted' }, ' · конверсий нет: выберите цели в «Настроить»')));
 }
 
 const fmtDur = (sec) => (sec ? `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}` : '-');
@@ -471,7 +485,7 @@ function slicesPanel(clientId, per, account) {
   let showAll = false;
 
   const DIRECT_COLS = [
-    ['cost', 'Расход', money],
+    ['cost', 'Расход с НДС', money],
     ['share', 'Доля расхода', null],
     ['impressions', 'Показы', int],
     ['clicks', 'Клики', int],
@@ -558,7 +572,7 @@ function slicesPanel(clientId, per, account) {
       on ? h('div', { class: 'ads-slice-group' }, h('span', { class: 'ads-slice-src' }, title), h('div', { class: 'rating-filter' }, list.map((x) => h('button', { type: 'button', 'aria-pressed': 'false', dataset: { slice: x.id }, onclick: () => open(x.id, source) }, x.label)))) : null;
     fill(tabs, group('Директ', sliceCatalogCache.direct, 'direct', account?.direct_enabled), group('Метрика', sliceCatalogCache.metrika, 'metrika', account?.metrika_counter));
     if (account?.direct_enabled) open('campaigns', 'direct');
-    else if (account?.metrika_counter) open('sources', 'metrika');
+    else if (account?.metrika_counter) open('utm', 'metrika');
   })().catch((err) => fill(body, h('p', { class: 'error' }, err.message)));
   return box;
 }
@@ -568,9 +582,11 @@ export async function renderAdClient(params) {
   if (!id) return navigate('adstats');
   const body = h('div', { class: 'ads' }, h('p', { class: 'muted' }, 'Загружаю…'));
   const head = h('div', { class: 'doc-head' });
+  const info = h('div', { class: 'ads-info' });
   const back = new URLSearchParams(params);
   back.delete('id');
-  fill(app, shell('adclient', [head, controls('adclient', params, { agency: false }), body]));
+  // название, кнопки, период и строка источников остаются наверху при прокрутке карточки
+  fill(app, shell('adclient', [h('div', { class: 'ads-sticky' }, head, controls('adclient', params, { agency: false }), info), body]));
   const per = periodOf(params);
   let d;
   let client;
@@ -610,16 +626,20 @@ export async function renderAdClient(params) {
     d.account ? sync : null,
   );
   const a = d.account;
+  if (a && (a.direct_enabled || a.metrika_counter))
+    fill(
+      info,
+      h(
+        'p',
+        { class: 'muted small' },
+        [a.direct_enabled ? `Директ${a.direct_login ? `: ${a.direct_login}` : ''}` : null, a.metrika_counter ? `Метрика: ${a.metrika_counter}, только визиты из Директа` : null, a.goals ? `цели: ${a.goals.replace(/,/g, ', ')}` : 'цели не выбраны', a.synced_at ? `обновлено ${new Date(`${a.synced_at.replace(' ', 'T')}Z`).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow' })}` : 'ещё не загружено'].filter(Boolean).join(' · '),
+      ),
+    );
   fill(
     body,
     !a || (!a.direct_enabled && !a.metrika_counter)
       ? h('div', { class: 'panel empty' }, h('strong', {}, 'Статистика не подключена'), 'Нажмите «Настроить»: кабинет Директа и счётчик Метрики клиента.')
       : [
-          h(
-            'p',
-            { class: 'muted small' },
-            [a.direct_enabled ? `Директ${a.direct_login ? `: ${a.direct_login}` : ''}` : null, a.metrika_counter ? `Метрика: ${a.metrika_counter}` : null, a.goals ? `цели: ${a.goals.replace(/,/g, ', ')}` : 'цели не выбраны', a.synced_at ? `обновлено ${new Date(`${a.synced_at.replace(' ', 'T')}Z`).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow' })}` : 'ещё не загружено'].filter(Boolean).join(' · '),
-          ),
           a.error ? h('p', { class: 'ads-error' }, `Ошибка загрузки: ${a.error}`) : null,
           !a.metrika_counter
             ? h('p', { class: 'ads-note' }, 'Метрика не подключена, поэтому визиты, отказы и цели пустые, а конверсий нет. Нажмите «Настроить», укажите номер счётчика, «Загрузить цели», отметьте нужные и сохраните. Отдельный токен не нужен: подойдёт тот же, что для Директа.')
@@ -635,7 +655,7 @@ export async function renderAdClient(params) {
             h(
               'table',
               { class: 'leads docs ads-table' },
-              h('thead', {}, h('tr', {}, ['Дата', 'Расход', 'Показы', 'Клики', 'CTR', 'Цена клика', 'Конверсии', 'Цена конверсии', 'Визиты', 'Отказы', 'Цели'].map((c) => h('th', { scope: 'col' }, c)))),
+              h('thead', {}, h('tr', {}, ['Дата', 'Расход с НДС', 'Показы', 'Клики', 'CTR', 'Цена клика', 'Конверсии', 'Цена конверсии', 'Визиты', 'Отказы', 'Цели'].map((c) => h('th', { scope: 'col' }, c)))),
               h(
                 'tbody',
                 {},

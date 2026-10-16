@@ -1,5 +1,5 @@
 // Срезы статистики клиента за период: кампании, группы, фразы, запросы, площадки РСЯ, устройства,
-// пол и возраст, регионы (Директ) и источники, страницы входа, устройства, регионы, UTM (Метрика).
+// пол и возраст, регионы (Директ) и UTM, страницы входа, устройства, регионы визитов из Директа (Метрика).
 // Отчёт строится по требованию в фоне и хранится 3 часа: Директ отдаёт отчёты не чаще раза в 10 секунд.
 
 import { directReport, metrikaReport } from './yandex.js';
@@ -33,9 +33,8 @@ export const DIRECT_SLICES = {
   regions: { label: 'Регионы', group: ['LocationOfPresenceName'], title: (r) => r.LocationOfPresenceName || 'Не определено' },
 };
 
-/** Срезы Метрики: измерения отчёта. */
+/** Срезы Метрики: измерения отчёта. Только визиты из Директа (METRIKA_DIRECT_ONLY), поэтому среза по источникам нет. */
 export const METRIKA_SLICES = {
-  sources: { label: 'Источники трафика', dimensions: ['ym:s:lastsignTrafficSource'] },
   utm: { label: 'UTM-метки', dimensions: ['ym:s:UTMSource', 'ym:s:UTMCampaign'] },
   landing: { label: 'Страницы входа', dimensions: ['ym:s:startURL'] },
   sitedevices: { label: 'Устройства на сайте', dimensions: ['ym:s:deviceCategory'] },

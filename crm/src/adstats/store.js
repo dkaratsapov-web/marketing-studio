@@ -160,7 +160,15 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
     if (a.metrika_counter) {
       try {
         const rows = await metrikaDaily({ token, counter: a.metrika_counter, from, to, goals, fetchImpl });
-        writeRows(() => rows.forEach((r) => q.putDaily.run(a.client_id, 'metrika', r.date, 0, 0, 0, 0, r.visits, r.bounces, r.goals)));
+        // Метрика не присылает дни без визитов из Директа: пишем их нулями, чтобы перезаписать
+        // прежние цифры за эти дни (в том числе посчитанные по всему трафику до правила «только Директ»)
+        const byDate = new Map(rows.map((r) => [r.date, r]));
+        writeRows(() => {
+          for (let d = from; d <= to; d = shift(d, 1)) {
+            const r = byDate.get(d) ?? { visits: 0, bounces: 0, goals: 0 };
+            q.putDaily.run(a.client_id, 'metrika', d, 0, 0, 0, 0, r.visits, r.bounces, r.goals);
+          }
+        });
       } catch (err) {
         errors.push(err instanceof AdApiError ? err.message : `Метрика: ${err.message}`);
       }

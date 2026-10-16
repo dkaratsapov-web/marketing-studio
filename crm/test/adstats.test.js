@@ -55,6 +55,9 @@ test('Метрика: визиты, отказы из доли и сумма д�
   const rows = await metrikaDaily({ token: 't', counter: '123', from: '2026-10-01', to: '2026-10-01', goals: ['1', '2'], fetchImpl });
   assert.deepEqual(rows, [{ date: '2026-10-01', visits: 200, bounces: 50, goals: 5 }]);
   assert.match(url, /ym%3As%3Agoal1reaches%2Cym%3As%3Agoal2reaches/);
+  const qs = new URL(url).searchParams;
+  assert.equal(qs.get('attribution'), 'automatic');
+  assert.equal(qs.get('filters'), "ym:s:<attribution>AdvEngine=='ya_direct'");
 });
 
 function setup(fetchImpl, token = 'tok') {
@@ -65,7 +68,7 @@ function setup(fetchImpl, token = 'tok') {
 
 test('загрузка и сводка: расход, CTR, CPA, отказы, сравнение с прошлым периодом, неподключённые клиенты', async () => {
   const fetchImpl = async (url) => {
-    if (String(url).includes('direct')) return res(200, `Date\tImpressions\tClicks\tCost\tConversions_9_AUTO\n${day(-1)}\t1000\t100\t5000\t5\n${day(-40)}\t500\t50\t2000\t2\n`);
+    if (String(url).includes('api.direct')) return res(200, `Date\tImpressions\tClicks\tCost\tConversions_9_AUTO\n${day(-1)}\t1000\t100\t5000\t5\n${day(-40)}\t500\t50\t2000\t2\n`);
     return res(200, { data: [{ dimensions: [{ name: day(-1) }], metrics: [400, 50, 8] }] });
   };
   const { stats } = setup(fetchImpl);
@@ -93,7 +96,7 @@ test('загрузка и сводка: расход, CTR, CPA, отказы, с
 });
 
 test('ошибка источника сохраняется у клиента, другой источник грузится; смена счётчика стирает старые цифры', async () => {
-  const fetchImpl = async (url) => (String(url).includes('direct') ? res(500, 'boom') : res(200, { data: [{ dimensions: [{ name: day(-1) }], metrics: [10, 0] }] }));
+  const fetchImpl = async (url) => (String(url).includes('api.direct') ? res(500, 'boom') : res(200, { data: [{ dimensions: [{ name: day(-1) }], metrics: [10, 0] }] }));
   const { stats } = setup(fetchImpl);
   stats.saveAccount(1, { directEnabled: true, metrikaCounter: '1' });
   const r = await stats.syncClient(1);
@@ -204,14 +207,16 @@ test('скрытые клиенты: не в списке неподключён
   assert.ok(o.notConnected.some((c) => c.name === 'Без рекламы'));
 });
 
-test('срезы: площадки РСЯ из Директа с фильтром, источники из Метрики; сборка в фоне и кеш', async () => {
+test('срезы: площадки РСЯ из Директа с фильтром, страницы входа из Метрики только по Директу; сборка в фоне и кеш', async () => {
   const bodies = [];
+  const metrikaUrls = [];
   const fetchImpl = async (url, init) => {
-    if (String(url).includes('direct')) {
+    if (String(url).includes('api.direct')) {
       bodies.push(JSON.parse(init.body).params);
       return res(200, 'Placement\tImpressions\tClicks\tCost\tBounceRate\tConversions_9_AUTO\nmail.ru\t1000\t20\t400\t30\t2\navito.ru\t500\t10\t900\t--\t0\n');
     }
-    return res(200, { data: [{ dimensions: [{ name: 'Поисковые системы' }], metrics: [100, 80, 20, 2.5, 90, 4] }] });
+    metrikaUrls.push(new URL(url));
+    return res(200, { data: [{ dimensions: [{ name: 'https://site.ru/' }], metrics: [100, 80, 20, 2.5, 90, 4] }] });
   };
   const { stats } = setup(fetchImpl);
   stats.saveAccount(1, { directEnabled: true, metrikaCounter: '5', goals: '9' });
@@ -226,12 +231,17 @@ test('срезы: площадки РСЯ из Директа с фильтро�
   stats.slice(1, 'placements', { from: '2026-10-01', to: '2026-10-07' });
   assert.equal(bodies.length, 1);
 
-  stats.slice(1, 'sources', { from: '2026-10-01', to: '2026-10-07' });
+  stats.slice(1, 'landing', { from: '2026-10-01', to: '2026-10-07' });
   await stats.settleSlices();
-  const s = stats.slice(1, 'sources', { from: '2026-10-01', to: '2026-10-07' });
-  assert.equal(s.rows[0].name, 'Поисковые системы');
+  const s = stats.slice(1, 'landing', { from: '2026-10-01', to: '2026-10-07' });
+  assert.equal(s.rows[0].name, 'https://site.ru/');
   assert.equal(s.rows[0].cr, 4);
-  assert.deepEqual(Object.keys(stats.readySlices(1, { from: '2026-10-01', to: '2026-10-07' })).sort(), ['placements', 'sources']);
+  // правило: из Метрики только визиты, которые автоматическая атрибуция относит к Директу
+  assert.equal(metrikaUrls[0].searchParams.get('attribution'), 'automatic');
+  assert.equal(metrikaUrls[0].searchParams.get('filters'), "ym:s:<attribution>AdvEngine=='ya_direct'");
+  assert.deepEqual(Object.keys(stats.readySlices(1, { from: '2026-10-01', to: '2026-10-07' })).sort(), ['landing', 'placements']);
+  // среза «Источники трафика» больше нет: при визитах только из Директа он бессмыслен
+  assert.throws(() => stats.slice(1, 'sources', {}), /Неизвестный срез/);
   assert.throws(() => stats.slice(1, 'nope', {}), /Неизвестный срез/);
 });
 

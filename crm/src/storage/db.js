@@ -637,6 +637,10 @@ const MIGRATIONS = [
    );
    CREATE INDEX kb_items_folder ON kb_items (folder_id);
    CREATE INDEX kb_items_file ON kb_items (file_id);`,
+
+  // Метрика теперь отдаёт только визиты из Директа (автоматическая атрибуция). Клиентов с Метрикой
+  // помечаем незагруженными: при следующей загрузке история за 90 дней перезапишется по новому правилу.
+  `UPDATE ad_accounts SET synced_at = NULL WHERE metrika_counter IS NOT NULL;`,
 ];
 
 /** Номер текущей версии схемы базы. */
