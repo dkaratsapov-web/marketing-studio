@@ -730,7 +730,7 @@ function shell(active, content) {
       'aside',
       // В редакторах документа и медиаплана панель сворачивается до значков — больше места под работу
       { class: `sidebar${active === 'doc' || active === 'plan' ? ' compact' : ''}` },
-      h('div', { class: 'side-head' }, h('a', { class: 'brand', href: '#/home' }, logo(), h('span', { class: 'product' }, 'Ассистент')), bellButton()),
+      h('div', { class: 'side-head' }, h('a', { class: 'brand', href: '#/home' }, logo(), h('span', { class: 'product' }, 'Кабинет')), bellButton()),
       h(
         'nav',
         { class: 'nav', 'aria-label': 'Разделы' },

@@ -5,22 +5,22 @@
   color-scheme: light;
   /* фирменные */
   --brand: var(--soroka-ink);
-  --brand-2: #14181c;
+  --brand-2: #111113;
   --accent: var(--soroka-accent);
   --accent-text: var(--soroka-accent-text);
   --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--surface));
   --on-brand: var(--soroka-on-dark);
   --on-brand-muted: var(--soroka-on-dark-muted);
   /* поверхности */
-  --bg: #EEF2F4;
+  --bg: #F3F3F4;
   --surface: var(--soroka-paper);
-  --surface-2: #F5F8F9;
-  --surface-3: #E8EEF1;
+  --surface-2: #F7F7F8;
+  --surface-3: #EBEBED;
   --field: var(--soroka-paper);
   --text: var(--soroka-ink);
   --muted: var(--soroka-steel);
   --line: var(--soroka-line);
-  --line-strong: #C9D3D8;
+  --line-strong: #D0D0D4;
   --focus: var(--accent);
   /* смысловые */
   --danger: #B42318;
@@ -36,18 +36,18 @@
   --side-line: rgba(243, 246, 247, .1);
   /* кнопка-действие */
   --btn-primary: var(--soroka-ink);
-  --btn-primary-hover: #14181c;
+  --btn-primary-hover: #1C1C1F;
   --btn-primary-text: var(--soroka-on-dark);
   /* рейтинг 1→5: порядковая шкала бренда, от светлого к тёмному */
   --r1: var(--soroka-ordinal-1); --r2: var(--soroka-ordinal-2); --r3: var(--soroka-ordinal-3); --r4: var(--soroka-ordinal-4); --r5: var(--soroka-ordinal-5);
-  --shadow-1: 0 1px 2px rgba(32, 37, 42, .05);
-  --shadow: 0 2px 6px rgba(32, 37, 42, .06), 0 12px 32px rgba(32, 37, 42, .10);
-  --scrim: rgba(20, 24, 28, .48);
+  --shadow-1: 0 1px 2px rgba(5, 5, 5, .05);
+  --shadow: 0 2px 6px rgba(5, 5, 5, .06), 0 12px 32px rgba(5, 5, 5, .10);
+  --scrim: rgba(5, 5, 5, .48);
   --radius-s: 8px;
   --radius-m: 12px;
   --radius-l: 16px;
   --hero-bg: var(--soroka-ink);
-  --on-accent: #0B1A1C;
+  --on-accent: #050505;
   --column: var(--surface-2);
   --card: var(--surface);
   --hero-text: var(--soroka-on-dark);
@@ -61,36 +61,36 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --brand: #0F1316;
-  --brand-2: #0B0E10;
-  --accent-text: #4FD8E2;
+  --brand: #0A0A0B;
+  --brand-2: #050505;
+  --accent-text: #FF4D9D;
   --accent-soft: color-mix(in srgb, var(--accent) 14%, var(--surface));
-  --bg: #14181B;
-  --surface: #1B2024;
-  --surface-2: #21272C;
-  --surface-3: #283036;
-  --field: #161B1E;
-  --text: #E8EEF0;
-  --muted: #9AA7AE;
-  --line: #2C343A;
-  --line-strong: #3A444B;
+  --bg: #0E0E10;
+  --surface: #161618;
+  --surface-2: #1C1C1F;
+  --surface-3: #242428;
+  --field: #121214;
+  --text: #F2F2F3;
+  --muted: #9A9AA0;
+  --line: #2A2A2E;
+  --line-strong: #3A3A3F;
   --danger: #FF8A80;
   --good: #5BD394;
   --warn-bg: #3A300C;
   --warn-text: #F3D27A;
   --due-today: #F3C25A;
-  --side-bg: #0F1316;
+  --side-bg: #050505;
   --side-line: rgba(243, 246, 247, .08);
   --btn-primary: var(--accent);
   --btn-primary-hover: color-mix(in srgb, var(--accent) 82%, white);
   --btn-primary-text: var(--on-accent);
-  --r1: #0A6870; --r2: #0E8590; --r3: #1FA2AD; --r4: #48BDC7; --r5: #8FD9DF;
+  --r1: #3A5206; --r2: #648A0E; --r3: #94C21F; --r4: #C4F542; --r5: #E4FAA8;
   --shadow-1: 0 1px 2px rgba(0, 0, 0, .3);
   --shadow: 0 2px 6px rgba(0, 0, 0, .3), 0 16px 40px rgba(0, 0, 0, .4);
   --scrim: rgba(0, 0, 0, .6);
-  --hero-bg: color-mix(in srgb, var(--accent) 20%, #14181B);
-  --hero-muted: #B5C6CC;
-  --column: #181D21;
+  --hero-bg: color-mix(in srgb, var(--accent) 16%, #0E0E10);
+  --hero-muted: #B8B8BE;
+  --column: #121214;
   --card: var(--surface-2);
 }
 
@@ -186,6 +186,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 .side-head { display: flex; align-items: flex-start; gap: 4px; border-bottom: 1px solid var(--side-line); margin-bottom: 8px; }
 .brand { flex: 1; min-width: 0; display: grid; gap: 8px; padding: 4px 4px 18px 12px; color: var(--side-active); text-decoration: none; }
 .brand .wordmark { color: var(--side-active); font-size: 13px; }
+.side-head .brand-logo { height: auto; width: 100%; max-width: 168px; }
 .brand .product { display: flex; align-items: center; gap: 8px; color: var(--side-text); font-size: 13px; }
 .brand .product::before { content: ''; width: 14px; height: 4px; border-radius: 2px; background: var(--accent); }
 .nav { display: grid; gap: 2px; align-content: start; flex: 1; overflow-y: auto; }
