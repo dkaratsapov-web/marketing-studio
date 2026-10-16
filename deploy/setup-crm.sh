@@ -28,6 +28,14 @@ NGINX_SITE="/etc/nginx/sites-available/korp-cabinet.conf"
 [ "$(id -u)" -eq 0 ] || { echo "Запустите под root." >&2; exit 1; }
 [[ "${DOMAIN}" =~ ^[a-z0-9.-]+$ ]] || { echo "Неверный домен: ${DOMAIN}" >&2; exit 1; }
 [[ "${ADMIN_LOGIN}" =~ ^[A-Za-z0-9._@-]+$ ]] || { echo "Логин: латиница, цифры, точка, дефис или e-mail" >&2; exit 1; }
+# Сорока (soroka-assistant.ru, /opt/kvalificator) — отдельный проект на этом же сервере: его не трогаем никогда
+case "${DOMAIN}" in *soroka*) echo "Это адрес Сороки, кабинет Корпорации туда не ставится." >&2; exit 1 ;; esac
+# Адрес уже занят другим сайтом в nginx — ничего не меняем, пусть владелец решит
+other="$(grep -lE "server_name[^;]*[[:space:]]${DOMAIN//./\\.}([[:space:];]|$)" /etc/nginx/sites-enabled/* 2>/dev/null | grep -v korp-cabinet || true)"
+if [ -n "${other}" ]; then
+  echo "Адрес ${DOMAIN} уже обслуживает другой сайт: ${other}. Ничего не меняю." >&2
+  exit 1
+fi
 id "${DEPLOY_USER}" >/dev/null 2>&1 && command -v nginx >/dev/null \
   || { echo "Сначала запустите deploy/setup-server.sh (nginx и пользователь deploy)." >&2; exit 1; }
 

@@ -4,6 +4,7 @@
 # GitHub при деплое запускает его через sudo от пользователя deploy:
 #   sudo -n /usr/local/sbin/korp-cabinet-update <коммит> [хеш папки crm]
 # Код берётся из публичного репозитория по номеру коммита, .env и data/ на сервере не трогаются.
+# Работает только с /opt/korp-cabinet. Сорока (/opt/kvalificator, soroka-assistant.ru) на этом же сервере не трогается никогда.
 set -euo pipefail
 # Docker не должен читать чужой ввод (скрипт установки приходит через curl | bash)
 exec </dev/null
