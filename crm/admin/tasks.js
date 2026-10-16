@@ -665,8 +665,7 @@ function stickers(t, onChange) {
     return [
       h('div', { class: 'pop-title' }, 'Срок'),
       h('div', { class: 'pop-due' }, date, time),
-      h('div', { class: 'pop-quick' }, [['Сегодня', 0], ['Завтра', 1], ['Через неделю', 7]].map(([l, n]) => chip(l, () => (date.value = addDays(n))))),
-      h('div', { class: 'pop-quick' }, ['10:00', '13:00', '18:00'].map((v) => chip(v, () => ((time.value = v), date.value || (date.value = today())))), chip('Без времени', () => (time.value = ''))),
+      h('div', { class: 'pop-quick' }, [['Сегодня', 0], ['Завтра', 1]].map(([l, n]) => chip(l, () => (date.value = addDays(n))))),
       h(
         'div',
         { class: 'pop-actions' },
@@ -676,7 +675,7 @@ function stickers(t, onChange) {
         }, 'Сохранить'),
         t.due ? h('button', { type: 'button', class: 'linkish', onclick: () => save({ due: null }, close) }, 'Убрать срок') : null,
       ),
-      h('p', { class: 'pop-hint' }, 'Время — по Москве. Без времени срок — до конца дня.'),
+      h('p', { class: 'pop-hint' }, 'Время по Москве. Если время не указать, срок до конца дня.'),
     ];
   });
 
