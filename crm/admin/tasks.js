@@ -621,7 +621,8 @@ function popover(anchor, build) {
     document.removeEventListener('keydown', esc, true);
     if (openPop === close) openPop = null;
   };
-  const outside = (e) => !box.contains(e.target) && !anchor.contains(e.target) && close();
+  // календарь и списки выбора открываются поверх окна, но клик в них — не клик мимо окна
+  const outside = (e) => !box.contains(e.target) && !anchor.contains(e.target) && !e.target.closest?.('.date-pop, .select-pop') && close();
   const esc = (e) => e.key === 'Escape' && (e.stopPropagation(), close(), anchor.focus());
   box.append(...[build(close)].flat().filter(Boolean));
   document.body.append(box);
