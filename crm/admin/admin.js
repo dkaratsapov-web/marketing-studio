@@ -15,6 +15,7 @@ import { renderNews, refreshNewsBadge } from './news.js';
 import { renderMoney } from './money.js';
 import { renderAdStats, renderAdClient } from './adstats.js';
 import { renderParser, renderParserJob } from './parser.js';
+import { renderLibrary } from './library.js';
 import { renderNotifySettings } from './notify.js';
 import { renderChat, refreshChatBadge } from './chat.js';
 
@@ -195,6 +196,7 @@ const routes = {
   adstats: renderAdStats,
   adclient: renderAdClient,
   parser: renderParser,
+  library: renderLibrary,
   parsejob: renderParserJob,
   'notify-settings': renderNotifySettings,
   chat: renderChat,
@@ -295,6 +297,9 @@ async function boot() {
 const ICONS = {
   home: 'M3 11l9-7 9 7M5 9.5V20h5v-6h4v6h5V9.5',
   adstats: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  library: 'M5 4h5l2 2h7v13H5zM9 11h6M9 14h4',
+  folder: 'M3 6h6l2 2h10v11H3z',
+  edit: 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4',
   parser: 'M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM15.3 15.3L20 20M8 10.5h5',
   news: 'M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5M8 16h3',
   chat: 'M4 5h16v11H9l-5 4zM8 9h8M8 12h5',
@@ -783,6 +788,7 @@ const NAV = [
   ['news', 'Новости'],
   ['chat', 'Сообщения'],
   ['docs', 'Документы'],
+  ['library', 'База знаний'],
   ['templates', 'Шаблоны'],
   ['plans', 'Медиапланы'],
   ['tasks', 'Задачи'],
@@ -795,7 +801,7 @@ const NAV = [
 ];
 // Разделы, включённые на этом сервере (ADMIN_SECTIONS); учётная запись и её вкладки доступны всегда
 // «Главное» — сводка по всем включённым разделам, поэтому доступна всегда
-const ALWAYS = new Set(['home', 'adstats', 'parser', 'account', 'appearance', 'notify-settings']);
+const ALWAYS = new Set(['home', 'adstats', 'parser', 'library', 'account', 'appearance', 'notify-settings']);
 const sectionOf = (route) => PAGE_SECTION[route] ?? Object.keys(SECTION_TABS).find((k) => SECTION_TABS[k].some(([id]) => id === route)) ?? route;
 function sectionAllowed(route) {
   return !ctx.sections || ALWAYS.has(route) || ALWAYS.has(sectionOf(route)) || ctx.sections.includes(sectionOf(route));
@@ -902,7 +908,7 @@ function shell(active, content) {
             tabs.map(([id, label]) => h('a', { href: `#/${id}`, 'aria-current': id === active ? 'page' : null }, label)),
           )
         : null,
-      h('main', { class: `page${['doc', 'plan', 'tasks', 'board', 'home', 'adstats', 'adclient', 'parser', 'parsejob'].includes(active) ? ' page-wide' : ''}`, id: 'main' }, content),
+      h('main', { class: `page${['doc', 'plan', 'tasks', 'board', 'home', 'adstats', 'adclient', 'parser', 'parsejob', 'library'].includes(active) ? ' page-wide' : ''}`, id: 'main' }, content),
     ),
   ];
 }

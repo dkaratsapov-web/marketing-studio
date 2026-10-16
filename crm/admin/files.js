@@ -7,7 +7,7 @@ import { fill } from './docs.js';
 import { prepareImage } from './docs.js';
 
 export const ACCEPT_MEDIA = 'image/jpeg,image/png,image/webp,image/gif,image/heic,video/mp4,video/quicktime,video/webm';
-export const ACCEPT_ANY = `${ACCEPT_MEDIA},application/pdf,.docx,.xlsx,.pptx,.zip,.txt,.csv`;
+export const ACCEPT_ANY = `${ACCEPT_MEDIA},application/pdf,.docx,.xlsx,.pptx,.doc,.xls,.ppt,.rtf,.zip,.rar,.7z,.txt,.csv`;
 
 // расширение → тип, если браузер не определил его сам (часто с .docx/.xlsx/.mov)
 const BY_EXT = {
@@ -15,14 +15,22 @@ const BY_EXT = {
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   zip: 'application/zip', txt: 'text/plain', csv: 'text/csv', pdf: 'application/pdf',
+  doc: 'application/msword', xls: 'application/vnd.ms-excel', ppt: 'application/vnd.ms-powerpoint', rtf: 'application/rtf',
+  rar: 'application/vnd.rar', '7z': 'application/x-7z-compressed',
   mov: 'video/quicktime', mp4: 'video/mp4', webm: 'video/webm',
 };
 
-/** Загрузить файл; onProgress(0…1). Возвращает { id, mime, kind, name, bytes }. */
-export async function uploadFile(file, { onProgress = () => {} } = {}) {
+/**
+ * Загрузить файл; onProgress(0…1). Возвращает { id, mime, kind, name, bytes }.
+ * original — фото не уменьшать (база знаний: схемы и скриншоты нужны в исходном качестве); HEIC всё равно в JPEG.
+ */
+export async function uploadFile(file, { onProgress = () => {}, original = false } = {}) {
   let body = file;
-  let type = file.type || BY_EXT[file.name.split('.').pop().toLowerCase()] || 'application/octet-stream';
-  if (/^image\/(jpeg|png|webp|heic|heif)$/.test(type) || /\.(heic|heif)$/i.test(file.name)) {
+  // браузер часто не знает тип у .rar, .7z, старых Office или отдаёт «application/x-zip-compressed»
+  const ext = file.name.split('.').pop().toLowerCase();
+  let type = (!file.type || /octet-stream|x-zip|x-rar|x-msdownload|text\/rtf/.test(file.type) ? BY_EXT[ext] : file.type) || file.type || 'application/octet-stream';
+  const heic = /^image\/(heic|heif)$/.test(type) || /\.(heic|heif)$/i.test(file.name);
+  if (heic || (!original && /^image\/(jpeg|png|webp)$/.test(type))) {
     body = await prepareImage(file);
     type = body.type || 'image/jpeg';
   }

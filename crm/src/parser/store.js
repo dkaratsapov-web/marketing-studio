@@ -359,7 +359,7 @@ export function createParser({ db, fetchImpl = fetch, siteFetch = null, lookup =
   const m = {
     lists: db.prepare("SELECT j.id, j.query AS name, (SELECT COUNT(*) FROM parse_places p WHERE p.job_id = j.id) AS count FROM parse_jobs j WHERE j.sources = 'manual' ORDER BY j.id DESC"),
     list: db.prepare("SELECT * FROM parse_jobs WHERE id = ? AND sources = 'manual'"),
-    byName: db.prepare("SELECT * FROM parse_jobs WHERE sources = 'manual' AND lower(query) = lower(?)"),
+    manualAll: db.prepare("SELECT * FROM parse_jobs WHERE sources = 'manual'"),
     newList: db.prepare("INSERT INTO parse_jobs (query, geo, sources, per_source, enrich, status, progress, created_by, finished_at) VALUES (?, '', 'manual', 0, 0, 'done', '{}', ?, datetime('now'))"),
     rows: db.prepare('SELECT id, data FROM parse_places WHERE job_id = ?'),
     update: db.prepare('UPDATE parse_places SET name = ?, data = ? WHERE id = ?'),
@@ -373,7 +373,7 @@ export function createParser({ db, fetchImpl = fetch, siteFetch = null, lookup =
     if (listId && !list) throw new ParserError('Список не найден');
     if (!list) {
       const name = String(listName ?? '').trim().slice(0, 120) || 'С карт вручную';
-      list = m.byName.get(name) ?? m.list.get(Number(m.newList.run(name, user?.name ?? null).lastInsertRowid));
+      list = m.manualAll.all().find((l) => l.query.toLowerCase() === name.toLowerCase()) ?? m.list.get(Number(m.newList.run(name, user?.name ?? null).lastInsertRowid));
     }
     const source = ['yandex', '2gis', 'google'].includes(raw.source) ? raw.source : 'yandex';
     const p = place({

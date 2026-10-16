@@ -613,6 +613,30 @@ const MIGRATIONS = [
      created_at   TEXT NOT NULL DEFAULT (datetime('now')),
      last_used_at TEXT
    );`,
+
+  // База знаний: важные файлы и ссылки команды по папкам (файлы — в общем хранилище files)
+  `CREATE TABLE kb_folders (
+     id         INTEGER PRIMARY KEY,
+     name       TEXT NOT NULL,
+     created_by TEXT,
+     created_at TEXT NOT NULL DEFAULT (datetime('now'))
+   );
+   CREATE TABLE kb_items (
+     id          INTEGER PRIMARY KEY,
+     folder_id   INTEGER REFERENCES kb_folders(id) ON DELETE SET NULL,
+     kind        TEXT NOT NULL,
+     file_id     INTEGER REFERENCES files(id) ON DELETE CASCADE,
+     url         TEXT,
+     title       TEXT NOT NULL,
+     note        TEXT,
+     pinned      INTEGER NOT NULL DEFAULT 0,
+     added_by    TEXT,
+     added_by_id INTEGER,
+     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+     updated_at  TEXT
+   );
+   CREATE INDEX kb_items_folder ON kb_items (folder_id);
+   CREATE INDEX kb_items_file ON kb_items (file_id);`,
 ];
 
 /** Номер текущей версии схемы базы. */

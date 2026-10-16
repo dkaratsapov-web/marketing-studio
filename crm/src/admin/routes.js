@@ -3,6 +3,8 @@
 
 import { adStatsRoutes } from './adstats-routes.js';
 import { parserRoutes, parserExtRoutes } from './parser-routes.js';
+import { libraryRoutes } from './library-routes.js';
+import { createLibrary } from '../library/store.js';
 import cookie from '@fastify/cookie';
 import fastifyStatic from '@fastify/static';
 import { randomBytes } from 'node:crypto';
@@ -490,6 +492,7 @@ export async function adminRoutes(app, { config, auth, reports, db, scenarioSour
     if (crm) await api.register(crmRoutes, { crm, auth, db, scenarioSource, kb, files, money });
     if (adstats) await api.register(adStatsRoutes, { adstats });
     if (parser) await api.register(parserRoutes, { parser, config });
+    await api.register(libraryRoutes, { library: createLibrary({ db: db.raw }), files });
 
     // ---------- уведомления (колокольчик) ----------
     // after — только новые (для всплывающих окон): опрос раз в 20 секунд

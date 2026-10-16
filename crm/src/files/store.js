@@ -16,12 +16,13 @@ export class FileError extends Error {
 }
 
 const MB = 1024 * 1024;
-export const FILE_LIMITS = { image: 20 * MB, video: 100 * MB, doc: 25 * MB };
+export const FILE_LIMITS = { image: 20 * MB, video: 100 * MB, doc: 50 * MB };
 
 // тип → [вид, расширение, проверка первых байтов]
 const starts = (...sig) => (b) => sig.every((x, i) => x == null || b[i] === x);
 const ascii = (s, at = 0) => (b) => b.slice(at, at + s.length).toString('latin1') === s;
 const zip = starts(0x50, 0x4b, 0x03, 0x04);
+const ole = starts(0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1); // старые .doc, .xls, .ppt
 export const FILE_TYPES = {
   'image/jpeg': ['image', 'jpg', starts(0xff, 0xd8, 0xff)],
   'image/png': ['image', 'png', starts(0x89, 0x50, 0x4e, 0x47)],
@@ -35,6 +36,12 @@ export const FILE_TYPES = {
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['doc', 'xlsx', zip],
   'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['doc', 'pptx', zip],
   'application/zip': ['doc', 'zip', zip],
+  'application/msword': ['doc', 'doc', ole],
+  'application/vnd.ms-excel': ['doc', 'xls', ole],
+  'application/vnd.ms-powerpoint': ['doc', 'ppt', ole],
+  'application/rtf': ['doc', 'rtf', ascii('{\\rtf')],
+  'application/vnd.rar': ['doc', 'rar', ascii('Rar!')],
+  'application/x-7z-compressed': ['doc', '7z', starts(0x37, 0x7a, 0xbc, 0xaf, 0x27, 0x1c)],
   'text/plain': ['doc', 'txt', () => true],
   'text/csv': ['doc', 'csv', () => true],
 };
@@ -44,8 +51,8 @@ export const UPLOAD_TYPES = Object.keys(FILE_TYPES);
 export const baseMime = (s) => String(s ?? '').split(';')[0].trim().toLowerCase();
 
 /**
- * Кто может открыть файл: тот, кто загрузил; все сотрудники — если файл прикреплён к новости, задаче
- * или клиенту; вложение из чата — только участники этого чата (переписка личная, администратор тоже не видит).
+ * Кто может открыть файл: тот, кто загрузил; все сотрудники — если файл прикреплён к новости, задаче,
+ * клиенту или лежит в базе знаний; вложение из чата — только участники этого чата (переписка личная, администратор тоже не видит).
  */
 export function fileAccess(db) {
   let q = null;
@@ -53,6 +60,7 @@ export function fileAccess(db) {
       OR EXISTS (SELECT 1 FROM news_files WHERE file_id = f.id)
       OR EXISTS (SELECT 1 FROM task_files WHERE file_id = f.id)
       OR EXISTS (SELECT 1 FROM client_files WHERE file_id = f.id)
+      OR EXISTS (SELECT 1 FROM kb_items WHERE file_id = f.id)
       OR EXISTS (SELECT 1 FROM chat_files cf JOIN chat_messages m ON m.id = cf.message_id AND m.deleted = 0
                  JOIN chat_members cm ON cm.chat_id = m.chat_id AND cm.user_id = ? WHERE cf.file_id = f.id) AS ok
     FROM files f WHERE f.id = ?`;
@@ -66,7 +74,7 @@ export function createFiles({ db, dir }) {
     get: db.prepare('SELECT * FROM files WHERE id = ?'),
     remove: db.prepare('DELETE FROM files WHERE id = ?'),
     sameFile: db.prepare('SELECT COUNT(*) AS n FROM files WHERE sha256 = ?'),
-    used: db.prepare('SELECT (SELECT COUNT(*) FROM news_files WHERE file_id = ?) + (SELECT COUNT(*) FROM task_files WHERE file_id = ?) + (SELECT COUNT(*) FROM client_files WHERE file_id = ?) + (SELECT COUNT(*) FROM chat_files WHERE file_id = ?) AS n'),
+    used: db.prepare('SELECT (SELECT COUNT(*) FROM news_files WHERE file_id = ?) + (SELECT COUNT(*) FROM task_files WHERE file_id = ?) + (SELECT COUNT(*) FROM client_files WHERE file_id = ?) + (SELECT COUNT(*) FROM chat_files WHERE file_id = ?) + (SELECT COUNT(*) FROM kb_items WHERE file_id = ?) AS n'),
   };
   const canRead = fileAccess(db);
   const pathOf = (f) => join(root, `${f.sha256}.${FILE_TYPES[f.mime]?.[1] ?? 'bin'}`);
@@ -74,7 +82,7 @@ export function createFiles({ db, dir }) {
   /** Сохранить файл из потока. Размер проверяется на лету — лишнее не дописываем на диск. */
   async function save(stream, { mime, name = '', user }) {
     const type = FILE_TYPES[baseMime(mime)];
-    if (!type) throw new FileError('Такой формат не поддерживается: подойдут фото (JPG, PNG, WebP, GIF), видео (MP4, MOV, WebM), PDF, Word, Excel, PowerPoint, ZIP, TXT, CSV', 415);
+    if (!type) throw new FileError('Такой формат не поддерживается: подойдут фото (JPG, PNG, WebP, GIF), видео (MP4, MOV, WebM), PDF, Word, Excel, PowerPoint (и старые .doc, .xls, .ppt), RTF, ZIP, RAR, 7z, TXT, CSV', 415);
     const [kind, , check] = type;
     const limit = FILE_LIMITS[kind];
     mkdirSync(join(root, 'tmp'), { recursive: true });
@@ -144,7 +152,7 @@ export function createFiles({ db, dir }) {
 
   /** Удалить файл, если он больше нигде не прикреплён (ни к новостям, ни к задаче, ни к клиенту). */
   function removeIfUnused(id) {
-    if (!q.used.get(Number(id), Number(id), Number(id), Number(id)).n) remove(id);
+    if (!q.used.get(Number(id), Number(id), Number(id), Number(id), Number(id)).n) remove(id);
   }
 
   return { save, get, canRead, size, open, remove, removeIfUnused };
