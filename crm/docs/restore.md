@@ -17,7 +17,7 @@
 лежат в зеркале. Её можно запустить и отдельно:
 
 ```bash
-cd /opt/kvalificator
+cd /opt/korp-cabinet
 docker compose exec -T app npm run restore-check
 ```
 
@@ -33,7 +33,7 @@ docker compose exec -T app npm run restore-check
 
 1. Остановить приложение (другие сайты на сервере не затрагиваются):
    ```bash
-   cd /opt/kvalificator && docker compose stop app
+   cd /opt/korp-cabinet && docker compose stop app
    ```
 2. Отложить текущие данные — на всякий случай:
    ```bash

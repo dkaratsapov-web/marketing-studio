@@ -4,8 +4,8 @@
 import { h, api, app, shell, navigate, ctx } from './admin.js';
 import { fill } from './docs.js';
 
-const ENV = 'nano /opt/kvalificator/.env';
-const APPLY = 'cd /opt/kvalificator && bash deploy/update.sh';
+const ENV = 'nano /opt/korp-cabinet/.env';
+const APPLY = '/usr/local/sbin/korp-cabinet-update main';
 
 export async function renderIntegrations() {
   if (ctx.me.role !== 'admin') return navigate('docs');

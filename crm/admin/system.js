@@ -4,7 +4,7 @@
 import { h, api, app, shell, navigate, ctx } from './admin.js';
 import { fill } from './docs.js';
 
-const BACKUP = 'cd /opt/kvalificator && docker compose exec -T app npm run backup';
+const BACKUP = 'cd /opt/korp-cabinet && docker compose exec -T app npm run backup';
 
 const mb = (b) => (b >= 1073741824 ? `${(b / 1073741824).toFixed(1)} ГБ` : `${(b / 1048576).toFixed(1)} МБ`);
 const when = (iso) =>

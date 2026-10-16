@@ -21,7 +21,7 @@ export class BrowserUnavailable extends Error {}
 
 export function chromiumPath() {
   const path = CANDIDATES.find((p) => existsSync(p));
-  if (!path) throw new BrowserUnavailable('На сервере нет Chromium — проверка и PDF недоступны. Обновите сервер: bash deploy/update.sh');
+  if (!path) throw new BrowserUnavailable('На сервере нет Chromium — проверка и PDF недоступны. Обновите сервер: /usr/local/sbin/korp-cabinet-update main');
   return path;
 }
 

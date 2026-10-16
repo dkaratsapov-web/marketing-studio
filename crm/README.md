@@ -270,14 +270,14 @@ npm test
 Нужен сервер в РФ (152-ФЗ) с Ubuntu 22.04/24.04, 2–4 ГБ памяти, и домен с A-записью на IP сервера.
 
 ```bash
-git clone https://github.com/banifaci13-sketch/kvalificator.git && cd kvalificator
-sudo bash deploy/install.sh
+# Кабинет Корпорации: один раз под root на сервере сайта
+curl -fsSL https://raw.githubusercontent.com/dkaratsapov-web/marketing-studio/main/deploy/setup-crm.sh | bash -s -- crm.marketing-studio.pro admin
 ```
 
 Установщик ставит Docker, спрашивает настройки (домен, почту для админки, Telegram, Яндекс ID), запускает квалификатор за Caddy с автоматическим HTTPS, создаёт первого сотрудника и печатает его пароль, настраивает ежедневный бэкап базы (14 копий в `data/backups`) и проверяет настройки.
 
 - Если на сервере уже есть nginx с другими сайтами, установщик предложит работать через него: добавит отдельный конфиг `kvalificator.conf` (прокси на `127.0.0.1:APP_PORT`, по умолчанию 3100), проверит его `nginx -t` до перезагрузки и выпустит сертификат через certbot. Другие сайты не затрагиваются. Если на сервере больше ничего нет — HTTPS обслуживает Caddy в Docker.
-- Обновление: `sudo bash deploy/update.sh` (сначала бэкап, потом `git pull` и перезапуск).
+- Обновление: само при каждом деплое сайта, вручную `/usr/local/sbin/korp-cabinet-update main` (сначала бэкап, потом пересборка).
 - Резервные копии: база и файлы (вложения, медиатека, выгрузки), после копии — автоматическая проверка восстановления. Итог виден в «Сотрудники» → «Состояние»; как восстановиться — [docs/restore.md](docs/restore.md).
 - Docker Hub с российских серверов недоступен — образы берутся с зеркала `mirror.gcr.io`. Другое зеркало: `NODE_IMAGE` и `CADDY_IMAGE` в `.env`.
 - Репозиторий приватный: для `git clone` на сервере нужен токен GitHub с доступом только на чтение или deploy key.
@@ -304,7 +304,7 @@ sudo bash deploy/install.sh
 
 ## Подключение сервисов
 
-Ключи вписываются в `.env` на сервере (`nano /opt/kvalificator/.env`), затем `bash deploy/update.sh`. Без ключа соответствующие кнопки просто не показываются или подсказывают, что сервис не подключён.
+Ключи вписываются в `.env` на сервере (`nano /opt/korp-cabinet/.env`), затем `/usr/local/sbin/korp-cabinet-update main`. Без ключа соответствующие кнопки просто не показываются или подсказывают, что сервис не подключён.
 
 - **YandexGPT** (рекомендуется: данные остаются в России). В [Yandex Cloud](https://console.yandex.cloud):
   1. создайте каталог и сервисный аккаунт с ролью `ai.languageModels.user`;
