@@ -105,16 +105,12 @@ rm -f "${APP_DIR}/.tree"
 "${UPDATER}" main || echo "    ! Кабинет ещё запускается, продолжаю установку"
 
 echo "==> nginx: ${DOMAIN} -> 127.0.0.1:${APP_PORT}"
-if [ -f "${NGINX_SITE}" ] && grep -q "managed by Certbot" "${NGINX_SITE}"; then
-  sed -i -E "s|proxy_pass http://127\.0\.0\.1:[0-9]+;|proxy_pass http://127.0.0.1:${APP_PORT};|" "${NGINX_SITE}"
-else
-  cat > "${NGINX_SITE}" <<NGINX
-# Кабинет Корпорации (deploy/setup-crm.sh). HTTPS дописывает certbot.
-server {
-    listen 80;
-    listen [::]:80;
-    server_name ${DOMAIN};
-    client_max_body_size 120m;
+LE_DIR="/etc/letsencrypt/live/${DOMAIN}"
+# Конфиг пишем сами и целиком: и для http, и для https. Автоподключение certbot на этом сервере
+# не находит блок кабинета среди других сайтов, поэтому сертификат прописываем напрямую
+write_site() {
+  local proxy
+  proxy="    client_max_body_size 120m;
 
     location / {
         proxy_pass http://127.0.0.1:${APP_PORT};
@@ -124,39 +120,87 @@ server {
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_read_timeout 120s;
-    }
+    }"
+  if [ "$1" = https ]; then
+    cat > "${NGINX_SITE}" <<NGINX
+# Кабинет Корпорации (deploy/setup-crm.sh)
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN};
+    location /.well-known/acme-challenge/ { root /var/www/html; }
+    location / { return 301 https://\$host\$request_uri; }
+}
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name ${DOMAIN};
+    ssl_certificate ${LE_DIR}/fullchain.pem;
+    ssl_certificate_key ${LE_DIR}/privkey.pem;
+$( [ -f /etc/letsencrypt/options-ssl-nginx.conf ] && echo "    include /etc/letsencrypt/options-ssl-nginx.conf;" )
+$( [ -f /etc/letsencrypt/ssl-dhparams.pem ] && echo "    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;" )
+${proxy}
 }
 NGINX
-fi
-ln -sf "${NGINX_SITE}" /etc/nginx/sites-enabled/korp-cabinet.conf
-if ! nginx -t 2>/tmp/korp-nginx.log; then
-  # Сайт не ломаем: убираем конфиг кабинета, если nginx его не принял
-  rm -f "${NGINX_SITE}" /etc/nginx/sites-enabled/korp-cabinet.conf
+  else
+    cat > "${NGINX_SITE}" <<NGINX
+# Кабинет Корпорации (deploy/setup-crm.sh). HTTPS появится после выпуска сертификата.
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN};
+${proxy}
+}
+NGINX
+  fi
+  ln -sf "${NGINX_SITE}" /etc/nginx/sites-enabled/korp-cabinet.conf
+}
+apply_site() {
+  write_site "$1"
+  if nginx -t 2>/tmp/korp-nginx.log; then
+    systemctl reload nginx
+    echo "    ✓ ${DOMAIN}: $1"
+    return 0
+  fi
   cat /tmp/korp-nginx.log
-  echo "nginx не принял конфиг кабинета, он удалён, сайт работает как раньше. Пришлите вывод выше." >&2
-  exit 1
+  return 1
+}
+has_cert() { [ -f "${LE_DIR}/fullchain.pem" ] && [ -f "${LE_DIR}/privkey.pem" ]; }
+
+if has_cert; then
+  apply_site https || apply_site http || {
+    # Сайт не ломаем: убираем конфиг кабинета, если nginx его не принял
+    rm -f "${NGINX_SITE}" /etc/nginx/sites-enabled/korp-cabinet.conf
+    echo "nginx не принял конфиг кабинета, он удалён, сайты работают как раньше. Пришлите вывод выше." >&2
+    exit 1
+  }
+else
+  apply_site http || {
+    rm -f "${NGINX_SITE}" /etc/nginx/sites-enabled/korp-cabinet.conf
+    echo "nginx не принял конфиг кабинета, он удалён, сайты работают как раньше. Пришлите вывод выше." >&2
+    exit 1
+  }
 fi
-systemctl reload nginx
 
 echo "==> HTTPS"
-server_ip="$(curl -4 -fsS --max-time 10 https://api.ipify.org || true)"
-domain_ip="$(getent ahostsv4 "${DOMAIN}" 2>/dev/null | awk 'NR==1 {print $1}' || true)"
-if certbot certificates 2>/dev/null | grep -qE "Domains:.*\b${DOMAIN//./\\.}\b"; then
-  if grep -q "managed by Certbot" "${NGINX_SITE}"; then
-    echo "    Сертификат для ${DOMAIN} уже есть и подключён"
+if ! has_cert; then
+  if getent ahostsv4 "${DOMAIN}" >/dev/null 2>&1; then
+    # Только выпуск сертификата: в конфиг его прописываем сами
+    certbot certonly --nginx -d "${DOMAIN}" --non-interactive --agree-tos --register-unsafely-without-email \
+      || echo "    ! Сертификат не выпущен, вывод выше. Запустите скрипт ещё раз позже."
   else
-    # Сертификат выпущен раньше, но раздела nginx тогда не было: подключаем его сейчас
-    certbot install --nginx --cert-name "${DOMAIN}" --redirect --non-interactive \
-      || echo "    ! Не удалось подключить сертификат: certbot install --nginx --cert-name ${DOMAIN} --redirect"
+    echo "    ! ${DOMAIN} пока не резолвится. Добавьте A-запись и запустите скрипт ещё раз."
   fi
-elif [ -n "${domain_ip}" ]; then
-  # Свой IP сервер узнаёт через внешний сервис, который бывает недоступен: пробуем выпустить
-  # сертификат, как только домен резолвится, а certbot сам проверит, что он ведёт сюда
-  certbot --nginx -d "${DOMAIN}" --non-interactive --agree-tos --register-unsafely-without-email --redirect \
-    || echo "    ! Сертификат не выпущен. Повторите позже: certbot --nginx -d ${DOMAIN} --redirect"
-else
-  echo "    ! ${DOMAIN} пока не указывает на этот сервер (${server_ip:-IP неизвестен}, DNS: ${domain_ip:-нет записи})."
-  echo "      Добавьте A-запись и запустите скрипт ещё раз: он выпустит сертификат."
+  has_cert && { apply_site https || apply_site http; }
+fi
+if has_cert; then
+  # После продления certbot перечитываем nginx, чтобы он взял новый сертификат
+  install -d /etc/letsencrypt/renewal-hooks/deploy
+  printf '#!/bin/sh\nsystemctl reload nginx\n' > /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+  chmod 755 /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+  # Продлевать без автоподключения certbot к nginx: конфиг кабинета уже указывает на файлы сертификата
+  sed -i '/^installer = /d' "/etc/letsencrypt/renewal/${DOMAIN}.conf" 2>/dev/null || true
+  echo "    ✓ сертификат: ${LE_DIR}"
 fi
 
 echo "==> Первый администратор"
