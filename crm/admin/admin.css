@@ -750,6 +750,11 @@ details.menu summary::-webkit-details-marker { display: none; }
 .repeat-row > select:first-child { flex: 2 1 280px; }
 .repeat-row [hidden], .repeat-box [hidden] { display: none; }
 .repeat-box .weekdays button { min-width: 38px; }
+.repeat-days { display: grid; gap: 6px; margin-top: 10px; }
+.repeat-days .label { font-size: 13px; font-weight: 600; }
+.repeat-days .hint { margin: 0; }
+.repeat-summary { margin: 10px 0 0; padding: 10px 12px; border-radius: var(--radius-s); background: var(--accent-soft); font-size: 14px; }
+.repeat-summary:empty { display: none; }
 .series-scope .hint { margin: 0; }
 .ev-repeat { opacity: .75; }
 .check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 6px 12px; }

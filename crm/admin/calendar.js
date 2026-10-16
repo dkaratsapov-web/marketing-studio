@@ -2,7 +2,7 @@
 // ссылки Zoom / Телемост, напоминания в Telegram, подписка на календарь.
 // Время везде московское (UTC+3, без перехода на летнее время).
 
-import { h, api, app, shell, toast, navigate, ctx, confirmDialog, countdown } from './admin.js';
+import { h, api, app, shell, toast, navigate, ctx, confirmDialog, countdown, plural } from './admin.js';
 import { fill, formDialog } from './docs.js';
 
 const TZ = 'Europe/Moscow';
@@ -44,9 +44,15 @@ const WD_SHORT = ['', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 const WD_ACC = ['', 'понедельник', 'вторник', 'среду', 'четверг', 'пятницу', 'субботу', 'воскресенье'];
 const NTH = ['', 'первый', 'второй', 'третий', 'четвёртый', 'последний'];
 const NTH_F = ['', 'первую', 'вторую', 'третью', 'четвёртую', 'последнюю'];
-/** Подписи «каждый месяц …» зависят от даты первой встречи. */
-function repeatOptionLabel(rule, label, date) {
+const WD_DAT = ['', 'понедельникам', 'вторникам', 'средам', 'четвергам', 'пятницам', 'субботам', 'воскресеньям'];
+const MONTHS_SHORT = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+const joinAnd = (list) => (list.length > 1 ? `${list.slice(0, -1).join(', ')} и ${list.at(-1)}` : list[0]);
+/** Подписи повторов зависят от даты первой встречи и выбранных дней: «Каждую неделю по вторникам». */
+function repeatOptionLabel(rule, label, date, days) {
   const day = Number(date.slice(8, 10));
+  const on = joinAnd((days?.length ? days : [weekdayOf(date)]).map((d) => WD_DAT[d]));
+  if (rule === 'weekly') return `Каждую неделю по ${on}`;
+  if (rule === 'biweekly') return `Раз в две недели по ${on}`;
   if (rule === 'monthly') return `Каждый месяц, ${day}-го числа`;
   if (rule === 'monthly_weekday') {
     const wd = weekdayOf(date);
@@ -54,6 +60,38 @@ function repeatOptionLabel(rule, label, date) {
     return `Каждый месяц, в ${[3, 5, 6].includes(wd) ? NTH_F[nth] : NTH[nth]} ${WD_ACC[wd]}`;
   }
   return label;
+}
+/** Ближайшие даты по правилу повтора — для подсказки под полем, без обращения к серверу. */
+function nextDates({ rule, days }, first, n = 3) {
+  const out = [];
+  const wdFirst = weekdayOf(first);
+  const set = new Set(rule === 'weekdays' ? [1, 2, 3, 4, 5] : rule === 'daily' ? [1, 2, 3, 4, 5, 6, 7] : days?.length ? days : [wdFirst]);
+  const monday0 = mondayOf(first);
+  for (let i = 0; out.length < n && i < 400; i++) {
+    const d = addDays(first, i);
+    if (rule === 'monthly' || rule === 'monthly_weekday') break;
+    if (!set.has(weekdayOf(d))) continue;
+    if (rule === 'biweekly' && Math.round((new Date(`${mondayOf(d)}T12:00:00Z`) - new Date(`${monday0}T12:00:00Z`)) / 864e5 / 7) % 2) continue;
+    out.push(d);
+  }
+  if (rule === 'monthly' || rule === 'monthly_weekday') {
+    const [y, mo, dd] = first.split('-').map(Number);
+    const nth = Math.min(Math.ceil(dd / 7), 5);
+    for (let k = 0; out.length < n; k++) {
+      const yy = y + Math.floor((mo - 1 + k) / 12);
+      const mm = ((mo - 1 + k) % 12) + 1;
+      const last = new Date(Date.UTC(yy, mm, 0)).getUTCDate();
+      const ym = `${yy}-${String(mm).padStart(2, '0')}`;
+      if (rule === 'monthly') out.push(`${ym}-${String(Math.min(dd, last)).padStart(2, '0')}`);
+      else {
+        // n-й такой же день недели в месяце; «последний» — последний в месяце
+        let dom = ((wdFirst - weekdayOf(`${ym}-01`) + 7) % 7) + 1 + (Math.min(nth, 4) - 1) * 7;
+        if (nth === 5) while (dom + 7 <= last) dom += 7;
+        if (dom <= last) out.push(`${ym}-${String(dom).padStart(2, '0')}`);
+      }
+    }
+  }
+  return out;
 }
 const dayLabel = (date, opts) => new Date(`${date}T12:00:00Z`).toLocaleDateString('ru-RU', { timeZone: 'UTC', ...opts });
 const endTime = (m) => msk(new Date(new Date(m.starts_at_iso).getTime() + m.duration * 60_000).toISOString()).time;
@@ -356,7 +394,10 @@ export async function openMeeting(id, { defaults = {}, onChange = () => {}, onCr
       },
     }, WD_SHORT[d]),
   );
-  const daysBox = h('div', { class: 'rating-filter weekdays', role: 'group', 'aria-label': 'Дни недели' }, dayBtns);
+  const daysBox = h('div', { class: 'repeat-days' },
+    h('span', { class: 'label', id: 'm-repeat-days' }, 'По каким дням'),
+    h('div', { class: 'rating-filter weekdays', role: 'group', 'aria-labelledby': 'm-repeat-days' }, dayBtns),
+    h('p', { class: 'hint' }, 'Отметьте один или несколько дней. Время у всех встреч одно, как указано выше.'));
   const endSel = h('select', { class: 'select', id: 'm-repeat-end' },
     h('option', { value: 'never', selected: rep.end === 'never' }, 'Без даты окончания'),
     h('option', { value: 'until', selected: rep.end === 'until' }, 'До даты'),
@@ -364,10 +405,12 @@ export async function openMeeting(id, { defaults = {}, onChange = () => {}, onCr
   const untilEl = h('input', { class: 'input', type: 'date', id: 'm-repeat-until', value: series?.until ?? '', 'aria-label': 'Последняя дата' });
   const countEl = h('input', { class: 'input', type: 'number', id: 'm-repeat-count', min: 2, max: 500, value: series?.count ?? 10, 'aria-label': 'Сколько встреч' });
   const repeatHint = h('p', { class: 'hint' });
+  const repeatSummary = h('p', { class: 'repeat-summary', role: 'status' });
   const repeatBox = h('div', { class: 'field full repeat-box' },
     h('label', { for: 'm-repeat' }, 'Повтор'),
     h('div', { class: 'repeat-row' }, repeatSel, endSel, untilEl, countEl),
     daysBox,
+    repeatSummary,
     repeatHint);
   // для встречи из серии: изменить только эту или эту и следующие
   const scope = { value: 'one' };
@@ -395,7 +438,8 @@ export async function openMeeting(id, { defaults = {}, onChange = () => {}, onCr
   }
   function syncRepeat() {
     const d = date.value || todayMsk();
-    [...repeatSel.options].forEach((o) => { if (o.value) o.textContent = repeatOptionLabel(o.value, settings.repeats[o.value], d); });
+    const chosen = rep.days ?? [weekdayOf(d)];
+    [...repeatSel.options].forEach((o) => { if (o.value) o.textContent = repeatOptionLabel(o.value, settings.repeats[o.value], d, chosen); });
     const on = Boolean(repeatSel.value);
     const weekly = ['weekly', 'biweekly'].includes(repeatSel.value);
     daysBox.hidden = !weekly;
@@ -404,12 +448,21 @@ export async function openMeeting(id, { defaults = {}, onChange = () => {}, onCr
     countEl.hidden = !on || endSel.value !== 'count';
     const days = rep.days ?? [weekdayOf(d)];
     dayBtns.forEach((b, i) => b.setAttribute('aria-pressed', String(days.includes(i + 1))));
-    fill(repeatHint, on && series && rep.touched ? 'Новое правило — с этой встречи; прошлые встречи серии не меняются.' : on && !series ? 'Каждая встреча серии — отдельная в календаре: напоминания, итоги и задачи по итогам — у каждой свои.' : null);
+    if (on) {
+      const rule = repeatSel.value;
+      const when = { daily: 'Каждый день', weekdays: 'По будням', weekly: `По ${joinAnd(days.map((x) => WD_DAT[x]))}` }[rule] ?? repeatOptionLabel(rule, '', d, days);
+      const ends = endSel.value === 'until' && untilEl.value ? `, до ${dayLabel(untilEl.value, { day: 'numeric', month: 'long' })}` : endSel.value === 'count' ? `, всего ${Number(countEl.value) || 0} ${plural(Number(countEl.value) || 0, 'встреча', 'встречи', 'встреч')}` : '';
+      const soon = nextDates({ rule, days }, d).map((x) => `${WD_SHORT[weekdayOf(x)].toLowerCase()} ${Number(x.slice(8, 10))} ${MONTHS_SHORT[Number(x.slice(5, 7)) - 1]}`);
+      fill(repeatSummary, h('b', {}, `${when} в ${time.value || '—'}`), `, ${duration.selectedOptions[0]?.textContent ?? ''}${ends}.`, soon.length ? ` Ближайшие: ${soon.join(', ')}.` : '');
+    } else fill(repeatSummary);
+    fill(repeatHint, on && series && rep.touched ? 'Новое правило — с этой встречи; прошлые встречи серии не меняются.' : on && !series ? 'Каждая встреча серии появится в календаре отдельно, со своими напоминаниями, итогами и задачами.' : null);
   }
   repeatSel.addEventListener('change', repeatChanged);
   endSel.addEventListener('change', repeatChanged);
   untilEl.addEventListener('change', repeatChanged);
   countEl.addEventListener('change', repeatChanged);
+  time.addEventListener('change', syncRepeat);
+  duration.addEventListener('change', syncRepeat);
   date.addEventListener('change', () => {
     // день недели берём из даты, пока его не выбрали вручную
     if (!rep.touched && !series) rep.days = null;
