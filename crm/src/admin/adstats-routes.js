@@ -48,6 +48,9 @@ export async function adStatsRoutes(api, { adstats }) {
             directLogin: { type: ['string', 'null'], maxLength: 100 },
             metrikaCounter: { type: ['string', 'null'], maxLength: 20 },
             goals: { type: ['string', 'null'], maxLength: 400 },
+            // свой токен клиента: пустой — не менять, clearToken — убрать
+            token: { type: ['string', 'null'], maxLength: 400 },
+            clearToken: { type: 'boolean' },
           },
         },
       },
@@ -55,7 +58,7 @@ export async function adStatsRoutes(api, { adstats }) {
     async (req) => {
       const account = adstats.saveAccount(req.params.id, req.body);
       // после подключения сразу грузим историю, если токен есть; ошибка видна в ответе и в сводке
-      const sync = adstats.hasToken() && (account.direct_enabled || account.metrika_counter) ? await adstats.syncClient(req.params.id).catch((err) => ({ ok: false, errors: [err.message] })) : null;
+      const sync = (account.own_token || adstats.hasToken()) && (account.direct_enabled || account.metrika_counter) ? await adstats.syncClient(req.params.id).catch((err) => ({ ok: false, errors: [err.message] })) : null;
       return { account: adstats.account(req.params.id), sync };
     },
   );
@@ -64,7 +67,10 @@ export async function adStatsRoutes(api, { adstats }) {
 
   api.post('/admin/api/ad-stats/sync', { config: { rateLimit: { max: 6, timeWindow: '1 minute' } } }, async () => ({ sync: await adstats.syncAll() }));
 
-  api.get('/admin/api/ad-stats/goals', { schema: { querystring: { type: 'object', required: ['counter'], properties: { counter: { type: 'string', maxLength: 20 } } } } }, async (req) => ({
-    goals: await adstats.goalsFor(req.query.counter),
-  }));
+  // POST, а не GET: токен из формы не должен попадать в адрес запроса и журналы
+  api.post(
+    '/admin/api/ad-stats/goals',
+    { schema: { body: { type: 'object', additionalProperties: false, required: ['counter'], properties: { counter: { type: 'string', maxLength: 20 }, clientId: { type: ['integer', 'null'] }, token: { type: ['string', 'null'], maxLength: 400 } } } } },
+    async (req) => ({ goals: await adstats.goalsFor(req.body.counter, { clientId: req.body.clientId, token: req.body.token }) }),
+  );
 }

@@ -558,6 +558,9 @@ const MIGRATIONS = [
      updated_by TEXT,
      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
    );`,
+
+  // Свой токен Яндекса у клиента (доступ к его кабинету без агентского аккаунта)
+  `ALTER TABLE ad_accounts ADD COLUMN token TEXT;`,
 ];
 
 /** Номер текущей версии схемы базы. */

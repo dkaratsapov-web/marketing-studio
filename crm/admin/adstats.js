@@ -185,6 +185,8 @@ function tokenPanel(onChange) {
 
 /** Настройки клиента: Директ (логин клиента у агентского аккаунта), счётчик Метрики, цели-конверсии. */
 export function openAccountDialog(client, account, onSaved, { token = true } = {}) {
+  const ownToken = h('input', { class: 'input', id: 'ads-own-token', type: 'password', maxlength: 400, autocomplete: 'off', spellcheck: 'false', placeholder: account?.own_token ? `сохранён …${account.token_tail}, вставьте новый, чтобы заменить` : 'y0_…' });
+  const dropToken = h('input', { type: 'checkbox' });
   const direct = h('input', { type: 'checkbox', checked: Boolean(account?.direct_enabled) });
   const login = h('input', { class: 'input', id: 'ads-login', maxlength: 100, value: account?.direct_login ?? '', placeholder: 'client-login' });
   const counter = h('input', { class: 'input', id: 'ads-counter', inputmode: 'numeric', maxlength: 12, value: account?.metrika_counter ?? '', placeholder: '12345678' });
@@ -198,7 +200,7 @@ export function openAccountDialog(client, account, onSaved, { token = true } = {
       onclick: async () => {
         loadGoals.disabled = true;
         try {
-          const { goals: list } = await api(`/admin/api/ad-stats/goals?counter=${encodeURIComponent(counter.value.trim())}`);
+          const { goals: list } = await api('/admin/api/ad-stats/goals', { method: 'POST', body: { counter: counter.value.trim(), clientId: client.id, token: ownToken.value.trim() || null } });
           const chosen = new Set(goals.value.split(/[\s,;]+/).filter(Boolean));
           fill(
             goalList,
@@ -236,18 +238,26 @@ export function openAccountDialog(client, account, onSaved, { token = true } = {
     body: h(
       'div',
       { class: 'ads-form' },
-      token
+      token || account?.own_token
         ? null
-        : h('p', { class: 'ads-note' }, 'Токен Яндекса вставляется один раз на всё агентство: вверху раздела «Статистика», блок «Подключите Яндекс». Здесь только настройки клиента: без токена они сохранятся, цифры появятся после подключения.'),
+        : h('p', { class: 'ads-note' }, 'Общий токен агентства вставляется вверху раздела «Статистика». Если у клиента свой доступ, вставьте его токен ниже, в поле «Свой токен клиента».'),
       h('label', { class: 'check' }, direct, 'Яндекс Директ'),
       h('div', { class: 'field' }, h('label', { for: 'ads-login' }, 'Логин клиента в Директе'), login, h('span', { class: 'hint' }, 'Для агентского аккаунта. Если токен выдан на кабинет самого клиента, оставьте пустым.')),
       h('div', { class: 'field' }, h('label', { for: 'ads-counter' }, 'Счётчик Яндекс Метрики'), counter),
+      h(
+        'div',
+        { class: 'field' },
+        h('label', { for: 'ads-own-token' }, 'Свой токен клиента'),
+        ownToken,
+        h('span', { class: 'hint' }, 'Если доступ к Директу и Метрике клиента не через ваш агентский аккаунт: токен под аккаунтом клиента. Пусто — используется общий токен агентства.'),
+        account?.own_token ? h('label', { class: 'check' }, dropToken, 'Убрать свой токен, использовать общий') : null,
+      ),
       h('div', { class: 'field' }, h('label', { for: 'ads-goals' }, 'Цели-конверсии'), h('div', { class: 'ads-goal-row' }, goals, loadGoals), h('span', { class: 'hint' }, 'Номера целей Метрики через запятую: по ним считаются конверсии и их цена.'), goalList),
     ),
     onSubmit: async () => {
       const r = await api(`/admin/api/ad-stats/clients/${client.id}/account`, {
         method: 'PUT',
-        body: { directEnabled: direct.checked, directLogin: login.value.trim() || null, metrikaCounter: counter.value.trim() || null, goals: goals.value.trim() || null },
+        body: { directEnabled: direct.checked, directLogin: login.value.trim() || null, metrikaCounter: counter.value.trim() || null, goals: goals.value.trim() || null, token: ownToken.value.trim() || null, clearToken: dropToken.checked },
       });
       if (r.sync && !r.sync.ok) toast(`Сохранено, но загрузка не удалась: ${r.sync.errors.join('; ')}`);
       else toast(r.sync ? 'Сохранено, статистика загружена' : 'Сохранено');
@@ -295,8 +305,8 @@ export async function renderAdStats(params) {
           'td',
           {},
           h('a', { class: 'row-link company', href: `#/adclient?id=${r.id}` }, r.name),
-          h('span', { class: 'ads-sources' }, h('span', { class: `agency-tag agency-${r.agency}` }, AGENCY[r.agency]), r.sources.direct ? h('span', { class: 'ads-src' }, 'Директ') : null, r.sources.metrika ? h('span', { class: 'ads-src' }, 'Метрика') : null),
-          r.error ? h('span', { class: 'ads-error', title: r.error }, `Ошибка загрузки: ${r.error}`) : !r.syncedAt && d.token ? h('span', { class: 'muted small' }, 'Ещё не загружено') : null,
+          h('span', { class: 'ads-sources' }, h('span', { class: `agency-tag agency-${r.agency}` }, AGENCY[r.agency]), r.sources.direct ? h('span', { class: 'ads-src' }, 'Директ') : null, r.sources.metrika ? h('span', { class: 'ads-src' }, 'Метрика') : null, r.ownToken ? h('span', { class: 'ads-src', title: 'Цифры грузятся по токену клиента' }, 'свой токен') : null),
+          r.noToken ? h('span', { class: 'muted small' }, 'Нет токена: общего или своего') : r.error ? h('span', { class: 'ads-error', title: r.error }, `Ошибка загрузки: ${r.error}`) : !r.syncedAt ? h('span', { class: 'muted small' }, 'Ещё не загружено') : null,
         ),
         h('td', { class: 'num nowrap' }, money(r.cost), ' ', delta(r.cost, r.prev.cost, { neutral: true })),
         h('td', { class: 'num' }, int(r.impressions)),

@@ -13,6 +13,7 @@ const shift = (date, n) => iso(new Date(Date.parse(`${date}T12:00:00Z`) + n * 86
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 const TOKEN_KEY = 'yandex_ads_token';
+const TOKEN_RE = /^[\w.\-]{20,400}$/;
 
 /** token — из .env (YANDEX_ADS_TOKEN); токен, сохранённый администратором в кабинете, важнее. */
 export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, log = null }) {
@@ -30,10 +31,10 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
        WHERE c.archived = 0 AND (a.direct_enabled = 1 OR a.metrika_counter IS NOT NULL)`,
     ),
     upsertAccount: db.prepare(
-      `INSERT INTO ad_accounts (client_id, direct_login, direct_enabled, metrika_counter, goals, updated_at)
-       VALUES (?, ?, ?, ?, ?, datetime('now'))
+      `INSERT INTO ad_accounts (client_id, direct_login, direct_enabled, metrika_counter, goals, token, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
        ON CONFLICT(client_id) DO UPDATE SET direct_login = excluded.direct_login, direct_enabled = excluded.direct_enabled,
-         metrika_counter = excluded.metrika_counter, goals = excluded.goals, error = NULL, updated_at = datetime('now')`,
+         metrika_counter = excluded.metrika_counter, goals = excluded.goals, token = excluded.token, error = NULL, updated_at = datetime('now')`,
     ),
     synced: db.prepare("UPDATE ad_accounts SET synced_at = datetime('now'), error = ? WHERE client_id = ?"),
     putDaily: db.prepare(
@@ -70,6 +71,14 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
     }
   }
   const goalsOf = (a) => (a?.goals ? a.goals.split(',').filter(Boolean) : []);
+  // у клиента может быть свой токен (его собственный кабинет); иначе — общий токен агентства
+  const tokenFor = (a) => a?.token || currentToken();
+  /** Аккаунт без самого токена: наружу — только признак и последние 4 символа. */
+  const publicAccount = (a) => {
+    if (!a) return null;
+    const { token, ...rest } = a;
+    return { ...rest, own_token: Boolean(token), token_tail: token ? token.slice(-4) : null };
+  };
   const needToken = () => {
     const token = currentToken();
     if (!token) throw new AdStatsError('Не подключён токен Яндекса: администратор вставляет его в «Статистике» → «Токен Яндекса»');
@@ -94,7 +103,15 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
     if (goals.some((g) => !/^\d{1,12}$/.test(g))) throw new AdStatsError('Цели — номера целей Метрики через запятую');
     const before = q.account.get(Number(clientId));
     const direct = v.directEnabled ? 1 : 0;
-    q.upsertAccount.run(Number(clientId), login, direct, counter, goals.join(',') || null);
+    // свой токен: пусто — оставить как был, clearToken — убрать, иначе — заменить
+    const newToken = String(v.token ?? '').trim();
+    if (newToken && !TOKEN_RE.test(newToken)) throw new AdStatsError('Это не похоже на токен Яндекса: скопируйте строку целиком, она начинается с y0_');
+    const token = v.clearToken ? null : newToken || before?.token || null;
+    q.upsertAccount.run(Number(clientId), login, direct, counter, goals.join(',') || null, token);
+    if (before && (before.token ?? null) !== token) {
+      q.dropSource.run(Number(clientId), 'direct');
+      q.dropSource.run(Number(clientId), 'metrika');
+    }
     // выключили источник или сменили кабинет — старые цифры этого источника не смешиваем с новыми
     if (before && (!direct || before.direct_login !== login)) q.dropSource.run(Number(clientId), 'direct');
     if (before && before.metrika_counter !== counter) q.dropSource.run(Number(clientId), 'metrika');
@@ -102,14 +119,14 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
       q.dropSource.run(Number(clientId), 'direct');
       q.dropSource.run(Number(clientId), 'metrika');
     }
-    return q.account.get(Number(clientId));
+    return publicAccount(q.account.get(Number(clientId)));
   }
 
   /** Загрузка цифр одного клиента за период; ошибка запоминается у клиента, остальные грузятся дальше. */
   async function syncClient(clientId, { days = null } = {}) {
-    const token = needToken();
     const a = q.account.get(Number(clientId));
     if (!a || (!a.direct_enabled && !a.metrika_counter)) throw new AdStatsError('У клиента не подключены Директ и Метрика');
+    const token = a.token || needToken();
     const to = mskToday();
     const from = shift(to, -((days ?? (a.synced_at ? SYNC_DAYS : FIRST_DAYS)) - 1));
     const goals = goalsOf(a);
@@ -136,10 +153,11 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
 
   /** Фоновая загрузка всех подключённых клиентов по очереди. */
   async function syncAll() {
-    if (!currentToken()) return { skipped: 'нет токена' };
+    const list = q.accounts.all().filter((a) => tokenFor(a));
+    if (!list.length) return { skipped: 'нет токена' };
     let ok = 0;
     let failed = 0;
-    for (const a of q.accounts.all()) {
+    for (const a of list) {
       const r = await syncClient(a.client_id).catch((err) => ({ ok: false, errors: [err.message] }));
       if (r.ok) ok++;
       else {
@@ -184,6 +202,8 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
         name: c.name,
         agency: c.agency ?? 'korp',
         sources: { direct: Boolean(a.direct_enabled), metrika: Boolean(a.metrika_counter) },
+        ownToken: Boolean(a.token),
+        noToken: !tokenFor(a),
         syncedAt: a.synced_at,
         error: a.error,
         ...derive({ ...ZERO, ...cur.get(c.id) }),
@@ -201,11 +221,13 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
     const byDate = new Map(q.daily.all(Number(clientId), p.from, p.to).map((r) => [r.date, r]));
     const days = [];
     for (let d = p.from; d <= p.to; d = shift(d, 1)) days.push(derive({ date: d, ...ZERO, ...byDate.get(d) }));
-    return { period: p, account: a ?? null, token: Boolean(currentToken()), days, total: derive(sum(days)) };
+    return { period: p, account: publicAccount(a), token: Boolean(tokenFor(a)), agencyToken: Boolean(currentToken()), days, total: derive(sum(days)) };
   }
 
-  async function goalsFor(counter) {
-    const token = needToken();
+  /** Цели счётчика: по токену из формы, своему токену клиента или токену агентства. */
+  async function goalsFor(counter, { clientId = null, token: typed = null } = {}) {
+    const own = clientId ? q.account.get(Number(clientId))?.token : null;
+    const token = String(typed ?? '').trim() || own || needToken();
     if (!/^\d{1,12}$/.test(String(counter ?? ''))) throw new AdStatsError('Укажите номер счётчика Метрики');
     try {
       return await metrikaGoals({ token, counter, fetchImpl });
@@ -224,7 +246,7 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
   /** Токен проверяется в Метрике до сохранения: неверный не сохраняем. */
   async function setToken(value, user) {
     const t = String(value ?? '').trim();
-    if (!/^[\w.\-]{20,400}$/.test(t)) throw new AdStatsError('Это не похоже на токен Яндекса: скопируйте строку целиком, она начинается с y0_');
+    if (!TOKEN_RE.test(t)) throw new AdStatsError('Это не похоже на токен Яндекса: скопируйте строку целиком, она начинается с y0_');
     let counters;
     try {
       counters = await metrikaCounters({ token: t, fetchImpl });
@@ -240,5 +262,5 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
     return tokenInfo();
   }
 
-  return { saveAccount, account: (id) => q.account.get(Number(id)) ?? null, syncClient, syncAll, overview, clientStats, goalsFor, hasToken: () => Boolean(currentToken()), tokenInfo, setToken, clearToken };
+  return { saveAccount, account: (id) => publicAccount(q.account.get(Number(id))), syncClient, syncAll, overview, clientStats, goalsFor, hasToken: () => Boolean(currentToken()), tokenInfo, setToken, clearToken };
 }

@@ -139,3 +139,30 @@ test('токен из кабинета: проверка в Метрике, ва
   assert.equal(seen.at(-1), 'OAuth y0_good_token_value_9876543', 'загрузка идёт с токеном из кабинета');
   assert.equal(stats.clearToken().source, 'env');
 });
+
+test('свой токен клиента: грузится по нему без общего токена, наружу не отдаётся, можно убрать', async () => {
+  const seen = [];
+  const fetchImpl = async (url, init) => {
+    seen.push(init?.headers?.Authorization);
+    return res(200, { data: [{ dimensions: [{ name: day(-1) }], metrics: [7, 0] }] });
+  };
+  const db = openDb(':memory:');
+  db.raw.exec("INSERT INTO clients (name) VALUES ('Свой кабинет'), ('Через агентство')");
+  const stats = createAdStats({ db: db.raw, token: null, fetchImpl });
+  assert.throws(() => stats.saveAccount(1, { metrikaCounter: '1', token: 'short' }), /не похоже на токен/);
+  const acc = stats.saveAccount(1, { metrikaCounter: '1', token: 'y0_client_own_token_123456' });
+  assert.equal(acc.own_token, true);
+  assert.equal(acc.token_tail, '3456');
+  assert.equal(acc.token, undefined, 'токен не возвращается');
+  stats.saveAccount(2, { metrikaCounter: '2' });
+  const all = await stats.syncAll();
+  assert.deepEqual(all, { ok: 1, failed: 0 }, 'клиент без токена пропущен');
+  assert.equal(seen[0], 'OAuth y0_client_own_token_123456');
+  const o = stats.overview();
+  assert.equal(o.rows.find((r) => r.id === 1).ownToken, true);
+  assert.equal(o.rows.find((r) => r.id === 2).noToken, true);
+  assert.ok(!JSON.stringify(o).includes('y0_client'), 'в сводке токена нет');
+  // пустое поле при сохранении не стирает токен; clearToken — стирает
+  assert.equal(stats.saveAccount(1, { metrikaCounter: '1' }).own_token, true);
+  assert.equal(stats.saveAccount(1, { metrikaCounter: '1', clearToken: true }).own_token, false);
+});
