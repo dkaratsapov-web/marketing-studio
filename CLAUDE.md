@@ -12,7 +12,7 @@
 | Адреса | marketing-studio.pro, crm.marketing-studio.pro | qual.soroka-marketing.ru |
 | Папка | /var/www/marketing-studio, /opt/korp-cabinet | /opt/kvalificator на сервере Сороки |
 | Контейнер, порт | korp-cabinet-app-1, 127.0.0.1:3101 | — |
-| nginx | sites-available/marketing-studio, korp-cabinet.conf | — |
+| nginx | sites-available/marketing-studio, korp-cabinet.conf, 00-default (заглушка для чужих адресов) | — |
 | Бэкап | /etc/cron.d/korp-cabinet-backup | — |
 | Репозиторий | dkaratsapov-web/marketing-studio | banifaci13-sketch/kvalificator |
 
