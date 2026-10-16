@@ -151,23 +151,40 @@ export function stem(query) {
 }
 
 /** Запрос Overpass: компании с запросом в названии или с подходящим тегом, внутри границ города. */
-export function overpassQuery(query, areaId, limit) {
+export function overpassQuery(query, bbox, limit) {
   const q = query.toLowerCase();
   const tags = [...new Set(OSM_TAGS.filter(([re]) => re.test(q)).flatMap(([, t]) => t))];
-  const parts = [`nwr["name"~"${osmEscape(stem(query))}",i](area.a);`, ...tags.map((t) => {
+  const parts = [`nwr["name"~"${osmEscape(stem(query))}",i];`, ...tags.map((t) => {
     const [k, v] = t.split('=');
-    return `nwr["${k}"="${v}"]["name"](area.a);`;
+    return `nwr["${k}"="${v}"]["name"];`;
   })];
-  return `[out:json][timeout:100];area(${areaId})->.a;(${parts.join('')});out center tags ${limit};`;
+  // прямоугольник вокруг города, а не «область»: области есть не на всех серверах Overpass,
+  // и без них запрос молча возвращает пусто
+  return `[out:json][timeout:100][bbox:${bbox.join(',')}];(${parts.join('')});out center tags ${limit};`;
 }
 
 /** Город → область поиска Overpass (id области из отношения или линии OSM). */
-async function osmArea(geo, fetchImpl) {
-  const qs = new URLSearchParams({ q: geo, format: 'json', limit: '5', 'accept-language': 'ru' });
+export async function osmArea(geo, fetchImpl) {
+  const qs = new URLSearchParams({ q: geo, format: 'json', limit: '10', 'accept-language': 'ru' });
   const list = await getJson(fetchImpl, `https://nominatim.openstreetmap.org/search?${qs}`, { headers: { 'user-agent': UA } }, 'OpenStreetMap');
-  const hit = list.find((x) => x.osm_type === 'relation') ?? list.find((x) => x.osm_type === 'way');
-  if (!hit) throw new SourceError(`OpenStreetMap не нашёл границы «${geo}»: укажите город или область`);
-  return { id: (hit.osm_type === 'relation' ? 3600000000 : 2400000000) + Number(hit.osm_id), name: hit.display_name };
+  // граница города, района или области, потом населённый пункт — а не маршрут автобуса или улица с тем же названием
+  const hit =
+    list.find((x) => x.class === 'boundary' && x.type === 'administrative') ??
+    list.find((x) => x.class === 'place') ??
+    list.find((x) => x.osm_type === 'relation') ??
+    list[0];
+  if (!hit) throw new SourceError(`OpenStreetMap не нашёл «${geo}»: укажите город или область`);
+  let [south, north, west, east] = (hit.boundingbox ?? []).map(Number);
+  const lat = Number(hit.lat);
+  const lon = Number(hit.lon);
+  // у посёлка без границы в OSM только точка: берём примерно 10 км вокруг
+  if (![south, north, west, east].every(Number.isFinite) || north - south < 0.02) {
+    const dLat = 0.09;
+    const dLon = 0.09 / Math.max(0.2, Math.cos((lat * Math.PI) / 180));
+    [south, north, west, east] = [lat - dLat, lat + dLat, lon - dLon, lon + dLon];
+  }
+  const r = (v) => Math.round(v * 1e5) / 1e5;
+  return { bbox: [r(south), r(west), r(north), r(east)], name: hit.display_name };
 }
 
 const split = (v) => (v ? String(v).split(/\s*[;,]\s*/).filter(Boolean) : []);
@@ -202,7 +219,7 @@ export const OVERPASS = ['https://maps.mail.ru/osm/tools/overpass/api/interprete
 
 async function searchOsm({ query, geo, limit, fetchImpl }) {
   const area = await osmArea(geo, fetchImpl);
-  const data = new URLSearchParams({ data: overpassQuery(query, area.id, limit) }).toString();
+  const data = new URLSearchParams({ data: overpassQuery(query, area.bbox, limit) }).toString();
   let body = null;
   const errors = [];
   for (const url of OVERPASS) {

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { openDb } from '../src/storage/db.js';
 import { createParser, mergePlaces, toCsv, formatPhone, phoneKey, matches } from '../src/parser/store.js';
-import { OVERPASS, overpassQuery, osmPlace, yandexPlace, gisPlace, googlePlace, place, searchSource } from '../src/parser/sources.js';
+import { OVERPASS, osmArea, overpassQuery, osmPlace, yandexPlace, gisPlace, googlePlace, place, searchSource } from '../src/parser/sources.js';
 import { extractContacts, contactsLink, privateIp, fetchPage, nativeGet, decodeHtml } from '../src/parser/site.js';
 import { createServer } from 'node:http';
 import { gzipSync } from 'node:zlib';
@@ -17,11 +17,11 @@ const res = (status, body, headers = {}) => ({
 const publicDns = async () => [{ address: '93.184.216.34', family: 4 }];
 
 test('OSM: запрос по названию и тегам, компания с контактами из тегов', () => {
-  const ql = overpassQuery('Стоматология', 3600012345, 200);
-  assert.match(ql, /area\(3600012345\)/);
+  const ql = overpassQuery('Стоматология', [56.7, 35.7, 56.95, 36.1], 200);
+  assert.match(ql, /\[bbox:56\.7,35\.7,56\.95,36\.1\]/);
   assert.match(ql, /nwr\["name"~"стоматолог",i\]/, 'без окончания: найдётся и «Стоматология Улыбка», и «Стоматологический центр»');
-  assert.match(ql, /nwr\["amenity"="dentist"\]\["name"\]/);
-  assert.match(overpassQuery('кафе (центр)', 1, 5), /кафе \\\\\(центр\\\\\)/, 'скобки экранированы для регулярного выражения');
+  assert.match(ql, /nwr\["amenity"="dentist"\]\["name"\];/);
+  assert.match(overpassQuery('кафе (центр)', [1, 2, 3, 4], 5), /кафе \\\\\(центр\\\\\)/, 'скобки экранированы для регулярного выражения');
   const p = osmPlace({ type: 'node', id: 7, lat: 56.85, lon: 35.9, tags: { name: 'Улыбка', amenity: 'dentist', phone: '+7 4822 11-22-33; +7 900 123 45 67', website: 'ulybka.ru', 'addr:city': 'Тверь', 'addr:street': 'улица Советская', 'addr:housenumber': '5', 'contact:vk': 'https://vk.com/ulybka' } });
   assert.equal(p.category, 'Стоматология');
   assert.equal(p.address, 'Тверь, улица Советская, 5');
@@ -120,10 +120,10 @@ test('Сбор: OSM и Яндекс, склейка, контакты с сай�
   const seen = [];
   const fetchImpl = async (url, init = {}) => {
     seen.push(url);
-    if (url.startsWith('https://nominatim.openstreetmap.org/')) return res(200, [{ osm_type: 'relation', osm_id: 2095259, display_name: 'Тверь' }]);
+    if (url.startsWith('https://nominatim.openstreetmap.org/')) return res(200, [{ osm_type: 'relation', class: 'route', type: 'bus', osm_id: 1, boundingbox: ['0', '1', '0', '1'] }, { osm_type: 'relation', osm_id: 2095259, class: 'boundary', type: 'administrative', display_name: 'Тверь', boundingbox: ['56.7', '56.95', '35.7', '36.1'], lat: '56.85', lon: '35.9' }]);
     if (url === OVERPASS[0]) return res(504, 'Gateway Timeout');
     if (url === OVERPASS[1]) {
-      assert.match(decodeURIComponent(init.body), /area\(3602095259\)/);
+      assert.match(decodeURIComponent(init.body), /bbox:56\.7,35\.7,56\.95,36\.1/, 'граница города, не маршрут автобуса');
       return res(200, { elements: [{ type: 'node', id: 1, lat: 56.85, lon: 35.9, tags: { name: 'Улыбка', amenity: 'dentist', phone: '+7 900 123-45-67', website: 'https://ulybka.ru' } }, { type: 'node', id: 2, tags: { amenity: 'dentist' } }] });
     }
     if (url.startsWith('https://search-maps.yandex.ru/')) {
@@ -223,4 +223,10 @@ test('Условия сбора: только с телефоном и без с
   const done = parser.job(job.id);
   assert.deepEqual(parser.places(job.id).map((x) => [x.name, x.city]), [['С телефоном', 'Тверь']]);
   assert.deepEqual([done.progress.found, done.progress.filtered, done.progress.sites.total], [3, 2, 0]);
+});
+
+test('OSM: посёлок без границы — около 10 км вокруг точки', async () => {
+  const fetchImpl = async () => res(200, [{ osm_type: 'node', class: 'place', type: 'village', lat: '55.68', lon: '37.28', boundingbox: ['55.67', '55.69', '37.27', '37.29'] }]);
+  const { bbox } = await osmArea('Лесной Городок', fetchImpl);
+  assert.ok(bbox[2] - bbox[0] > 0.15 && bbox[3] - bbox[1] > 0.25, JSON.stringify(bbox));
 });
