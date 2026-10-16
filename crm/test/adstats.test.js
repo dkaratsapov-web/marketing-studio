@@ -166,3 +166,15 @@ test('свой токен клиента: грузится по нему без 
   assert.equal(stats.saveAccount(1, { metrikaCounter: '1' }).own_token, true);
   assert.equal(stats.saveAccount(1, { metrikaCounter: '1', clearToken: true }).own_token, false);
 });
+
+test('Директ: одно имя отчёта при повторных запросах в течение часа; лимит запросов — понятный текст', async () => {
+  const names = [];
+  const fetchImpl = async (url, init) => {
+    names.push(JSON.parse(init.body).params.ReportName);
+    return names.length < 3 ? res(200, 'Date\tImpressions\tClicks\tCost\n') : res(400, { error: { error_code: 56, error_string: 'Превышен лимит запросов метода' } });
+  };
+  await directDaily({ token: 't', from: '2026-10-01', to: '2026-10-02', fetchImpl });
+  await directDaily({ token: 't', from: '2026-10-01', to: '2026-10-02', fetchImpl });
+  assert.equal(names[0], names[1]);
+  await assert.rejects(directDaily({ token: 't', from: '2026-10-01', to: '2026-10-02', fetchImpl }), /временно ограничил запросы.*код 56/);
+});

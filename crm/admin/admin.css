@@ -1925,7 +1925,7 @@ div.notify-row { cursor: default; }
 .ads-table tfoot td { font-weight: 700; border-top: 2px solid var(--line-strong); }
 .ads-sources { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .ads-src { padding: 1px 7px; border-radius: 999px; background: var(--surface-3); color: var(--muted); font-size: 11.5px; }
-.ads-error { display: block; color: var(--danger); font-size: 12px; max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ads-error { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; color: var(--danger); font-size: 12px; max-width: 380px; white-space: normal; line-height: 1.35; margin-top: 2px; }
 p.ads-error { white-space: normal; max-width: none; }
 .ads-setup ol { margin: 6px 0; padding-left: 20px; display: grid; gap: 4px; }
 .ads-off-list { list-style: none; margin: 8px 0 0; padding: 0; }

@@ -405,7 +405,7 @@ export async function renderAdClient(params) {
         sync.disabled = true;
         try {
           const r = (await api(`/admin/api/ad-stats/clients/${id}/sync`, { method: 'POST' })).sync;
-          toast(r.ok ? 'Статистика обновлена' : `Ошибка: ${r.errors.join('; ')}`);
+          toast(r.busy ? 'Загрузка уже идёт, обновите страницу через минуту' : r.ok ? 'Статистика обновлена' : `Ошибка: ${r.errors.join('; ')}`);
           reload();
         } catch (err) {
           toast(err.message);

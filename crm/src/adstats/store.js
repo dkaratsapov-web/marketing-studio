@@ -123,7 +123,20 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
   }
 
   /** Загрузка цифр одного клиента за период; ошибка запоминается у клиента, остальные грузятся дальше. */
-  async function syncClient(clientId, { days = null } = {}) {
+  // одна загрузка клиента за раз: кнопка, сохранение настроек и фоновая загрузка не дублируют запросы в Яндекс
+  const running = new Set();
+  async function syncClient(clientId, opts = {}) {
+    const id = Number(clientId);
+    if (running.has(id)) return { ok: true, errors: [], busy: true };
+    running.add(id);
+    try {
+      return await syncOne(id, opts);
+    } finally {
+      running.delete(id);
+    }
+  }
+
+  async function syncOne(clientId, { days = null } = {}) {
     const a = q.account.get(Number(clientId));
     if (!a || (!a.direct_enabled && !a.metrika_counter)) throw new AdStatsError('У клиента не подключены Директ и Метрика');
     const token = a.token || needToken();

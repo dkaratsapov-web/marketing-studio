@@ -18,14 +18,16 @@ const num = (v) => {
  * Отчёт Директа по дням: показы, клики, расход (с НДС, в валюте аккаунта) и конверсии по целям Метрики.
  * Директ готовит отчёт в фоне: ответы 201/202 — ждём retryIn секунд и спрашиваем снова.
  */
-export async function directDaily({ token, login = null, from, to, goals = [], fetchImpl = fetch, wait = sleep, attempts = 12 }) {
+export async function directDaily({ token, login = null, from, to, goals = [], fetchImpl = fetch, wait = sleep, attempts = 30 }) {
   const fields = ['Date', 'Impressions', 'Clicks', 'Cost'];
   if (goals.length) fields.push('Conversions');
   const params = {
     SelectionCriteria: { DateFrom: from, DateTo: to },
     FieldNames: fields,
-    // имя отчёта уникально для набора параметров: Директ кеширует отчёты по имени
-    ReportName: `korp-${login ?? 'own'}-${from}-${to}-${goals.join('.')}-${Date.now()}`.slice(0, 250),
+    // Имя отчёта постоянно в пределах часа: повторный запрос (кнопка, фоновая загрузка) получает тот же
+    // отчёт из очереди Директа, а не ставит новый. С уникальным именем на каждый вызов очередь
+    // переполнялась и Директ отвечал «Превышен лимит запросов метода».
+    ReportName: `korp-${login ?? 'own'}-${from}-${to}-${goals.join('.')}-${new Date().toISOString().slice(0, 13)}`.slice(0, 250),
     ReportType: 'CUSTOM_REPORT',
     DateRangeType: 'CUSTOM_DATE',
     Format: 'TSV',
@@ -55,10 +57,18 @@ export async function directDaily({ token, login = null, from, to, goals = [], f
   throw new AdApiError('Директ слишком долго готовит отчёт, попробуйте обновить позже');
 }
 
+// Ограничения Директа временные: очередь отчётов, лимит запросов, баллы — понятный текст вместо кода
+const DIRECT_LIMITS = {
+  56: 'Директ временно ограничил запросы отчётов. Цифры подтянутся при следующей загрузке, через 3 часа, или нажмите «Обновить» позже',
+  152: 'У аккаунта Директа закончились баллы API на сегодня. Цифры подтянутся при следующей загрузке',
+  9000: 'Директ сейчас готовит слишком много отчётов. Цифры подтянутся при следующей загрузке',
+};
+
 async function directError(res) {
   const text = await res.text().catch(() => '');
   try {
     const e = JSON.parse(text).error;
+    if (e && DIRECT_LIMITS[Number(e.error_code)]) return `${DIRECT_LIMITS[Number(e.error_code)]} (код ${e.error_code})`;
     if (e) return `${e.error_string ?? 'ошибка'}${e.error_detail ? `: ${e.error_detail}` : ''} (код ${e.error_code})`;
   } catch {
     /* не JSON */
