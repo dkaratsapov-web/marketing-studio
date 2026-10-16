@@ -1913,7 +1913,7 @@ div.notify-row { cursor: default; }
 .ads { display: grid; gap: 14px; }
 .ads-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .ads-dates { display: flex; align-items: center; gap: 6px; }
-.ads-dates .input { width: 150px; min-height: 36px; }
+.ads-dates .input { width: 164px; min-height: 36px; }
 .ads-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 @media (max-width: 760px) { .ads-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .ads-tile b { font-size: 22px; }
@@ -1957,3 +1957,38 @@ p.ads-error { white-space: normal; max-width: none; }
 .ads-token-form { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
 .ads-token-form .input { flex: 1 1 260px; min-width: 0; }
 .ads-note { margin: 0; padding: 10px 12px; border-radius: var(--radius-s); background: var(--accent-soft); font-size: 13px; }
+
+/* Календарь выбора даты в стиле кабинета (вместо системного окна браузера) */
+@media (pointer: fine) {
+  input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0; pointer-events: none; }
+  input[type="date"].input {
+    cursor: pointer; padding-right: 34px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238F8F96' stroke-width='1.8' stroke-linecap='round'%3E%3Crect x='3.5' y='5' width='17' height='15' rx='2'/%3E%3Cpath d='M3.5 10h17M8 3v4M16 3v4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center; background-size: 16px;
+  }
+}
+input[type="date"][data-open] { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.date-pop {
+  position: fixed; z-index: 120; width: 288px; padding: 12px;
+  background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-m);
+  box-shadow: var(--shadow); font-size: 13.5px; animation: select-in .12s ease-out;
+}
+.date-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.date-head b { font-family: var(--soroka-font-heading); font-size: 15px; }
+.date-nav { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: var(--radius-s); background: transparent; color: var(--text); font-size: 18px; line-height: 1; cursor: pointer; }
+.date-nav:hover { border-color: var(--line-strong); background: var(--surface-2); }
+.date-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.date-wd { padding: 4px 0; text-align: center; font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.date-wd.weekend, .date-day.weekend { color: var(--accent-text); }
+.date-day {
+  height: 34px; border: 0; border-radius: 8px; background: transparent; color: var(--text);
+  font: inherit; font-variant-numeric: tabular-nums; cursor: pointer;
+}
+.date-day:hover:not(:disabled) { background: var(--surface-2); }
+.date-day.out { opacity: .4; }
+.date-day.today { box-shadow: inset 0 0 0 1.5px var(--accent); font-weight: 700; }
+.date-day.selected { background: var(--accent); color: var(--on-accent); font-weight: 700; }
+.date-day.active:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.date-day:disabled { opacity: .25; cursor: default; }
+.date-foot { display: flex; justify-content: space-between; margin-top: 8px; font-size: 13px; }
+@media (prefers-reduced-motion: reduce) { .date-pop { animation: none; } }

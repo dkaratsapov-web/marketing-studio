@@ -33,7 +33,7 @@ test('Директ: отчёт в очереди (201), потом готов; �
   const waits = [];
   const rows = await directDaily({ token: 't', login: 'client-login', from: '2026-10-01', to: '2026-10-01', goals: ['7'], fetchImpl, wait: async (ms) => waits.push(ms) });
   assert.equal(rows[0].conversions, 1);
-  assert.deepEqual(waits, [2000]);
+  assert.ok(waits.includes(2000), 'ждём retryIn из ответа');
   assert.equal(calls[0].init.headers['Client-Login'], 'client-login');
   assert.equal(calls[0].init.headers.Authorization, 'Bearer t');
   const body = JSON.parse(calls[0].init.body).params;
@@ -177,4 +177,15 @@ test('Директ: одно имя отчёта при повторных за�
   await directDaily({ token: 't', from: '2026-10-01', to: '2026-10-02', fetchImpl });
   assert.equal(names[0], names[1]);
   await assert.rejects(directDaily({ token: 't', from: '2026-10-01', to: '2026-10-02', fetchImpl }), /временно ограничил запросы.*код 56/);
+});
+
+test('Директ: «не чаще 1 раза в 10 секунд» — пауза не меньше 11 секунд и повтор, а не ошибка', async () => {
+  const replies = [
+    res(400, { error: { error_code: 56, error_string: 'Превышен лимит запросов метода', error_detail: 'Данный метод можно запрашивать не чаще чем 1 раз в 10 секунд' } }),
+    res(200, 'Date\tImpressions\tClicks\tCost\n2026-10-01\t1\t1\t10\n'),
+  ];
+  const waits = [];
+  const rows = await directDaily({ token: 'throttle-test', from: '2026-10-01', to: '2026-10-01', fetchImpl: async () => replies.shift(), wait: async (ms) => waits.push(ms) });
+  assert.equal(rows[0].cost, 10);
+  assert.ok(waits.some((ms) => ms > 10_000), 'между запросами отчётов не меньше 10 секунд');
 });

@@ -369,13 +369,15 @@ function chart(days) {
   const bw = (W - pad.l - pad.r) / days.length;
   const y = (v, max) => pad.t + (H - pad.t - pad.b) * (1 - v / max);
   const bars = days.map((x, i) => `<rect x="${pad.l + i * bw + bw * 0.15}" y="${y(x.cost, maxCost)}" width="${Math.max(1, bw * 0.7)}" height="${H - pad.b - y(x.cost, maxCost)}" rx="2" class="ads-bar"><title>${x.date}: ${Math.round(x.cost)} ₽</title></rect>`).join('');
-  const line = conv.map((v, i) => `${i ? 'L' : 'M'}${pad.l + i * bw + bw / 2},${y(v, maxConv)}`).join(' ');
+  // нет ни конверсий, ни целей — линию не рисуем, чтобы не казалось, что их ноль
+  const hasConv = conv.some(Boolean);
+  const line = hasConv ? conv.map((v, i) => `${i ? 'L' : 'M'}${pad.l + i * bw + bw / 2},${y(v, maxConv)}`).join(' ') : '';
   const dots = conv.map((v, i) => (v ? `<circle cx="${pad.l + i * bw + bw / 2}" cy="${y(v, maxConv)}" r="3" class="ads-dot"><title>${days[i].date}: ${v}</title></circle>` : '')).join('');
   const step = Math.ceil(days.length / 10);
   const labels = days.map((x, i) => (i % step === 0 ? `<text x="${pad.l + i * bw + bw / 2}" y="${H - 8}" text-anchor="middle" class="ads-label">${Number(x.date.slice(8))}.${x.date.slice(5, 7)}</text>` : '')).join('');
   const box = h('div', { class: 'ads-chart' });
   box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Расход и конверсии по дням" preserveAspectRatio="none">${bars}<path d="${line}" class="ads-line" fill="none"/>${dots}${labels}</svg>`;
-  return h('div', {}, box, h('p', { class: 'ads-legend muted small' }, h('span', { class: 'ads-key bar' }), 'Расход', h('span', { class: 'ads-key line' }), days.some((x) => x.conversions) ? 'Конверсии в Директе' : 'Достижения целей в Метрике'));
+  return h('div', {}, box, h('p', { class: 'ads-legend muted small' }, h('span', { class: 'ads-key bar' }), 'Расход', hasConv ? [h('span', { class: 'ads-key line' }), days.some((x) => x.conversions) ? 'Конверсии в Директе' : 'Достижения целей в Метрике'] : h('span', { class: 'muted' }, ' · конверсий нет: выберите цели в «Настроить»')));
 }
 
 export async function renderAdClient(params) {

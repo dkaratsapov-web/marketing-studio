@@ -447,6 +447,135 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ---------- календарь выбора даты в стиле кабинета ----------
+// Системное окно <input type="date"> браузера не стилизуется: на компьютере открываем своё.
+// Значение по-прежнему хранит настоящее поле (формы, change, min/max); вводить дату с клавиатуры можно как раньше.
+
+const MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+let closeDatePop = null;
+const isoDay = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+const mskTodayIso = () => new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+
+function openDatePop(input) {
+  closeDatePop?.();
+  closeSelectPop?.();
+  const today = mskTodayIso();
+  let cursor = input.value || (input.min && input.min > today ? input.min : today);
+  let view = { y: Number(cursor.slice(0, 4)), m: Number(cursor.slice(5, 7)) - 1 };
+  const pop = h('div', { class: 'date-pop', role: 'dialog', 'aria-label': 'Выбор даты' });
+  const allowed = (iso) => (!input.min || iso >= input.min) && (!input.max || iso <= input.max);
+
+  function pick(iso) {
+    if (iso && !allowed(iso)) return;
+    input.value = iso ?? '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    close();
+    input.focus();
+  }
+  function draw() {
+    const first = new Date(Date.UTC(view.y, view.m, 1));
+    const offset = (first.getUTCDay() + 6) % 7;
+    const cells = [];
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(Date.UTC(view.y, view.m, 1 - offset + i, 12));
+      const iso = d.toISOString().slice(0, 10);
+      const wd = (d.getUTCDay() + 6) % 7;
+      cells.push(
+        h('button', {
+          type: 'button',
+          class: ['date-day', d.getUTCMonth() !== view.m ? 'out' : '', wd > 4 ? 'weekend' : '', iso === today ? 'today' : '', iso === input.value ? 'selected' : '', iso === cursor ? 'active' : ''].filter(Boolean).join(' '),
+          disabled: !allowed(iso),
+          tabindex: iso === cursor ? '0' : '-1',
+          'aria-label': d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }),
+          'aria-pressed': String(iso === input.value),
+          dataset: { iso },
+          onclick: () => pick(iso),
+        }, String(d.getUTCDate())),
+      );
+    }
+    const step = (n) => {
+      view = { y: view.y + Math.floor((view.m + n) / 12), m: (((view.m + n) % 12) + 12) % 12 };
+      draw();
+    };
+    pop.replaceChildren(
+      h('div', { class: 'date-head' },
+        h('button', { type: 'button', class: 'date-nav', 'aria-label': 'Предыдущий месяц', onclick: () => step(-1) }, '‹'),
+        h('b', {}, `${MONTHS[view.m]} ${view.y}`),
+        h('button', { type: 'button', class: 'date-nav', 'aria-label': 'Следующий месяц', onclick: () => step(1) }, '›')),
+      h('div', { class: 'date-grid' }, ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((w, i) => h('span', { class: `date-wd${i > 4 ? ' weekend' : ''}` }, w)), cells),
+      h('div', { class: 'date-foot' },
+        input.required ? h('span') : h('button', { type: 'button', class: 'linkish', onclick: () => pick(null) }, 'Очистить'),
+        allowed(today) ? h('button', { type: 'button', class: 'linkish', onclick: () => pick(today) }, 'Сегодня') : null),
+    );
+  }
+  function move(days) {
+    const d = new Date(Date.parse(`${cursor}T12:00:00Z`) + days * 86400e3).toISOString().slice(0, 10);
+    cursor = d;
+    view = { y: Number(d.slice(0, 4)), m: Number(d.slice(5, 7)) - 1 };
+    draw();
+    pop.querySelector('.date-day.active')?.focus();
+  }
+  function onKey(e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      close();
+      input.focus();
+      return;
+    }
+    if (!pop.contains(document.activeElement)) return;
+    const moves = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7, PageUp: -30, PageDown: 30 };
+    if (moves[e.key] != null) {
+      e.preventDefault();
+      move(moves[e.key]);
+    }
+  }
+  const outside = (e) => {
+    if (!pop.contains(e.target) && e.target !== input) close();
+  };
+  function reposition() {
+    const r = input.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return close();
+    const up = innerHeight - r.bottom < 330 && r.top > innerHeight - r.bottom;
+    pop.style.cssText = `left:${Math.max(8, Math.min(r.left, innerWidth - 296))}px;${up ? `bottom:${innerHeight - r.top + 4}px` : `top:${r.bottom + 4}px`}`;
+  }
+  function close() {
+    pop.remove();
+    input.removeAttribute('data-open');
+    document.removeEventListener('keydown', onKey, true);
+    document.removeEventListener('mousedown', outside, true);
+    document.removeEventListener('scroll', reposition, true);
+    window.removeEventListener('resize', close);
+    if (closeDatePop === close) closeDatePop = null;
+  }
+  draw();
+  (input.closest('dialog[open]') ?? document.body).append(pop);
+  input.setAttribute('data-open', '');
+  reposition();
+  document.addEventListener('keydown', onKey, true);
+  document.addEventListener('mousedown', outside, true);
+  document.addEventListener('scroll', reposition, true);
+  window.addEventListener('resize', close);
+  closeDatePop = close;
+}
+const fineDate = (t) => t instanceof HTMLInputElement && t.type === 'date' && !t.disabled && !t.readOnly && !matchMedia('(pointer: coarse)').matches;
+document.addEventListener('click', (e) => {
+  if (!fineDate(e.target)) return;
+  if (e.target.hasAttribute('data-open')) return;
+  openDatePop(e.target);
+});
+document.addEventListener('keydown', (e) => {
+  if (!fineDate(e.target)) return;
+  // Alt+↓, F4 и пробел открывают календарь кабинета вместо системного
+  if ((e.altKey && e.key === 'ArrowDown') || e.key === 'F4' || e.key === ' ') {
+    e.preventDefault();
+    if (e.target.hasAttribute('data-open')) closeDatePop?.();
+    else openDatePop(e.target);
+    setTimeout(() => document.querySelector('.date-pop .date-day.active')?.focus(), 0);
+  }
+});
+
 /**
  * Поле с подсказками (вместо системного <datalist>): список вариантов под полем,
  * фильтруется по введённому тексту; можно выбрать мышью или стрелками и Enter.

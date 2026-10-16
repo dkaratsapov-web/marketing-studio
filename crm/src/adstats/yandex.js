@@ -45,6 +45,7 @@ export async function directDaily({ token, login = null, from, to, goals = [], f
     ...(login ? { 'Client-Login': login } : {}),
   };
   for (let i = 0; i < attempts; i++) {
+    await throttle(token, wait);
     const res = await fetchImpl(DIRECT_URL, { method: 'POST', headers, body: JSON.stringify({ params }) });
     if (res.status === 200) return parseDirectTsv(await res.text());
     if (res.status === 201 || res.status === 202) {
@@ -52,7 +53,10 @@ export async function directDaily({ token, login = null, from, to, goals = [], f
       await wait(Math.min(retry, 30) * 1000);
       continue;
     }
-    throw new AdApiError(`Директ: ${await directError(res)}`);
+    const error = await directError(res);
+    // «не чаще 1 раза в 10 секунд» — не ошибка отчёта: ждём и спрашиваем снова
+    if (error.code === 56 && /секунд/i.test(error.detail ?? '')) continue;
+    throw new AdApiError(`Директ: ${error.text}`);
   }
   throw new AdApiError('Директ слишком долго готовит отчёт, попробуйте обновить позже');
 }
@@ -64,17 +68,29 @@ const DIRECT_LIMITS = {
   9000: 'Директ сейчас готовит слишком много отчётов. Цифры подтянутся при следующей загрузке',
 };
 
+// Отчёты Директа можно запрашивать не чаще раза в 10 секунд — на всех клиентов с одним токеном вместе
+const REPORT_GAP_MS = 11_000;
+const lastReportAt = new Map();
+async function throttle(token, wait) {
+  const left = (lastReportAt.get(token) ?? 0) + REPORT_GAP_MS - Date.now();
+  if (left > 0) await wait(left);
+  lastReportAt.set(token, Date.now());
+}
+
 async function directError(res) {
   const text = await res.text().catch(() => '');
   try {
     const e = JSON.parse(text).error;
-    // пояснение Директа оставляем: по нему видно, какой именно лимит сработал и когда он снимется
-    if (e && DIRECT_LIMITS[Number(e.error_code)]) return `${DIRECT_LIMITS[Number(e.error_code)]} (код ${e.error_code}${e.error_detail ? `, Директ: «${e.error_detail}»` : ''})`;
-    if (e) return `${e.error_string ?? 'ошибка'}${e.error_detail ? `: ${e.error_detail}` : ''} (код ${e.error_code})`;
+    if (e) {
+      const code = Number(e.error_code);
+      // пояснение Директа оставляем: по нему видно, какой именно лимит сработал и когда он снимется
+      const friendly = DIRECT_LIMITS[code] ? `${DIRECT_LIMITS[code]} (код ${code}${e.error_detail ? `, Директ: «${e.error_detail}»` : ''})` : null;
+      return { code, detail: e.error_detail ?? null, text: friendly ?? `${e.error_string ?? 'ошибка'}${e.error_detail ? `: ${e.error_detail}` : ''} (код ${code})` };
+    }
   } catch {
     /* не JSON */
   }
-  return `ответ ${res.status}${text ? `: ${text.slice(0, 200)}` : ''}`;
+  return { code: null, detail: null, text: `ответ ${res.status}${text ? `: ${text.slice(0, 200)}` : ''}` };
 }
 
 /** TSV Директа: первая строка — названия колонок; конверсии по нескольким целям приходят отдельными колонками. */
