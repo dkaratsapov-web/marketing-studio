@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { openDb } from '../src/storage/db.js';
 import { createParser, mergePlaces, toCsv, formatPhone, phoneKey } from '../src/parser/store.js';
-import { overpassQuery, osmPlace, yandexPlace, gisPlace, googlePlace, place, searchSource } from '../src/parser/sources.js';
+import { OVERPASS, overpassQuery, osmPlace, yandexPlace, gisPlace, googlePlace, place, searchSource } from '../src/parser/sources.js';
 import { extractContacts, contactsLink, privateIp, fetchPage } from '../src/parser/site.js';
 
 const res = (status, body, headers = {}) => ({
@@ -17,7 +17,7 @@ const publicDns = async () => [{ address: '93.184.216.34', family: 4 }];
 test('OSM: запрос по названию и тегам, компания с контактами из тегов', () => {
   const ql = overpassQuery('Стоматология', 3600012345, 200);
   assert.match(ql, /area\(3600012345\)/);
-  assert.match(ql, /nwr\["name"~"Стоматология",i\]/);
+  assert.match(ql, /nwr\["name"~"стоматолог",i\]/, 'без окончания: найдётся и «Стоматология Улыбка», и «Стоматологический центр»');
   assert.match(ql, /nwr\["amenity"="dentist"\]\["name"\]/);
   assert.match(overpassQuery('кафе (центр)', 1, 5), /кафе \\\\\(центр\\\\\)/, 'скобки экранированы для регулярного выражения');
   const p = osmPlace({ type: 'node', id: 7, lat: 56.85, lon: 35.9, tags: { name: 'Улыбка', amenity: 'dentist', phone: '+7 4822 11-22-33; +7 900 123 45 67', website: 'ulybka.ru', 'addr:city': 'Тверь', 'addr:street': 'улица Советская', 'addr:housenumber': '5', 'contact:vk': 'https://vk.com/ulybka' } });
@@ -119,7 +119,8 @@ test('Сбор: OSM и Яндекс, склейка, контакты с сай�
   const fetchImpl = async (url, init = {}) => {
     seen.push(url);
     if (url.startsWith('https://nominatim.openstreetmap.org/')) return res(200, [{ osm_type: 'relation', osm_id: 2095259, display_name: 'Тверь' }]);
-    if (url === 'https://overpass-api.de/api/interpreter') {
+    if (url === OVERPASS[0]) return res(504, 'Gateway Timeout');
+    if (url === OVERPASS[1]) {
       assert.match(decodeURIComponent(init.body), /area\(3602095259\)/);
       return res(200, { elements: [{ type: 'node', id: 1, lat: 56.85, lon: 35.9, tags: { name: 'Улыбка', amenity: 'dentist', phone: '+7 900 123-45-67', website: 'https://ulybka.ru' } }, { type: 'node', id: 2, tags: { amenity: 'dentist' } }] });
     }
@@ -160,6 +161,7 @@ test('Сбор: ошибка одного источника не роняет �
   const j = parser.job(job.id);
   assert.equal(j.status, 'error');
   assert.match(j.progress.sources.osm.error, /OpenStreetMap: down/);
+  assert.match(parser.job(job.id).progress.sources.osm.error, /^OpenStreetMap: down/, 'Nominatim не ответил — до Overpass не дошли');
   assert.throws(() => parser.create({ query: 'к', geo: 'Тверь', sources: ['osm'] }), /Напишите, что искать/);
   assert.throws(() => parser.create({ query: 'кафе', geo: 'Тверь', sources: [] }), /хотя бы один источник/);
   const csv = toCsv(mergePlaces([place({ source: 'osm', sourceId: '1', name: '=HYPERLINK("x")', phones: ['+7 900 000 00 00'] })]));

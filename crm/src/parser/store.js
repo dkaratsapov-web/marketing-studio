@@ -11,6 +11,13 @@ const KEY_RE = /^[\w.\-:]{10,300}$/;
 const MAX_PER_SOURCE = 1000;
 const KEEP_JOBS = 100;
 const SITE_WORKERS = 5;
+const SOURCE_DEADLINE = 8 * 60e3;
+
+/** Предел времени на источник: зависший сервер не должен держать сбор и очередь. */
+function deadline(promise, ms, message) {
+  let timer;
+  return Promise.race([promise, new Promise((_, reject) => (timer = setTimeout(() => reject(new SourceError(message)), ms)))]).finally(() => clearTimeout(timer));
+}
 
 const SOCIAL_HOSTS = [
   ['vk', /(^|\.)vk\.(com|ru)$/],
@@ -242,10 +249,10 @@ export function createParser({ db, fetchImpl = fetch, lookup = undefined, log = 
     q.status.run('running', JSON.stringify(progress), null, 0, j.id);
     const found = [];
     for (const source of j.sources.split(',')) {
-      progress.sources[source] = { status: 'running', found: 0 };
+      progress.sources[source] = { status: 'running', found: 0, startedAt: new Date().toISOString() };
       save();
       try {
-        const list = await searchSource(source, { query: j.query, geo: j.geo, limit: j.per_source, key: keyOf(source), fetchImpl, wait });
+        const list = await deadline(searchSource(source, { query: j.query, geo: j.geo, limit: j.per_source, key: keyOf(source), fetchImpl, wait }), SOURCE_DEADLINE, `${SOURCES[source].label}: поиск идёт дольше 8 минут, остановлен`);
         found.push(...list);
         progress.sources[source] = { status: 'done', found: list.length };
       } catch (err) {

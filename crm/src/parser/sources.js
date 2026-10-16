@@ -58,12 +58,12 @@ export function normUrl(v) {
   }
 }
 
-async function getJson(fetchImpl, url, init, name) {
+async function getJson(fetchImpl, url, init, name, timeout = TIMEOUT) {
   let res;
   try {
-    res = await fetchImpl(url, { ...init, signal: AbortSignal.timeout(TIMEOUT) });
+    res = await fetchImpl(url, { ...init, signal: AbortSignal.timeout(timeout) });
   } catch (err) {
-    throw new SourceError(`${name} не ответил: ${err.name === 'TimeoutError' ? 'нет ответа минуту' : err.message}`);
+    throw new SourceError(`${name} не ответил: ${err.name === 'TimeoutError' ? `нет ответа ${Math.round(timeout / 1000)} с` : err.message}`);
   }
   const text = await res.text().catch(() => '');
   let body = null;
@@ -140,15 +140,25 @@ const OSM_KIND = {
 // кавычки и обратную косую черту убираем, спецсимволы регулярного выражения экранируем для строки Overpass
 const osmEscape = (s) => s.replace(/[\\"]/g, '').replace(/[.*+?^${}()|[\]]/g, '\\\\$&');
 
+/** Основа слова без окончания: «рестораны» → «ресторан», «кофейни» → «кофейн» — чтобы найти «Ресторан Волга». */
+export function stem(query) {
+  return query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => (w.length > 5 ? w.replace(/(ами|ями|ов|ев|ей|ия|ие|ий|ая|ые|ый|ой|ам|ям|ах|ях|[аяыиеоуюь])$/, '') : w))
+    .join(' ');
+}
+
 /** Запрос Overpass: компании с запросом в названии или с подходящим тегом, внутри границ города. */
 export function overpassQuery(query, areaId, limit) {
   const q = query.toLowerCase();
   const tags = [...new Set(OSM_TAGS.filter(([re]) => re.test(q)).flatMap(([, t]) => t))];
-  const parts = [`nwr["name"~"${osmEscape(query)}",i](area.a);`, ...tags.map((t) => {
+  const parts = [`nwr["name"~"${osmEscape(stem(query))}",i](area.a);`, ...tags.map((t) => {
     const [k, v] = t.split('=');
     return `nwr["${k}"="${v}"]["name"](area.a);`;
   })];
-  return `[out:json][timeout:90];area(${areaId})->.a;(${parts.join('')});out center tags ${limit};`;
+  return `[out:json][timeout:100];area(${areaId})->.a;(${parts.join('')});out center tags ${limit};`;
 }
 
 /** Город → область поиска Overpass (id области из отношения или линии OSM). */
@@ -187,14 +197,23 @@ export function osmPlace(el) {
   });
 }
 
+// Публичные серверы Overpass бывают перегружены: пробуем по очереди, первым — зеркало VK в России
+export const OVERPASS = ['https://maps.mail.ru/osm/tools/overpass/api/interpreter', 'https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+
 async function searchOsm({ query, geo, limit, fetchImpl }) {
   const area = await osmArea(geo, fetchImpl);
-  const body = await getJson(
-    fetchImpl,
-    'https://overpass-api.de/api/interpreter',
-    { method: 'POST', headers: { 'user-agent': UA, 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ data: overpassQuery(query, area.id, limit) }).toString() },
-    'OpenStreetMap',
-  );
+  const data = new URLSearchParams({ data: overpassQuery(query, area.id, limit) }).toString();
+  let body = null;
+  const errors = [];
+  for (const url of OVERPASS) {
+    try {
+      body = await getJson(fetchImpl, url, { method: 'POST', headers: { 'user-agent': UA, 'content-type': 'application/x-www-form-urlencoded' }, body: data }, `OpenStreetMap (${new URL(url).hostname})`, 110_000);
+      break;
+    } catch (err) {
+      errors.push(err.message);
+    }
+  }
+  if (!body) throw new SourceError(`Серверы OpenStreetMap не ответили, попробуйте позже. ${errors.join('; ')}`);
   return (body.elements ?? []).filter((e) => e.tags?.name).map(osmPlace);
 }
 

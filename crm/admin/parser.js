@@ -9,6 +9,10 @@ const SOCIAL = { vk: 'ВК', telegram: 'Telegram', whatsapp: 'WhatsApp', instagr
 const PER_SOURCE = [50, 100, 200, 500, 1000];
 const fmtWhen = (s) => (s ? new Date(`${s.replace(' ', 'T')}Z`).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow' }) : '');
 const companies = (n) => `${n} ${plural(n, 'компания', 'компании', 'компаний')}`;
+const elapsed = (iso) => {
+  const sec = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 1000));
+  return sec < 60 ? `${sec} с` : `${Math.floor(sec / 60)} мин ${sec % 60} с`;
+};
 const busy = (j) => j.status === 'queued' || j.status === 'running';
 let sourcesCache = null;
 
@@ -242,7 +246,7 @@ export async function renderParserJob(params) {
     h('ul', { class: 'parser-steps' }, job.sources.map((sid) => {
       const p = job.progress.sources?.[sid] ?? {};
       const label = sourcesCache?.find((s) => s.id === sid)?.label ?? sid;
-      return h('li', { class: `ps-${p.status ?? 'queued'}` }, h('b', {}, label), h('span', {}, p.status === 'done' ? companies(p.found) : p.status === 'error' ? p.error : p.status === 'running' ? 'ищу…' : 'ждёт'));
+      return h('li', { class: `ps-${p.status ?? 'queued'}` }, h('b', {}, label), h('span', {}, p.status === 'done' ? companies(p.found) : p.status === 'error' ? p.error : p.status === 'running' ? `ищу…${p.startedAt ? ` ${elapsed(p.startedAt)}` : ''}` : 'ждёт'));
     }), job.enrich ? h('li', { class: job.progress.sites ? (job.progress.sites.done >= job.progress.sites.total ? 'ps-done' : 'ps-running') : 'ps-queued' }, h('b', {}, 'Сайты компаний'), h('span', {}, job.progress.sites ? `${job.progress.sites.done} из ${job.progress.sites.total}, новые контакты у ${job.progress.sites.found}` : 'после поиска')) : null),
     job.progress.sites?.total ? h('div', { class: 'parser-bar' }, h('span', { style: `width:${Math.round((job.progress.sites.done / job.progress.sites.total) * 100)}%` })) : null,
     job.error ? h('p', { class: 'ads-error' }, job.error) : null,
