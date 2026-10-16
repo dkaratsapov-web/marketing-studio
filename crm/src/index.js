@@ -157,6 +157,7 @@ async function initTelegramBot() {
     qualifier,
     log,
     staffLink: (code, chatId) => calendar.linkTelegram(code, chatId),
+    leads: config.leadsEnabled,
   });
   try {
     // Без ответа Telegram сайт должен работать: ждём не дольше 15 секунд

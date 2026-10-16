@@ -6,7 +6,9 @@ import { AnswerError } from '../core/qualifier.js';
 
 const CHANNEL = 'telegram';
 
-export function createTelegramBot({ token, managerChatId, privacyPolicyUrl, qualifier, log, botConfig, staffLink = null }) {
+const STAFF_ONLY = 'Это бот кабинета для сотрудников: он присылает напоминания о встречах и план на день. Подключить: кабинет → «Учётная запись» → «Подключить Telegram».';
+
+export function createTelegramBot({ token, managerChatId, privacyPolicyUrl, qualifier, log, botConfig, staffLink = null, leads = true }) {
   const bot = new Bot(token, botConfig);
   const dm = bot.chatType('private');
 
@@ -25,6 +27,8 @@ export function createTelegramBot({ token, managerChatId, privacyPolicyUrl, qual
           : 'Ссылка устарела. Откройте «Учётная запись» в админке и подключите Telegram заново.',
       );
     }
+    // без квалификатора бот нужен только сотрудникам: напоминания о встречах и план дня
+    if (!leads) return ctx.reply(STAFF_ONLY);
     if (code) {
       const session = qualifier.claimHandoff(code, CHANNEL, ctx.from.id, profileMeta(ctx.from));
       if (session) {
@@ -40,7 +44,7 @@ export function createTelegramBot({ token, managerChatId, privacyPolicyUrl, qual
     return startNew(ctx);
   });
 
-  dm.command('restart', (ctx) => startNew(ctx));
+  dm.command('restart', (ctx) => (leads ? startNew(ctx) : ctx.reply(STAFF_ONLY)));
 
   dm.callbackQuery(/^a:([a-z0-9_]+):(\d+)$/, async (ctx) => {
     const [, stepId, index] = ctx.match;
@@ -87,6 +91,7 @@ export function createTelegramBot({ token, managerChatId, privacyPolicyUrl, qual
   });
 
   dm.on('message', async (ctx) => {
+    if (!leads) return ctx.reply(STAFF_ONLY);
     const session = qualifier.activeSession(CHANNEL, ctx.from.id);
     if (!session) return startNew(ctx);
     await ctx.reply('Ответьте, пожалуйста, текстом или кнопкой.');

@@ -28,6 +28,9 @@ export function loadConfig(env = process.env) {
     // Разделы кабинета в меню (через запятую: tasks,calendar,docs,staff). Пусто — все разделы.
     // Для копии кабинета на другом сайте, где нужны не все разделы.
     adminSections: list(env.ADMIN_SECTIONS).length ? list(env.ADMIN_SECTIONS) : null,
+    // Квалификатор заявок для сайта: виджет, демо, API диалога и опрос в Telegram-боте.
+    // В кабинете Корпорации он не нужен: включён, только если раздел leads есть в меню или LEADS_ENABLED=true.
+    leadsEnabled: env.LEADS_ENABLED ? env.LEADS_ENABLED === 'true' : !list(env.ADMIN_SECTIONS).length || list(env.ADMIN_SECTIONS).includes('leads'),
     // брошенные диалоги (без контакта) хранятся столько дней, потом удаляются
     abandonedDays: Math.min(30, Math.max(1, Number(env.ABANDONED_DAYS) || 10)),
     telegram: {

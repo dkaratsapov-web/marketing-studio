@@ -146,3 +146,17 @@ test('корень домена ведёт на демо-страницу вид
   const widget = await app.inject({ method: 'GET', url: '/widget.js' });
   assert.equal(widget.statusCode, 200);
 });
+
+test('кабинет без квалификатора: виджет, демо и API диалога не раздаются', async () => {
+  const config = { ...loadConfig({ ADMIN_SECTIONS: 'tasks,calendar,docs,staff' }), root: process.cwd() };
+  assert.equal(config.leadsEnabled, false);
+  assert.equal(loadConfig({}).leadsEnabled, true);
+  assert.equal(loadConfig({ ADMIN_SECTIONS: 'tasks,leads' }).leadsEnabled, true);
+  assert.equal(loadConfig({ ADMIN_SECTIONS: 'tasks', LEADS_ENABLED: 'true' }).leadsEnabled, true);
+  const app = await buildServer({ config, qualifier: null, logger: false });
+  for (const url of ['/widget.js', '/demo.html']) assert.equal((await app.inject({ url })).statusCode, 404, url);
+  assert.equal((await app.inject({ method: 'POST', url: '/api/sessions', payload: {} })).statusCode, 404);
+  assert.equal((await app.inject({ url: '/' })).headers.location, '/admin/');
+  assert.equal((await app.inject({ url: '/health' })).statusCode, 200);
+  await app.close();
+});

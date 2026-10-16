@@ -70,7 +70,8 @@ export async function buildServer({ config, qualifier, logger, admin, brand = nu
     },
     max: (req, key) => (key.startsWith('staff:') ? 900 : 120),
   });
-  await app.register(fastifyStatic, {
+  // виджет и демо квалификатора раздаются, только если квалификатор включён
+  if (config.leadsEnabled !== false) await app.register(fastifyStatic, {
     root: resolve(config.root, 'widget'),
     prefix: '/',
     index: false,
@@ -90,7 +91,7 @@ export async function buildServer({ config, qualifier, logger, admin, brand = nu
   app.get('/health', async () => ({ ok: true }));
 
   // Корень домена ведёт в рабочее место (виджет живёт по прямым ссылкам на файлы)
-  app.get('/', (req, reply) => reply.redirect(admin ? '/admin/' : '/demo.html'));
+  app.get('/', (req, reply) => reply.redirect(admin || config.leadsEnabled === false ? '/admin/' : '/demo.html'));
 
   // Утверждённый логотип для виджета и документов (файл проверен по sha256 при загрузке бренда)
   app.get('/brand/logo/:variant', async (req, reply) => {
@@ -111,47 +112,50 @@ export async function buildServer({ config, qualifier, logger, admin, brand = nu
     max: config.max.botUsername ? `https://max.ru/${config.max.botUsername}?start=${session.handoff_code}` : null,
   });
 
-  app.post(
-    '/api/sessions',
-    {
-      schema: { body: { type: 'object', additionalProperties: false, properties: { meta: metaSchema } } },
-      config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
-    },
-    async (req) => {
-      const { session, reply } = qualifier.startSession({ channel: 'web', meta: req.body?.meta ?? {} });
-      return {
-        sessionId: session.id,
-        token: session.token,
-        privacyPolicyUrl: config.privacyPolicyUrl,
-        handoff: handoffLinks(session),
-        reply,
-      };
-    },
-  );
+  // API диалога квалификатора (виджет на сайте) — только если он включён
+  if (config.leadsEnabled !== false) {
+    app.post(
+      '/api/sessions',
+      {
+        schema: { body: { type: 'object', additionalProperties: false, properties: { meta: metaSchema } } },
+        config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
+      },
+      async (req) => {
+        const { session, reply } = qualifier.startSession({ channel: 'web', meta: req.body?.meta ?? {} });
+        return {
+          sessionId: session.id,
+          token: session.token,
+          privacyPolicyUrl: config.privacyPolicyUrl,
+          handoff: handoffLinks(session),
+          reply,
+        };
+      },
+    );
 
-  app.get('/api/sessions/:id', { schema: { params: sessionParams } }, async (req) => {
-    const session = qualifier.getSession(req.params.id, tokenOf(req));
-    return {
-      privacyPolicyUrl: config.privacyPolicyUrl,
-      handoff: session.status === 'active' ? handoffLinks(session) : null,
-      reply: qualifier.resume(session),
-    };
-  });
-
-  app.post(
-    '/api/sessions/:id/answer',
-    { schema: { params: sessionParams, body: answerSchema } },
-    async (req, res) => {
+    app.get('/api/sessions/:id', { schema: { params: sessionParams } }, async (req) => {
       const session = qualifier.getSession(req.params.id, tokenOf(req));
-      try {
-        return { reply: await qualifier.answer(session.id, req.body) };
-      } catch (err) {
-        if (!(err instanceof AnswerError)) throw err;
-        const fresh = qualifier.getSession(session.id);
-        return res.code(422).send({ error: err.message, reply: qualifier.resume(fresh) });
-      }
-    },
-  );
+      return {
+        privacyPolicyUrl: config.privacyPolicyUrl,
+        handoff: session.status === 'active' ? handoffLinks(session) : null,
+        reply: qualifier.resume(session),
+      };
+    });
+
+    app.post(
+      '/api/sessions/:id/answer',
+      { schema: { params: sessionParams, body: answerSchema } },
+      async (req, res) => {
+        const session = qualifier.getSession(req.params.id, tokenOf(req));
+        try {
+          return { reply: await qualifier.answer(session.id, req.body) };
+        } catch (err) {
+          if (!(err instanceof AnswerError)) throw err;
+          const fresh = qualifier.getSession(session.id);
+          return res.code(422).send({ error: err.message, reply: qualifier.resume(fresh) });
+        }
+      },
+    );
+  }
 
   if (admin) {
     await app.register(adminRoutes, { config, ...admin });
