@@ -54,6 +54,22 @@ function lastProject() {
     return null;
   }
 }
+/** Свёрнутые группы проектов (Корпорация, Сорока) — запоминаются в браузере сотрудника. */
+const FOLDED = 'korp-project-groups-folded';
+function foldedGroups() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(FOLDED) || '[]'));
+  } catch {
+    return new Set();
+  }
+}
+function rememberFolded(set) {
+  try {
+    localStorage.setItem(FOLDED, JSON.stringify([...set]));
+  } catch {
+    /* без хранилища группы откроются развёрнутыми */
+  }
+}
 function rememberProject(key) {
   try {
     localStorage.setItem(LAST, key);
@@ -800,14 +816,38 @@ export async function renderProjects(params) {
     );
   // проекты клиентов Корпорации и Сороки — двумя группами, если есть клиенты обоих агентств
   const clientProjects = projects.filter((p) => !p.internal);
-  const groups = AGENCIES.map(([v, label]) => [label, clientProjects.filter((p) => (p.agency ?? 'korp') === v)]).filter(([, list]) => list.length);
-  const clientsList = h(
-    'nav',
-    { class: 'pm-list', 'aria-label': 'Проекты' },
-    groups.length > 1 ? groups.map(([label, list]) => h('div', { class: 'pm-group' }, h('p', { class: 'pm-group-title' }, label), list.map(item))) : clientProjects.map(item),
-  );
+  const groups = AGENCIES.map(([v, label]) => [v, label, clientProjects.filter((p) => (p.agency ?? 'korp') === v)]).filter(([, , list]) => list.length);
+  const folded = foldedGroups();
+  const group = ([v, label, list]) => {
+    const listId = `pm-group-${v}`;
+    const box = h('div', { class: `pm-group pm-group-${v}${folded.has(v) ? ' folded' : ''}` });
+    const toggle = h(
+      'button',
+      {
+        type: 'button',
+        class: 'pm-group-title',
+        'aria-expanded': String(!folded.has(v)),
+        'aria-controls': listId,
+        onclick: () => {
+          const open = box.classList.toggle('folded');
+          toggle.setAttribute('aria-expanded', String(!open));
+          if (open) folded.add(v);
+          else folded.delete(v);
+          rememberFolded(folded);
+        },
+      },
+      h('span', { class: 'pm-group-name' }, label),
+      h('span', { class: 'pm-group-count num' }, list.length),
+      h('span', { class: 'pm-group-chevron', 'aria-hidden': 'true' }),
+    );
+    fill(box, toggle, h('div', { class: 'pm-group-list', id: listId }, list.map(item)));
+    return box;
+  };
+  const clientsList = h('nav', { class: 'pm-list', 'aria-label': 'Проекты' }, groups.length > 1 ? groups.map(group) : clientProjects.map(item));
   filterInput.addEventListener('input', () => {
     const v = filterInput.value.trim().toLowerCase();
+    // при поиске свёрнутые группы раскрываются, чтобы найденное было видно
+    clientsList.classList.toggle('searching', Boolean(v));
     for (const a of clientsList.querySelectorAll('.pm-project')) a.hidden = Boolean(v) && !a.dataset.name.includes(v);
     for (const g of clientsList.querySelectorAll('.pm-group')) g.hidden = ![...g.querySelectorAll('.pm-project')].some((a) => !a.hidden);
   });

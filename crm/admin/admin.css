@@ -815,9 +815,26 @@ details.menu summary::-webkit-details-marker { display: none; }
 .pm-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; }
 /* длинные названия проектов обрезаются многоточием, а не растягивают колонку */
 .pm-side { grid-template-columns: minmax(0, 1fr); overflow-x: hidden; }
-.pm-group { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; }
-.pm-group + .pm-group { margin-top: 8px; }
-.pm-group-title { margin: 4px 10px 2px; color: var(--muted); font-size: 12px; font-weight: 600; }
+.pm-group { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
+.pm-group + .pm-group { margin-top: 10px; }
+.pm-group-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; }
+.pm-group.folded .pm-group-list { display: none; }
+.pm-list.searching .pm-group.folded .pm-group-list { display: grid; }
+/* заголовок группы: плашка с меткой агентства, по нажатию сворачивает список */
+.pm-group-title {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 10px;
+  border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--surface-2);
+  color: var(--text); font-family: var(--soroka-font-heading); font-size: 13.5px; font-weight: 700; text-align: left; cursor: pointer;
+}
+.pm-group-title:hover { border-color: var(--line-strong); }
+.pm-group-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pm-group-title::before { content: ''; flex: none; width: 4px; height: 16px; border-radius: 2px; background: var(--accent); }
+.pm-group-soroka .pm-group-title::before { background: var(--muted); }
+.pm-group-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pm-group-count { color: var(--muted); font-family: var(--soroka-font-body); font-size: 12.5px; font-weight: 500; }
+.pm-group-chevron { flex: none; width: 7px; height: 7px; margin: 0 2px 3px 2px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); transition: transform .15s ease; }
+.pm-group.folded .pm-group-chevron { margin-bottom: 0; transform: rotate(-45deg); }
+@media (prefers-reduced-motion: reduce) { .pm-group-chevron { transition: none; } }
 .pm-pinned { border-top: 1px solid var(--line); padding-top: 8px; }
 .pm-project { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--radius-s); color: var(--text); text-decoration: none; font-size: 14px; }
 .pm-project:hover { background: var(--surface-2); }
@@ -940,7 +957,7 @@ details.menu summary::-webkit-details-marker { display: none; }
   .pm-side .pm-pinned { border: 0; padding: 0; }
   .pm-side .pm-project { flex: none; }
   /* на телефоне проекты идут одной лентой, без заголовков групп */
-  .pm-side .pm-group { display: contents; }
+  .pm-side .pm-group, .pm-side .pm-group-list, .pm-side .pm-group.folded .pm-group-list { display: contents; }
   .pm-side .pm-group-title { display: none; }
   .pm-side .input { display: none; }
 }
