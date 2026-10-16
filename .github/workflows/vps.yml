@@ -112,3 +112,6 @@ jobs:
           for f in robots.txt sitemap.xml; do
             curl -sS -o /dev/null -w "$f -> %{http_code}\n" "https://marketing-studio.pro/$f" || true
           done
+          # Кабинет: тоже только статус, деплой сайта от него не зависит
+          curl -sS -m 15 -w " <- https://crm.marketing-studio.pro/health %{http_code}\n" https://crm.marketing-studio.pro/health || true
+          curl -sS -m 15 -o /dev/null -w "https://crm.marketing-studio.pro/admin/ -> %{http_code}\n" https://crm.marketing-studio.pro/admin/ || true
