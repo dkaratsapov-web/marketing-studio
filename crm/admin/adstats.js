@@ -184,7 +184,7 @@ function tokenPanel(onChange) {
 }
 
 /** Настройки клиента: Директ (логин клиента у агентского аккаунта), счётчик Метрики, цели-конверсии. */
-export function openAccountDialog(client, account, onSaved) {
+export function openAccountDialog(client, account, onSaved, { token = true } = {}) {
   const direct = h('input', { type: 'checkbox', checked: Boolean(account?.direct_enabled) });
   const login = h('input', { class: 'input', id: 'ads-login', maxlength: 100, value: account?.direct_login ?? '', placeholder: 'client-login' });
   const counter = h('input', { class: 'input', id: 'ads-counter', inputmode: 'numeric', maxlength: 12, value: account?.metrika_counter ?? '', placeholder: '12345678' });
@@ -236,6 +236,9 @@ export function openAccountDialog(client, account, onSaved) {
     body: h(
       'div',
       { class: 'ads-form' },
+      token
+        ? null
+        : h('p', { class: 'ads-note' }, 'Токен Яндекса вставляется один раз на всё агентство: вверху раздела «Статистика», блок «Подключите Яндекс». Здесь только настройки клиента: без токена они сохранятся, цифры появятся после подключения.'),
       h('label', { class: 'check' }, direct, 'Яндекс Директ'),
       h('div', { class: 'field' }, h('label', { for: 'ads-login' }, 'Логин клиента в Директе'), login, h('span', { class: 'hint' }, 'Для агентского аккаунта. Если токен выдан на кабинет самого клиента, оставьте пустым.')),
       h('div', { class: 'field' }, h('label', { for: 'ads-counter' }, 'Счётчик Яндекс Метрики'), counter),
@@ -335,7 +338,7 @@ export async function renderAdStats(params) {
             'section',
             { class: 'panel ads-off' },
             h('h2', {}, `Не подключены: ${d.notConnected.length}`),
-            h('ul', { class: 'ads-off-list' }, d.notConnected.map((c) => h('li', {}, h('span', { class: 'ads-off-name' }, c.name), h('span', { class: `agency-tag agency-${c.agency}` }, AGENCY[c.agency]), h('button', { type: 'button', class: 'btn btn-s', onclick: () => openAccountDialog(c, null, load) }, 'Подключить')))),
+            h('ul', { class: 'ads-off-list' }, d.notConnected.map((c) => h('li', {}, h('span', { class: 'ads-off-name' }, c.name), h('span', { class: `agency-tag agency-${c.agency}` }, AGENCY[c.agency]), h('button', { type: 'button', class: 'btn btn-s', onclick: () => openAccountDialog(c, null, load, { token: d.token }) }, 'Подключить')))),
           )
         : null,
     );
@@ -408,7 +411,7 @@ export async function renderAdClient(params) {
     h('h1', { class: 'ads-title' }, client.name),
     h('span', { class: 'spacer' }),
     h('a', { class: 'btn', href: `#/tasks?project=${id}` }, 'Задачи проекта'),
-    h('button', { type: 'button', class: 'btn', onclick: () => openAccountDialog(client, d.account, reload) }, 'Настроить'),
+    h('button', { type: 'button', class: 'btn', onclick: () => openAccountDialog(client, d.account, reload, { token: d.token }) }, 'Настроить'),
     d.account ? sync : null,
   );
   const a = d.account;

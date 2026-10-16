@@ -201,7 +201,7 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
     const byDate = new Map(q.daily.all(Number(clientId), p.from, p.to).map((r) => [r.date, r]));
     const days = [];
     for (let d = p.from; d <= p.to; d = shift(d, 1)) days.push(derive({ date: d, ...ZERO, ...byDate.get(d) }));
-    return { period: p, account: a ?? null, days, total: derive(sum(days)) };
+    return { period: p, account: a ?? null, token: Boolean(currentToken()), days, total: derive(sum(days)) };
   }
 
   async function goalsFor(counter) {
