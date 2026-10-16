@@ -213,7 +213,7 @@ test('обновление базы: старые статусы задач ст
   const path = join(mkdtempSync(join(tmpdir(), 'crm-')), 'old.db');
   const fresh = openDb(path);
   // состояние до досок: колонок и досок ещё нет, у задач — статусы
-  fresh.raw.exec(`ALTER TABLE leads DROP COLUMN ai_summary; DROP INDEX meetings_series; ALTER TABLE meetings DROP COLUMN series_id; DROP TABLE meeting_series; DROP TABLE chat_files; DROP TABLE chat_messages; DROP TABLE chat_members; DROP TABLE chats; DROP TABLE client_files; ALTER TABLE meetings DROP COLUMN summary; ALTER TABLE meetings DROP COLUMN summary_by; ALTER TABLE meetings DROP COLUMN summary_at; DROP INDEX client_payments_auto; DROP TABLE client_payments; ALTER TABLE clients DROP COLUMN fee; ALTER TABLE clients DROP COLUMN pay_day; DROP TABLE task_files; DROP TABLE task_checklist; DROP TABLE news_reactions; DROP TABLE news_comments; DROP TABLE news_files; DROP TABLE news_posts; DROP TABLE files; ALTER TABLE admin_users DROP COLUMN news_seen; DROP TABLE user_avatars; ALTER TABLE admin_users DROP COLUMN avatar_ver; DROP TABLE notifications; DROP TABLE assistant_messages; DROP TABLE kb_docs; DROP TABLE task_links; ALTER TABLE admin_users DROP COLUMN prefs; DROP INDEX tasks_column; DROP TABLE tasks; DROP TABLE task_columns; DROP TABLE task_boards;
+  fresh.raw.exec(`ALTER TABLE clients DROP COLUMN agency; ALTER TABLE leads DROP COLUMN ai_summary; DROP INDEX meetings_series; ALTER TABLE meetings DROP COLUMN series_id; DROP TABLE meeting_series; DROP TABLE chat_files; DROP TABLE chat_messages; DROP TABLE chat_members; DROP TABLE chats; DROP TABLE client_files; ALTER TABLE meetings DROP COLUMN summary; ALTER TABLE meetings DROP COLUMN summary_by; ALTER TABLE meetings DROP COLUMN summary_at; DROP INDEX client_payments_auto; DROP TABLE client_payments; ALTER TABLE clients DROP COLUMN fee; ALTER TABLE clients DROP COLUMN pay_day; DROP TABLE task_files; DROP TABLE task_checklist; DROP TABLE news_reactions; DROP TABLE news_comments; DROP TABLE news_files; DROP TABLE news_posts; DROP TABLE files; ALTER TABLE admin_users DROP COLUMN news_seen; DROP TABLE user_avatars; ALTER TABLE admin_users DROP COLUMN avatar_ver; DROP TABLE notifications; DROP TABLE assistant_messages; DROP TABLE kb_docs; DROP TABLE task_links; ALTER TABLE admin_users DROP COLUMN prefs; DROP INDEX tasks_column; DROP TABLE tasks; DROP TABLE task_columns; DROP TABLE task_boards;
     CREATE TABLE tasks (
       id INTEGER PRIMARY KEY AUTOINCREMENT, client_id INTEGER REFERENCES clients(id) ON DELETE SET NULL, title TEXT NOT NULL, description TEXT,
       status TEXT NOT NULL DEFAULT 'todo', priority INTEGER NOT NULL DEFAULT 0, assignee_id INTEGER REFERENCES admin_users(id), due TEXT,
@@ -401,4 +401,21 @@ test('уведомления: отключённые категории не п�
   await oleg({ method: 'POST', url: '/admin/api/notifications/test', payload: {} });
   const test = (await oleg({ url: `/admin/api/notifications?after=${start}` })).json().items.at(-1);
   assert.equal(test.kind, 'test');
+});
+
+test('клиенты Корпорации и Сороки: по умолчанию Корпорация, агентство меняется в карточке', () => {
+  const db = openDb(':memory:');
+  const auth = createAuth(db.raw);
+  const { user } = auth.addUser('owner', 'Владелец', { password: 'secret-pass-1', role: 'admin' });
+  const crm = createCrm({ db: db.raw });
+  const mine = crm.createClient({ name: 'Ди Авто 69' }, user);
+  const theirs = crm.createClient({ name: 'Клиника', agency: 'soroka' }, user);
+  assert.equal(mine.agency, 'korp');
+  assert.equal(theirs.agency, 'soroka');
+  assert.equal(crm.updateClient(mine.id, { agency: 'soroka' }).agency, 'soroka');
+  // правка других полей не сбрасывает агентство
+  assert.equal(crm.updateClient(mine.id, { phone: '+7 900 000-00-00' }).agency, 'soroka');
+  assert.throws(() => crm.createClient({ name: 'Х', agency: 'other' }, user), /агентство/);
+  assert.deepEqual(crm.listClients().map((c) => c.agency).sort(), ['soroka', 'soroka']);
+  db.close();
 });

@@ -1191,8 +1191,19 @@ export async function renderMyTasks(params) {
 
 // ---------- клиенты ----------
 
+// Чей клиент: Корпорации или агентства Сорока. Списки разделены, по умолчанию клиент Корпорации
+const AGENCIES = [
+  ['korp', 'Корпорация'],
+  ['soroka', 'Сорока'],
+];
+const agencySelect = (id, value, onchange) =>
+  h('select', { class: 'select', id, onchange }, AGENCIES.map(([v, label]) => h('option', { value: v, selected: v === (value ?? 'korp') }, label)));
+
 export async function renderClients(params) {
   const archived = params.get('archived') === '1';
+  const agency = AGENCIES.some(([v]) => v === params.get('agency')) ? params.get('agency') : '';
+  const goAgency = (v) => navigate('clients', new URLSearchParams({ ...(archived ? { archived: '1' } : {}), ...(v ? { agency: v } : {}) }));
+  const tabs = h('div', { class: 'rating-filter client-agency', role: 'group', 'aria-label': 'Чьи клиенты' });
   const { team: people } = await loadTeam().catch(() => ({ team: [] }));
   const list = h('div', {}, h('p', { class: 'muted' }, 'Загружаю…'));
   const creator = h('div');
@@ -1202,6 +1213,7 @@ export async function renderClients(params) {
     app,
     shell('clients', [
       h('div', { class: 'page-head' }, h('h1', {}, archived ? 'Архив клиентов' : 'Клиенты'), count, h('span', { class: 'spacer' }), h('a', { class: 'btn', href: archived ? '#/clients' : '#/clients?archived=1' }, archived ? 'Действующие' : 'Архив'), archived ? null : newBtn),
+      tabs,
       creator,
       list,
     ]),
@@ -1218,6 +1230,7 @@ export async function renderClients(params) {
     const [phone, phoneF] = field('c-phone', 'Телефон', { type: 'tel', maxlength: 60 });
     const [email, emailF] = field('c-email', 'E-mail', { type: 'email' });
     const manager = h('select', { class: 'select', id: 'c-manager' }, h('option', { value: '' }, 'Не выбран'), people.map((u) => h('option', { value: u.id, selected: u.id === ctx.me.id }, u.name)));
+    const owner = agencySelect('c-agency', agency || 'korp');
     const submit = h('button', { type: 'submit', class: 'btn btn-primary' }, 'Создать клиента');
     fill(
       creator,
@@ -1231,7 +1244,7 @@ export async function renderClients(params) {
             try {
               const { client } = await api('/admin/api/clients', {
                 method: 'POST',
-                body: { name: name.value, contact: contact.value || null, phone: phone.value || null, email: email.value || null, managerId: manager.value ? Number(manager.value) : null },
+                body: { name: name.value, contact: contact.value || null, phone: phone.value || null, email: email.value || null, managerId: manager.value ? Number(manager.value) : null, agency: owner.value },
               });
               navigate('client', new URLSearchParams({ id: String(client.id) }));
             } catch (err) {
@@ -1241,7 +1254,7 @@ export async function renderClients(params) {
           },
         },
         h('h2', {}, 'Новый клиент'),
-        h('div', { class: 'create-fields' }, nameF, h('div', { class: 'field' }, h('label', { for: 'c-manager' }, 'Ответственный'), manager), contactF, phoneF, emailF),
+        h('div', { class: 'create-fields' }, nameF, h('div', { class: 'field' }, h('label', { for: 'c-agency' }, 'Чей клиент'), owner), h('div', { class: 'field' }, h('label', { for: 'c-manager' }, 'Ответственный'), manager), contactF, phoneF, emailF),
         h('div', { class: 'work-actions' }, submit, h('button', { type: 'button', class: 'btn', onclick: () => { fill(creator); newBtn.hidden = false; } }, 'Отмена')),
       ),
     );
@@ -1255,8 +1268,16 @@ export async function renderClients(params) {
     if (err.status !== 401) fill(list, h('p', { class: 'error' }, err.message));
     return;
   }
+  const of = (v) => clients.filter((c) => (c.agency ?? 'korp') === v).length;
+  fill(
+    tabs,
+    h('button', { type: 'button', 'aria-pressed': String(!agency), onclick: () => goAgency('') }, 'Все ', h('span', { class: 'num muted' }, clients.length)),
+    AGENCIES.map(([v, label]) => h('button', { type: 'button', 'aria-pressed': String(agency === v), onclick: () => goAgency(v) }, `${label} `, h('span', { class: 'num muted' }, of(v)))),
+  );
+  if (agency) clients = clients.filter((c) => (c.agency ?? 'korp') === agency);
   count.textContent = `${clients.length} ${plural(clients.length, 'клиент', 'клиента', 'клиентов')}`;
   if (!clients.length) {
+    if (agency) return fill(list, h('div', { class: 'panel empty' }, h('strong', {}, `${archived ? 'В архиве нет' : 'Нет'} клиентов агентства «${AGENCIES.find(([v]) => v === agency)[1]}»`), archived ? '' : 'Нажмите «Новый клиент» или поменяйте агентство в карточке клиента.'));
     fill(list, h('div', { class: 'panel empty' }, h('strong', {}, archived ? 'Архив пуст' : 'Клиентов пока нет'), archived ? '' : 'Заведите клиента вручную или из заявки квалификатора — кнопкой «Сделать клиентом» в карточке лида.'));
     return;
   }
@@ -1268,7 +1289,7 @@ export async function renderClients(params) {
       h(
         'table',
         { class: 'leads docs' },
-        h('thead', {}, h('tr', {}, ['Клиент', 'Ответственный', 'Открытых задач', 'Просрочено', 'Долг', 'Контакт'].map((t) => h('th', { scope: 'col' }, t)), h('th', { scope: 'col' }, h('span', { class: 'sr-only' }, 'Действия')))),
+        h('thead', {}, h('tr', {}, ['Клиент', ...(agency ? [] : ['Агентство']), 'Ответственный', 'Открытых задач', 'Просрочено', 'Долг', 'Контакт'].map((t) => h('th', { scope: 'col' }, t)), h('th', { scope: 'col' }, h('span', { class: 'sr-only' }, 'Действия')))),
         h(
           'tbody',
           {},
@@ -1278,6 +1299,7 @@ export async function renderClients(params) {
               'tr',
               { onclick: () => (location.hash = href) },
               h('td', {}, h('a', { class: 'row-link company', href }, c.name), c.lead_id ? h('span', { class: 'task' }, `Из заявки #${c.lead_id}`) : null),
+              agency ? null : h('td', {}, h('span', { class: `agency-tag agency-${c.agency ?? 'korp'}` }, AGENCIES.find(([v]) => v === (c.agency ?? 'korp'))[1])),
               h('td', {}, c.manager_name ?? h('span', { class: 'muted' }, '—')),
               h('td', { class: 'num' }, c.open_tasks || h('span', { class: 'muted' }, '—')),
               h('td', { class: 'num' }, c.overdue ? h('span', { class: 'due overdue' }, c.overdue) : h('span', { class: 'muted' }, '—')),
@@ -1353,7 +1375,7 @@ export async function renderClient(params) {
       h(
         'div',
         { class: 'doc-head' },
-        h('a', { class: 'back', href: '#/clients' }, 'Клиенты'),
+        h('a', { class: 'back', href: `#/clients?agency=${c.agency ?? 'korp'}` }, 'Клиенты'),
         name,
         saved,
         h('span', { class: 'spacer' }),
@@ -1367,6 +1389,7 @@ export async function renderClient(params) {
           'section',
           { class: 'panel', 'aria-label': 'О клиенте' },
           h('h2', {}, 'О клиенте'),
+          h('div', { class: 'field' }, h('label', { for: 'cl-agency' }, 'Чей клиент'), agencySelect('cl-agency', c.agency, (e) => save({ agency: e.target.value }))),
           h('div', { class: 'field' }, h('label', { for: 'cl-manager' }, 'Ответственный'), manager),
           input('contact', 'Контактное лицо'),
           input('phone', 'Телефон', { type: 'tel' }),

@@ -1832,3 +1832,10 @@ div.notify-row { cursor: default; }
 .ai-summary .potential.p-high { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 .ai-summary .potential.p-low { color: var(--muted); }
 .ai-summary .ai-comment { border-left: 3px solid var(--accent); padding-left: 10px; }
+
+/* Чей клиент: Корпорация или Сорока */
+.client-agency { margin: 0 0 16px; width: fit-content; }
+.client-agency .num { margin-left: 4px; font-size: 12px; }
+.agency-tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.agency-korp { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--text); }
+.agency-soroka { background: var(--surface-3); color: var(--muted); }

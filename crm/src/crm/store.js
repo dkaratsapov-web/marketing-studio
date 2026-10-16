@@ -91,8 +91,8 @@ export function createCrm({ db }) {
     ),
     client: db.prepare('SELECT c.*, u.name AS manager_name FROM clients c LEFT JOIN admin_users u ON u.id = c.manager_id WHERE c.id = ?'),
     clientByLead: db.prepare('SELECT id FROM clients WHERE lead_id = ?'),
-    insertClient: db.prepare('INSERT INTO clients (name, contact, phone, email, site, notes, manager_id, lead_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'),
-    updateClient: db.prepare("UPDATE clients SET name = ?, contact = ?, phone = ?, email = ?, site = ?, notes = ?, manager_id = ?, archived = ?, updated_at = datetime('now') WHERE id = ?"),
+    insertClient: db.prepare('INSERT INTO clients (name, contact, phone, email, site, notes, manager_id, agency, lead_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'),
+    updateClient: db.prepare("UPDATE clients SET name = ?, contact = ?, phone = ?, email = ?, site = ?, notes = ?, manager_id = ?, agency = ?, archived = ?, updated_at = datetime('now') WHERE id = ?"),
     deleteClient: db.prepare('DELETE FROM clients WHERE id = ?'),
     user: db.prepare('SELECT id, name FROM admin_users WHERE id = ? AND disabled = 0'),
     team: db.prepare('SELECT id, name FROM admin_users WHERE disabled = 0'),
@@ -187,6 +187,9 @@ export function createCrm({ db }) {
 
   // ---------- клиенты ----------
 
+  // Клиенты Корпорации и агентства Сорока ведутся в одном кабинете, но списки разделены
+  const AGENCIES = ['korp', 'soroka'];
+
   function getClient(id) {
     const c = q.client.get(Number(id));
     if (!c) throw new CrmError('Клиент не найден');
@@ -202,7 +205,9 @@ export function createCrm({ db }) {
   function clientFields(v) {
     const name = text(v.name, 200);
     if (!name) throw new CrmError('Укажите название клиента');
-    return [name, text(v.contact, 200), text(v.phone, 60), text(v.email, 200), text(v.site, 300), text(v.notes, 5000), checkUser(v.managerId)];
+    const agency = v.agency ?? 'korp';
+    if (!AGENCIES.includes(agency)) throw new CrmError('Неизвестное агентство клиента');
+    return [name, text(v.contact, 200), text(v.phone, 60), text(v.email, 200), text(v.site, 300), text(v.notes, 5000), checkUser(v.managerId), agency];
   }
 
   function createClient(v, user) {
@@ -221,6 +226,7 @@ export function createCrm({ db }) {
       site: patch.site !== undefined ? patch.site : c.site,
       notes: patch.notes !== undefined ? patch.notes : c.notes,
       managerId: patch.managerId !== undefined ? patch.managerId : c.manager_id,
+      agency: patch.agency ?? c.agency,
     };
     q.updateClient.run(...clientFields(merged), patch.archived !== undefined ? Number(Boolean(patch.archived)) : c.archived, c.id);
     return getClient(id);

@@ -522,6 +522,9 @@ const MIGRATIONS = [
 
   // Сводка ИИ по заявке: кто клиент, потенциал, комментарий менеджеру (JSON)
   `ALTER TABLE leads ADD COLUMN ai_summary TEXT;`,
+
+  // Чей клиент: Корпорации (korp) или агентства Сорока (soroka) — разделение в списке клиентов
+  `ALTER TABLE clients ADD COLUMN agency TEXT NOT NULL DEFAULT 'korp';`,
 ];
 
 /** Номер текущей версии схемы базы. */

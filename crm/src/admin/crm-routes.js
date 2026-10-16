@@ -19,6 +19,7 @@ const clientBody = {
     site: { type: ['string', 'null'], maxLength: 300 },
     notes: { type: ['string', 'null'], maxLength: 5000 },
     managerId: nullableId,
+    agency: { type: 'string', enum: ['korp', 'soroka'] },
     archived: { type: 'boolean' },
     fromLead: { type: 'integer' },
   },
