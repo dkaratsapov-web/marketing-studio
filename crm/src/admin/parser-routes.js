@@ -40,6 +40,11 @@ export async function parserRoutes(api, { parser }) {
             sources: { type: 'array', maxItems: 10, items: { type: 'string', maxLength: 20 } },
             perSource: { type: 'integer', minimum: 1, maximum: 1000 },
             enrich: { type: 'boolean' },
+            filters: {
+              type: 'object',
+              additionalProperties: false,
+              properties: Object.fromEntries(['phone', 'site', 'email', 'social'].map((k) => [k, { type: ['string', 'null'], enum: ['yes', 'no', null] }])),
+            },
           },
         },
       },

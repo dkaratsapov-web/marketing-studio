@@ -159,7 +159,7 @@ function tokenPanel(onChange) {
       );
       return;
     }
-    const clientId = h('input', { class: 'input', id: 'ads-client-id', maxlength: 64, placeholder: 'ClientID приложения', autocomplete: 'off' });
+    const clientId = h('input', { class: 'input', id: 'ads-client-id', maxlength: 64, placeholder: 'ClientID приложения', autocomplete: 'off', 'data-lpignore': 'true', 'data-1p-ignore': 'true', 'data-form-type': 'other' });
     const open = h('button', {
       type: 'button', class: 'btn',
       onclick: () => {
@@ -168,7 +168,7 @@ function tokenPanel(onChange) {
         window.open(OAUTH_LINK + id, '_blank', 'noopener');
       },
     }, 'Получить токен');
-    const input = h('input', { class: 'input', id: 'ads-token', type: 'password', maxlength: 400, placeholder: 'y0_…', autocomplete: 'off', spellcheck: 'false' });
+    const input = h('input', { id: 'ads-token', type: 'text', class: 'input secret-input', autocomplete: 'off', 'data-lpignore': 'true', 'data-1p-ignore': 'true', 'data-bwignore': 'true', 'data-form-type': 'other', maxlength: 400, placeholder: 'y0_…', spellcheck: 'false' });
     const save = h('button', { type: 'submit', class: 'btn btn-primary' }, 'Проверить и сохранить');
     fill(
       box,
@@ -214,10 +214,10 @@ function tokenPanel(onChange) {
 
 /** Настройки клиента: Директ (логин клиента у агентского аккаунта), счётчик Метрики, цели-конверсии. */
 export function openAccountDialog(client, account, onSaved, { token = true } = {}) {
-  const ownToken = h('input', { class: 'input', id: 'ads-own-token', type: 'password', maxlength: 400, autocomplete: 'off', spellcheck: 'false', placeholder: account?.own_token ? `сохранён …${account.token_tail}, вставьте новый, чтобы заменить` : 'y0_…' });
+  const ownToken = h('input', { id: 'ads-own-token', type: 'text', class: 'input secret-input', autocomplete: 'off', 'data-lpignore': 'true', 'data-1p-ignore': 'true', 'data-bwignore': 'true', 'data-form-type': 'other', maxlength: 400, spellcheck: 'false', placeholder: account?.own_token ? `сохранён …${account.token_tail}, вставьте новый, чтобы заменить` : 'y0_…' });
   const dropToken = h('input', { type: 'checkbox' });
   const direct = h('input', { type: 'checkbox', checked: Boolean(account?.direct_enabled) });
-  const login = h('input', { class: 'input', id: 'ads-login', maxlength: 100, value: account?.direct_login ?? '', placeholder: 'client-login' });
+  const login = h('input', { class: 'input', id: 'ads-login', maxlength: 100, autocomplete: 'off', 'data-lpignore': 'true', 'data-1p-ignore': 'true', 'data-form-type': 'other', value: account?.direct_login ?? '', placeholder: 'client-login' });
   const counter = h('input', { class: 'input', id: 'ads-counter', inputmode: 'numeric', maxlength: 12, value: account?.metrika_counter ?? '', placeholder: '12345678' });
   const goals = h('input', { class: 'input', id: 'ads-goals', maxlength: 400, value: (account?.goals ?? '').replace(/,/g, ', '), placeholder: '123456, 234567' });
   const goalList = h('div', { class: 'ads-goal-list' });

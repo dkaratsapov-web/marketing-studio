@@ -599,6 +599,9 @@ const MIGRATIONS = [
      data   TEXT NOT NULL
    );
    CREATE INDEX parse_places_job ON parse_places(job_id);`,
+
+  // Парсер: условия сбора — только с телефоном, без сайта и т. п. (JSON { phone, site, email, social: 'yes' | 'no' })
+  `ALTER TABLE parse_jobs ADD COLUMN filters TEXT;`,
 ];
 
 /** Номер текущей версии схемы базы. */

@@ -1,9 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { openDb } from '../src/storage/db.js';
-import { createParser, mergePlaces, toCsv, formatPhone, phoneKey } from '../src/parser/store.js';
+import { createParser, mergePlaces, toCsv, formatPhone, phoneKey, matches } from '../src/parser/store.js';
 import { OVERPASS, overpassQuery, osmPlace, yandexPlace, gisPlace, googlePlace, place, searchSource } from '../src/parser/sources.js';
-import { extractContacts, contactsLink, privateIp, fetchPage } from '../src/parser/site.js';
+import { extractContacts, contactsLink, privateIp, fetchPage, nativeGet, decodeHtml } from '../src/parser/site.js';
+import { createServer } from 'node:http';
+import { gzipSync } from 'node:zlib';
 
 const res = (status, body, headers = {}) => ({
   status,
@@ -131,7 +133,7 @@ test('Сбор: OSM и Яндекс, склейка, контакты с сай�
     if (url === 'https://ulybka.ru/') return res(200, '<a href="mailto:info@ulybka.ru">почта</a><a href="https://t.me/ulybka">tg</a>', { 'content-type': 'text/html; charset=utf-8' });
     throw new Error(`неожиданный адрес ${url}`);
   };
-  const parser = createParser({ db, fetchImpl, lookup: publicDns, wait: async () => {} });
+  const parser = createParser({ db, fetchImpl, siteFetch: fetchImpl, lookup: publicDns, wait: async () => {} });
   db.prepare("INSERT INTO app_settings (key, value, updated_at) VALUES ('parser_key_yandex', 'key-0123456789', datetime('now'))").run();
   const job = parser.create({ query: 'стоматология', geo: 'Тверь', sources: ['osm', 'yandex', 'nope'], perSource: 50 }, { name: 'Мен' });
   assert.deepEqual(job.sources, ['osm', 'yandex']);
@@ -176,4 +178,49 @@ test('Перезапуск: прерванный сбор — с ошибкой,
   await parser.resume();
   assert.equal(parser.job(1).status, 'error');
   assert.match(parser.job(1).error, /перезапускался/);
+});
+
+test('Сайт: запрос строго на проверенный IP, сжатие и кодировка windows-1251', async () => {
+  const html = Buffer.from([...Buffer.from('<meta charset="windows-1251"><p>'), 0xcf, 0xf0, 0xe8, 0xe2, 0xe5, 0xf2, ...Buffer.from(' info@firm.ru</p>')]);
+  let host;
+  const server = createServer((req, res) => {
+    host = req.headers.host;
+    res.writeHead(200, { 'content-type': 'text/html', 'content-encoding': 'gzip' });
+    res.end(gzipSync(html));
+  });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  try {
+    const { port } = server.address();
+    const r = await nativeGet(new URL(`http://firm.test:${port}/`), '127.0.0.1');
+    assert.equal(r.status, 200);
+    assert.equal(host, `firm.test:${port}`, 'имя сайта в заголовке, соединение на заданный IP');
+    assert.match(decodeHtml(r.body, r.type), /Привет info@firm\.ru/);
+  } finally {
+    server.close();
+  }
+  assert.equal(decodeHtml(Buffer.from('тест'), 'text/html; charset=utf-8'), 'тест');
+});
+
+test('Условия сбора: только с телефоном и без сайта', async () => {
+  const p = (x) => place({ source: 'osm', sourceId: x.id, name: x.id, phones: x.phones ?? [], website: x.website ?? null });
+  const list = [p({ id: 'a', phones: ['+79001112233'] }), p({ id: 'b', phones: ['+79001112234'], website: 'b.ru' }), p({ id: 'c' })];
+  const f = { phone: 'yes', site: 'no' };
+  assert.deepEqual(mergePlaces(list).filter((m) => matches(m, f)).map((m) => m.name), ['a']);
+
+  const db = openDb(':memory:').raw;
+  const fetchImpl = async (url) => {
+    if (url.startsWith('https://nominatim')) return res(200, [{ osm_type: 'relation', osm_id: 1 }]);
+    return res(200, { elements: [
+      { type: 'node', id: 1, tags: { name: 'С телефоном', phone: '+7 900 111 22 33' } },
+      { type: 'node', id: 2, tags: { name: 'С сайтом', phone: '+7 900 111 22 44', website: 'https://site.ru' } },
+      { type: 'node', id: 3, tags: { name: 'Пусто' } },
+    ] });
+  };
+  const parser = createParser({ db, fetchImpl, siteFetch: async () => res(500, ''), lookup: publicDns });
+  const job = parser.create({ query: 'кафе', geo: 'тверь', sources: ['osm'], filters: { phone: 'yes', site: 'no', email: 'bad' } });
+  assert.deepEqual(job.filters, { phone: 'yes', site: 'no' });
+  await parser.settle();
+  const done = parser.job(job.id);
+  assert.deepEqual(parser.places(job.id).map((x) => [x.name, x.city]), [['С телефоном', 'Тверь']]);
+  assert.deepEqual([done.progress.found, done.progress.filtered, done.progress.sites.total], [3, 2, 0]);
 });

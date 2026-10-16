@@ -109,10 +109,11 @@ function addPhones(m, phones) {
 
 /** Город по адресу, если источник не отдал его отдельно: первая часть адреса вида «Тверь, улица …». */
 function cityOf(p, geo) {
-  if (p.city) return p.city;
+  if (p.city) return p.city.charAt(0).toUpperCase() + p.city.slice(1);
   const first = p.address?.split(',')[0]?.trim();
   if (first && !/\d|улица|ул\.|проспект|пр-т|переулок|шоссе|бульвар|площадь|набережная/i.test(first) && first.length < 40) return first;
-  return geo.split(',')[0].trim();
+  const g = geo.split(',')[0].trim();
+  return g.charAt(0).toUpperCase() + g.slice(1);
 }
 
 const CSV_COLS = [
@@ -152,12 +153,27 @@ export function toCsv(places) {
   return `﻿${lines.join('\r\n')}\r\n`;
 }
 
-export function createParser({ db, fetchImpl = fetch, lookup = undefined, log = null, wait = undefined }) {
+/** Условия сбора: у каждого поля 'yes' — должно быть, 'no' — не должно быть, нет ключа — неважно. */
+export const CONDITIONS = {
+  phone: { label: 'Телефон', has: (p) => p.phones.length > 0 },
+  site: { label: 'Сайт', has: (p) => Boolean(p.website) },
+  email: { label: 'Почта', has: (p) => p.emails.length > 0 },
+  social: { label: 'Соцсети', has: (p) => Object.keys(p.socials ?? {}).length > 0 },
+};
+
+export function cleanFilters(f) {
+  return Object.fromEntries(Object.keys(CONDITIONS).filter((k) => f?.[k] === 'yes' || f?.[k] === 'no').map((k) => [k, f[k]]));
+}
+
+export const matches = (p, filters, keys = Object.keys(filters)) => keys.every((k) => !filters[k] || CONDITIONS[k].has(p) === (filters[k] === 'yes'));
+
+/** siteFetch — только для тестов: страницы сайтов без него читаются своим запросом с проверкой адреса. */
+export function createParser({ db, fetchImpl = fetch, siteFetch = null, lookup = undefined, log = null, wait = undefined }) {
   const q = {
     key: db.prepare('SELECT value, updated_by, updated_at FROM app_settings WHERE key = ?'),
     putKey: db.prepare("INSERT INTO app_settings (key, value, updated_by, updated_at) VALUES (?, ?, ?, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_by = excluded.updated_by, updated_at = excluded.updated_at"),
     delKey: db.prepare('DELETE FROM app_settings WHERE key = ?'),
-    insert: db.prepare("INSERT INTO parse_jobs (query, geo, sources, per_source, enrich, status, progress, created_by) VALUES (?, ?, ?, ?, ?, 'queued', ?, ?)"),
+    insert: db.prepare("INSERT INTO parse_jobs (query, geo, sources, per_source, enrich, status, progress, created_by, filters) VALUES (?, ?, ?, ?, ?, 'queued', ?, ?, ?)"),
     job: db.prepare('SELECT * FROM parse_jobs WHERE id = ?'),
     jobWithCount: db.prepare('SELECT j.*, (SELECT COUNT(*) FROM parse_places p WHERE p.job_id = j.id) AS places FROM parse_jobs j WHERE j.id = ?'),
     jobs: db.prepare('SELECT j.*, (SELECT COUNT(*) FROM parse_places p WHERE p.job_id = j.id) AS places FROM parse_jobs j ORDER BY j.id DESC LIMIT ?'),
@@ -202,9 +218,9 @@ export function createParser({ db, fetchImpl = fetch, lookup = undefined, log = 
     return sources().find((s) => s.id === source);
   }
 
-  const publicJob = (j) => (j ? { id: j.id, query: j.query, geo: j.geo, sources: j.sources.split(','), perSource: j.per_source, enrich: Boolean(j.enrich), status: j.status, progress: JSON.parse(j.progress ?? '{}'), error: j.error, createdBy: j.created_by, createdAt: j.created_at, finishedAt: j.finished_at, places: j.places ?? undefined } : null);
+  const publicJob = (j) => (j ? { id: j.id, query: j.query, geo: j.geo, sources: j.sources.split(','), perSource: j.per_source, enrich: Boolean(j.enrich), filters: JSON.parse(j.filters ?? '{}'), status: j.status, progress: JSON.parse(j.progress ?? '{}'), error: j.error, createdBy: j.created_by, createdAt: j.created_at, finishedAt: j.finished_at, places: j.places ?? undefined } : null);
 
-  function create({ query, geo, sources: list, perSource = 200, enrich = true }, user) {
+  function create({ query, geo, sources: list, perSource = 200, enrich = true, filters = {} }, user) {
     const text = String(query ?? '').trim();
     const where = String(geo ?? '').trim();
     if (text.length < 2) throw new ParserError('Напишите, что искать: например, «стоматология» или «автосервис»');
@@ -215,7 +231,7 @@ export function createParser({ db, fetchImpl = fetch, lookup = undefined, log = 
     if (missing.length) throw new ParserError(`Нет ключа API: ${missing.map((s) => SOURCES[s].label).join(', ')}. Добавьте его в «Ключи источников»`);
     const limit = Math.max(1, Math.min(MAX_PER_SOURCE, Math.round(Number(perSource) || 200)));
     const progress = { sources: Object.fromEntries(chosen.map((s) => [s, { status: 'queued', found: 0 }])), sites: null };
-    const { lastInsertRowid } = q.insert.run(text.slice(0, 200), where.slice(0, 200), chosen.join(','), limit, enrich ? 1 : 0, JSON.stringify(progress), user?.name ?? null);
+    const { lastInsertRowid } = q.insert.run(text.slice(0, 200), where.slice(0, 200), chosen.join(','), limit, enrich ? 1 : 0, JSON.stringify(progress), user?.name ?? null, JSON.stringify(cleanFilters(filters)));
     for (const { id } of q.old.all(KEEP_JOBS)) remove(id);
     pump();
     return job(Number(lastInsertRowid));
@@ -261,7 +277,10 @@ export function createParser({ db, fetchImpl = fetch, lookup = undefined, log = 
       }
       save();
     }
-    const merged = mergePlaces(found);
+    const filters = JSON.parse(j.filters ?? '{}');
+    const all = mergePlaces(found);
+    // сайт известен до захода на сайты — отсеиваем сразу; телефон, почта и соцсети могут найтись на сайте
+    let merged = all.filter((m) => matches(m, filters, ['site']));
     for (const m of merged) m.city = cityOf(m, j.geo);
 
     if (j.enrich) {
@@ -272,7 +291,7 @@ export function createParser({ db, fetchImpl = fetch, lookup = undefined, log = 
       const worker = async () => {
         while (next < todo.length) {
           const m = todo[next++];
-          const site = await siteContacts(normUrl(m.website), { fetchImpl, lookup }).catch(() => null);
+          const site = await siteContacts(normUrl(m.website), { fetchImpl: siteFetch, lookup }).catch(() => null);
           m.siteChecked = true;
           if (site) {
             const before = m.emails.length + Object.keys(m.socials).length;
@@ -287,6 +306,9 @@ export function createParser({ db, fetchImpl = fetch, lookup = undefined, log = 
       };
       await Promise.all(Array.from({ length: SITE_WORKERS }, worker));
     }
+    merged = merged.filter((m) => matches(m, filters));
+    progress.found = all.length;
+    progress.filtered = all.length - merged.length;
 
     db.exec('BEGIN');
     try {

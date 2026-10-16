@@ -2089,3 +2089,13 @@ input[type="date"][data-open] { border-color: var(--accent); box-shadow: 0 0 0 3
 .parser-key p { margin: 4px 0 8px; }
 .parser-key-head { display: flex; align-items: center; gap: 10px; }
 .parser-ok { color: var(--good); font-size: 12.5px; font-weight: 600; }
+
+/* Токены и ключи API: символы скрыты, но поле не «пароль» — браузер не подставляет туда сохранённый пароль от кабинета */
+.secret-input { -webkit-text-security: disc; text-security: disc; font-family: var(--soroka-font-body); }
+.secret-input::placeholder { -webkit-text-security: none; }
+.parser-conds { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0 0 12px; padding: 0; border: 0; }
+.parser-conds legend { width: 100%; padding: 0; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
+.parser-cond { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+.parser-cond > span { min-width: 58px; color: var(--muted); }
+.parser-cond-note { display: block; margin-top: 2px; }
+.parser-toggles button[data-mode="no"] { color: var(--danger); }

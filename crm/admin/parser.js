@@ -7,6 +7,14 @@ import { fill } from './docs.js';
 const STATUS = { queued: 'В очереди', running: 'Идёт сбор', done: 'Готово', error: 'Ошибка' };
 const SOCIAL = { vk: 'ВК', telegram: 'Telegram', whatsapp: 'WhatsApp', instagram: 'Instagram', ok: 'ОК', youtube: 'YouTube', dzen: 'Дзен' };
 const PER_SOURCE = [50, 100, 200, 500, 1000];
+// условия сбора и фильтры результатов: у поля «есть» или «нет»
+const CONDS = [
+  ['phone', 'Телефон', 'с телефоном', 'без телефона', (p) => p.phones.length > 0],
+  ['site', 'Сайт', 'с сайтом', 'без сайта', (p) => Boolean(p.website)],
+  ['email', 'Почта', 'с почтой', 'без почты', (p) => p.emails.length > 0],
+  ['social', 'Соцсети', 'с соцсетями', 'без соцсетей', (p) => Object.keys(p.socials ?? {}).length > 0],
+];
+const condText = (filters = {}) => CONDS.filter(([k]) => filters[k]).map(([k, , yes, no]) => (filters[k] === 'yes' ? yes : no)).join(', ');
 const fmtWhen = (s) => (s ? new Date(`${s.replace(' ', 'T')}Z`).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow' }) : '');
 const companies = (n) => `${n} ${plural(n, 'компания', 'компании', 'компаний')}`;
 const elapsed = (iso) => {
@@ -38,7 +46,7 @@ function openKeysDialog(onChange) {
       list,
       h('p', { class: 'muted small' }, 'OpenStreetMap работает без ключа. Для остальных нужен ключ API: он хранится на сервере кабинета, здесь видны только последние 4 символа.'),
       sources.filter((s) => s.needsKey).map((s) => {
-        const input = h('input', { class: 'input', type: 'password', maxlength: 300, placeholder: 'Ключ API', autocomplete: 'off', spellcheck: 'false', 'aria-label': `Ключ ${s.label}` });
+        const input = h('input', { type: 'text', class: 'input secret-input', autocomplete: 'off', 'data-lpignore': 'true', 'data-1p-ignore': 'true', 'data-bwignore': 'true', 'data-form-type': 'other', maxlength: 300, placeholder: 'Ключ API', spellcheck: 'false', 'aria-label': `Ключ ${s.label}` });
         const save = h('button', { type: 'submit', class: 'btn btn-primary btn-s' }, 'Проверить и сохранить');
         return h(
           'section',
@@ -105,6 +113,24 @@ export async function renderParser() {
     });
     const per = h('select', { class: 'input', id: 'parser-per' }, PER_SOURCE.map((n) => h('option', { value: String(n), selected: n === 200 }, `до ${n}`)));
     const enrich = h('input', { type: 'checkbox', checked: true });
+    const filters = {};
+    const conds = h(
+      'fieldset',
+      { class: 'parser-conds' },
+      h('legend', {}, 'Какие компании оставить'),
+      CONDS.map(([k, label]) =>
+        h(
+          'div',
+          { class: 'parser-cond' },
+          h('span', {}, label),
+          h('div', { class: 'rating-filter', role: 'group', 'aria-label': label }, [['', 'неважно'], ['yes', 'есть'], ['no', 'нет']].map(([v, t]) => h('button', { type: 'button', 'aria-pressed': String(v === ''), onclick: (e) => {
+            if (v) filters[k] = v;
+            else delete filters[k];
+            for (const b of e.currentTarget.parentNode.children) b.setAttribute('aria-pressed', String(b === e.currentTarget));
+          } }, t))),
+        ),
+      ),
+    );
     const submit = h('button', { type: 'submit', class: 'btn btn-primary' }, 'Начать сбор');
     fill(
       form,
@@ -117,7 +143,7 @@ export async function renderParser() {
             const chosen = boxes.map((l) => l.querySelector('input')).filter((b) => b.checked).map((b) => b.value);
             submit.disabled = true;
             try {
-              const { job } = await api('/admin/api/parser/jobs', { method: 'POST', body: { query: query.value, geo: geo.value, sources: chosen, perSource: Number(per.value), enrich: enrich.checked } });
+              const { job } = await api('/admin/api/parser/jobs', { method: 'POST', body: { query: query.value, geo: geo.value, sources: chosen, perSource: Number(per.value), enrich: enrich.checked, filters } });
               navigate('parsejob', new URLSearchParams({ id: String(job.id) }));
             } catch (err) {
               toast(err.message);
@@ -129,6 +155,7 @@ export async function renderParser() {
         h('div', { class: 'field' }, h('label', { for: 'parser-geo' }, 'Где'), geo),
         h('div', { class: 'field parser-per' }, h('label', { for: 'parser-per' }, 'С каждого источника'), per),
         h('fieldset', { class: 'parser-sources' }, h('legend', {}, 'Источники'), boxes),
+        conds,
         h('label', { class: 'check parser-enrich' }, enrich, 'Зайти на сайты компаний за почтой и соцсетями'),
         h('div', { class: 'parser-submit' }, submit),
       ),
@@ -162,7 +189,7 @@ export async function renderParser() {
                   h(
                     'tr',
                     { onclick: () => navigate('parsejob', new URLSearchParams({ id: String(j.id) })) },
-                    h('td', {}, h('a', { class: 'row-link company', href: `#/parsejob?id=${j.id}` }, j.query)),
+                    h('td', {}, h('a', { class: 'row-link company', href: `#/parsejob?id=${j.id}` }, j.query), condText(j.filters) ? h('span', { class: 'muted small parser-cond-note' }, condText(j.filters)) : null),
                     h('td', {}, j.geo),
                     h('td', {}, sourceChips(j)),
                     h('td', { class: 'num' }, busy(j) ? '' : String(j.places)),
@@ -192,6 +219,8 @@ function placeLinks(p) {
 }
 
 // адрес сайта без протокола; не через URL — он превратил бы кириллический домен в xn--
+// город с большой буквы: «тверь» из запроса и «Тверь» из карточки — один город
+const cityOf = (p) => (p.city ? p.city.charAt(0).toUpperCase() + p.city.slice(1) : 'Без города');
 const hostOf = (url) => url.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '');
 
 export async function renderParserJob(params) {
@@ -212,7 +241,7 @@ export async function renderParserJob(params) {
   const { job, places } = data;
   const again = async () => {
     try {
-      const r = await api('/admin/api/parser/jobs', { method: 'POST', body: { query: job.query, geo: job.geo, sources: job.sources, perSource: job.perSource, enrich: job.enrich } });
+      const r = await api('/admin/api/parser/jobs', { method: 'POST', body: { query: job.query, geo: job.geo, sources: job.sources, perSource: job.perSource, enrich: job.enrich, filters: job.filters } });
       navigate('parsejob', new URLSearchParams({ id: String(r.job.id) }));
     } catch (err) {
       toast(err.message);
@@ -239,7 +268,7 @@ export async function renderParserJob(params) {
       : null,
   );
 
-  const meta = h('p', { class: 'muted small' }, [`${STATUS[job.status]}`, job.createdBy ? `запустил ${job.createdBy}` : null, fmtWhen(job.createdAt), `до ${job.perSource} с источника`, job.enrich ? 'с сайтами компаний' : 'без сайтов'].filter(Boolean).join(' · '));
+  const meta = h('p', { class: 'muted small' }, [`${STATUS[job.status]}`, job.createdBy ? `запустил ${job.createdBy}` : null, fmtWhen(job.createdAt), `до ${job.perSource} с источника`, job.enrich ? 'с сайтами компаний' : 'без сайтов', condText(job.filters) ? `только ${condText(job.filters)}` : null, job.progress.filtered ? `не подошли под условия: ${job.progress.filtered} из ${job.progress.found}` : null].filter(Boolean).join(' · '));
   const progress = h(
     'section',
     { class: 'panel parser-progress' },
@@ -261,7 +290,7 @@ export async function renderParserJob(params) {
 
 /** Сводка, город, фильтры и таблица компаний. */
 function results(places) {
-  const state = { q: '', city: '', has: new Set(), source: '', limit: 100 };
+  const state = { q: '', city: '', has: {}, source: '', limit: 100 };
   const count = (f) => places.filter(f).length;
   const hasSocial = (p) => Object.keys(p.socials ?? {}).length > 0;
   const FILTERS = [
@@ -270,7 +299,7 @@ function results(places) {
     ['email', 'с почтой', (p) => p.emails.length > 0],
     ['social', 'с соцсетями', hasSocial],
   ];
-  const cities = Object.entries(places.reduce((m, p) => ((m[p.city ?? 'Без города'] = (m[p.city ?? 'Без города'] ?? 0) + 1), m), {})).sort((a, b) => b[1] - a[1]);
+  const cities = Object.entries(places.reduce((m, p) => ((m[cityOf(p)] = (m[cityOf(p)] ?? 0) + 1), m), {})).sort((a, b) => b[1] - a[1]);
   const usedSources = [...new Set(places.flatMap((p) => p.sources.map((s) => s.source)))];
 
   const sum = h(
@@ -280,12 +309,18 @@ function results(places) {
     FILTERS.map(([, label, f]) => h('div', { class: 'ads-sum-item' }, h('b', { class: 'num' }, String(count(f))), h('span', {}, label))),
   );
   const search = h('input', { class: 'input', type: 'search', placeholder: 'Название, адрес, телефон', 'aria-label': 'Поиск', oninput: () => ((state.q = search.value.trim().toLowerCase()), (state.limit = 100), draw()) });
-  const toggles = h('div', { class: 'rating-filter', role: 'group', 'aria-label': 'Только' }, FILTERS.map(([k, label]) => h('button', { type: 'button', 'aria-pressed': 'false', onclick: (e) => {
-    state.has.has(k) ? state.has.delete(k) : state.has.add(k);
-    e.currentTarget.setAttribute('aria-pressed', String(state.has.has(k)));
+  // каждая кнопка по кругу: неважно → «с …» → «без …» → неважно
+  const toggles = h('div', { class: 'rating-filter parser-toggles', role: 'group', 'aria-label': 'Только' }, CONDS.map(([k, , yes, no]) => h('button', { type: 'button', 'aria-pressed': 'false', title: 'Нажмите ещё раз: «без», третий раз — снять', onclick: (e) => {
+    const next = { undefined: 'yes', yes: 'no', no: undefined }[state.has[k]];
+    if (next) state.has[k] = next;
+    else delete state.has[k];
+    const b = e.currentTarget;
+    b.setAttribute('aria-pressed', String(Boolean(next)));
+    b.dataset.mode = next ?? '';
+    b.textContent = next === 'no' ? no : yes;
     state.limit = 100;
     draw();
-  } }, label)));
+  } }, yes)));
   const sourceSel = usedSources.length > 1
     ? h('select', { class: 'input parser-select', 'aria-label': 'Источник', onchange: (e) => ((state.source = e.target.value), draw()) }, h('option', { value: '' }, 'Все источники'), usedSources.map((s) => h('option', { value: s }, sourcesCache?.find((x) => x.id === s)?.label ?? s)))
     : null;
@@ -303,9 +338,9 @@ function results(places) {
   function draw() {
     const list = places.filter(
       (p) =>
-        (!state.city || (p.city ?? 'Без города') === state.city) &&
+        (!state.city || (cityOf(p)) === state.city) &&
         (!state.source || p.sources.some((s) => s.source === state.source)) &&
-        FILTERS.every(([k, , f]) => !state.has.has(k) || f(p)) &&
+        CONDS.every(([k, , , , f]) => !state.has[k] || f(p) === (state.has[k] === 'yes')) &&
         (!state.q || [p.name, p.address, p.category, ...p.phones, p.website, ...p.emails].filter(Boolean).join(' ').toLowerCase().includes(state.q)),
     );
     const row = (p) =>

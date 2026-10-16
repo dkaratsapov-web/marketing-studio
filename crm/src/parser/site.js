@@ -1,12 +1,15 @@
 // Контакты с сайта компании: почта, телефоны, соцсети и мессенджеры с главной и страницы «Контакты».
 // Сайты чужие, поэтому осторожно: только http(s) на стандартных портах, не во внутреннюю сеть,
-// не больше 1,5 МБ и 10 секунд на страницу.
+// не больше 1,5 МБ и 15 секунд на страницу.
 
 import { lookup as dnsLookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
+import http from 'node:http';
+import https from 'node:https';
+import zlib from 'node:zlib';
 
 const MAX_BYTES = 1_500_000;
-const TIMEOUT = 10_000;
+const TIMEOUT = 15_000;
 const UA = 'Mozilla/5.0 (compatible; KorpCabinet/1.0; +https://marketing-studio.pro)';
 
 /** Адрес из частной, служебной или локальной сети — туда не ходим. */
@@ -32,46 +35,109 @@ async function safeUrl(raw, lookup) {
   if (host === 'localhost' || host.endsWith('.local') || host.endsWith('.internal')) return null;
   const ips = isIP(host) ? [host] : (await lookup(host, { all: true }).catch(() => [])).map((x) => x.address);
   if (!ips.length || ips.some(privateIp)) return null;
-  return u;
+  // IPv4 надёжнее: у многих хостингов IPv6 в DNS есть, а сайт по нему не отвечает
+  return { url: u, ip: ips.find((ip) => isIP(ip) === 4) ?? ips[0] };
 }
 
-/** Страница сайта текстом; переходы проверяем на каждом шаге. */
-export async function fetchPage(url, { fetchImpl = fetch, lookup = dnsLookup } = {}) {
+/**
+ * Страница сайта текстом; переходы проверяем на каждом шаге.
+ * fetchImpl — для тестов; без него страница читается своим запросом (nativeGet).
+ */
+export async function fetchPage(url, { fetchImpl = null, lookup = dnsLookup } = {}) {
   let current = url;
-  for (let hop = 0; hop < 4; hop++) {
-    const u = await safeUrl(current, lookup);
-    if (!u) return null;
-    let res;
-    try {
-      res = await fetchImpl(u.href, { redirect: 'manual', headers: { 'user-agent': UA, accept: 'text/html,*/*;q=0.5', 'accept-language': 'ru' }, signal: AbortSignal.timeout(TIMEOUT) });
-    } catch {
-      return null;
-    }
+  for (let hop = 0; hop < 5; hop++) {
+    const safe = await safeUrl(current, lookup);
+    if (!safe) return null;
+    const res = fetchImpl ? await viaFetch(fetchImpl, safe.url) : await nativeGet(safe.url, safe.ip);
+    if (!res) return null;
     if (res.status >= 300 && res.status < 400) {
-      const loc = res.headers.get('location');
-      if (!loc) return null;
-      current = new URL(loc, u).href;
+      if (!res.location) return null;
+      current = new URL(res.location, safe.url).href;
       continue;
     }
-    if (!res.ok || !/html|text/i.test(res.headers.get('content-type') ?? 'text/html')) return null;
-    return { url: u.href, html: await readLimited(res) };
+    if (res.status >= 400 || !/html|text/i.test(res.type || 'text/html')) return null;
+    return { url: safe.url.href, html: decodeHtml(res.body, res.type) };
   }
   return null;
 }
 
-async function readLimited(res) {
-  if (!res.body?.getReader) return (await res.text()).slice(0, MAX_BYTES);
-  const reader = res.body.getReader();
-  const chunks = [];
-  let size = 0;
-  while (size < MAX_BYTES) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    chunks.push(value);
-    size += value.length;
+async function viaFetch(fetchImpl, u) {
+  try {
+    const res = await fetchImpl(u.href, { redirect: 'manual', headers: HEADERS, signal: AbortSignal.timeout(TIMEOUT) });
+    return { status: res.status, location: res.headers.get('location'), type: res.headers.get('content-type') ?? '', body: Buffer.from(await res.text()) };
+  } catch {
+    return null;
   }
-  reader.cancel().catch(() => {});
-  return new TextDecoder('utf-8', { fatal: false }).decode(Buffer.concat(chunks.map((c) => Buffer.from(c))));
+}
+
+const HEADERS = { 'user-agent': UA, accept: 'text/html,application/xhtml+xml,*/*;q=0.5', 'accept-language': 'ru,en;q=0.5', 'accept-encoding': 'gzip, deflate, br' };
+
+/**
+ * GET на уже проверенный адрес: соединение идёт строго на этот IP (DNS второй раз не спрашиваем),
+ * сертификат не проверяем — у многих сайтов он просрочен или выдан Минцифры, а мы только читаем
+ * открытую страницу. Сжатие распаковываем, читаем не больше MAX_BYTES.
+ */
+export function nativeGet(u, ip) {
+  return new Promise((resolve) => {
+    const mod = u.protocol === 'https:' ? https : http;
+    const family = isIP(ip);
+    let done = false;
+    const finish = (v) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      resolve(v);
+    };
+    const req = mod.request(
+      u,
+      {
+        method: 'GET',
+        headers: HEADERS,
+        rejectUnauthorized: false,
+        servername: isIP(u.hostname) ? undefined : u.hostname,
+        lookup: (host, opts, cb) => (opts?.all ? cb(null, [{ address: ip, family }]) : cb(null, ip, family)),
+      },
+      (res) => {
+        const type = String(res.headers['content-type'] ?? '');
+        if (res.statusCode >= 300 && res.statusCode < 400) {
+          res.resume();
+          return finish({ status: res.statusCode, location: res.headers.location ?? null, type, body: Buffer.alloc(0) });
+        }
+        const enc = String(res.headers['content-encoding'] ?? '').toLowerCase();
+        const stream = enc === 'gzip' ? res.pipe(zlib.createGunzip()) : enc === 'deflate' ? res.pipe(zlib.createInflate()) : enc === 'br' ? res.pipe(zlib.createBrotliDecompress()) : res;
+        const chunks = [];
+        let size = 0;
+        const end = () => finish({ status: res.statusCode, location: null, type, body: Buffer.concat(chunks) });
+        stream.on('data', (c) => {
+          chunks.push(c);
+          size += c.length;
+          if (size >= MAX_BYTES) {
+            end();
+            req.destroy();
+          }
+        });
+        stream.on('end', end);
+        stream.on('error', () => (chunks.length ? end() : finish(null)));
+      },
+    );
+    const timer = setTimeout(() => {
+      req.destroy();
+      finish(null);
+    }, TIMEOUT);
+    req.on('error', () => finish(null));
+    req.end();
+  });
+}
+
+/** Кодировка из заголовка или из <meta charset>: старые сайты бывают в windows-1251. */
+export function decodeHtml(buf, type = '') {
+  const head = buf.subarray(0, 4096).toString('latin1');
+  const charset = (/charset=["']?([\w-]+)/i.exec(type)?.[1] ?? /<meta[^>]+charset=["']?([\w-]+)/i.exec(head)?.[1] ?? 'utf-8').toLowerCase();
+  try {
+    return new TextDecoder(charset === 'cp1251' ? 'windows-1251' : charset, { fatal: false }).decode(buf);
+  } catch {
+    return new TextDecoder('utf-8', { fatal: false }).decode(buf);
+  }
 }
 
 const SOCIAL = [

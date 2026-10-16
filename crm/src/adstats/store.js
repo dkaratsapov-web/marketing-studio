@@ -14,7 +14,9 @@ const shift = (date, n) => iso(new Date(Date.parse(`${date}T12:00:00Z`) + n * 86
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 const TOKEN_KEY = 'yandex_ads_token';
-const TOKEN_RE = /^[\w.\-]{20,400}$/;
+// OAuth-токен Яндекса: y0_… (новый вид), AQAAAA… или 32 шестнадцатеричных символа (старые).
+// Всё остальное — скорее всего пароль, подставленный браузером: в Яндекс такое не отправляем.
+const TOKEN_RE = /^(?:y\d_[\w\-]{20,400}|AQAAAA[\w\-]{20,400}|[0-9a-f]{32})$/;
 
 /** token — из .env (YANDEX_ADS_TOKEN); токен, сохранённый администратором в кабинете, важнее. */
 export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, log = null, wait = undefined }) {
@@ -108,7 +110,7 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
     const direct = v.directEnabled ? 1 : 0;
     // свой токен: пусто — оставить как был, clearToken — убрать, иначе — заменить
     const newToken = String(v.token ?? '').trim();
-    if (newToken && !TOKEN_RE.test(newToken)) throw new AdStatsError('Это не похоже на токен Яндекса: скопируйте строку целиком, она начинается с y0_');
+    if (newToken && !TOKEN_RE.test(newToken)) throw new AdStatsError('Это не похоже на токен Яндекса: скопируйте строку целиком, она начинается с y0_. Если поле заполнил браузер, там пароль, а не токен');
     const token = v.clearToken ? null : newToken || before?.token || null;
     q.upsertAccount.run(Number(clientId), login, direct, counter, goals.join(',') || null, token);
     if (before && (before.token ?? null) !== token) {
@@ -246,7 +248,9 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
   /** Цели счётчика: по токену из формы, своему токену клиента или токену агентства. */
   async function goalsFor(counter, { clientId = null, token: typed = null } = {}) {
     const own = clientId ? q.account.get(Number(clientId))?.token : null;
-    const token = String(typed ?? '').trim() || own || needToken();
+    const t = String(typed ?? '').trim();
+    if (t && !TOKEN_RE.test(t)) throw new AdStatsError('В поле «Свой токен клиента» не токен Яндекса (он начинается с y0_). Возможно, браузер подставил туда пароль: очистите поле или вставьте токен');
+    const token = t || own || needToken();
     if (!/^\d{1,12}$/.test(String(counter ?? ''))) throw new AdStatsError('Укажите номер счётчика Метрики');
     try {
       return await metrikaGoals({ token, counter, fetchImpl });
@@ -265,7 +269,7 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
   /** Токен проверяется в Метрике до сохранения: неверный не сохраняем. */
   async function setToken(value, user) {
     const t = String(value ?? '').trim();
-    if (!TOKEN_RE.test(t)) throw new AdStatsError('Это не похоже на токен Яндекса: скопируйте строку целиком, она начинается с y0_');
+    if (!TOKEN_RE.test(t)) throw new AdStatsError('Это не похоже на токен Яндекса: скопируйте строку целиком, она начинается с y0_. Если поле заполнил браузер, там пароль, а не токен');
     let counters;
     try {
       counters = await metrikaCounters({ token: t, fetchImpl });

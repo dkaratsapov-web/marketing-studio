@@ -124,6 +124,8 @@ test('токен из кабинета: проверка в Метрике, ва
   };
   const db = openDb(':memory:');
   const stats = createAdStats({ db: db.raw, token: 'env_token_value_abcdefghijk', fetchImpl });
+  await assert.rejects(stats.setToken('MyCabinetPassword2026xyz', { name: 'Даниил' }), /не похоже на токен/, 'пароль из автозаполнения в Яндекс не уходит');
+  await assert.rejects(stats.goalsFor('123', { token: 'MyCabinetPassword2026xyz' }), /браузер подставил туда пароль/);
   assert.deepEqual(stats.tokenInfo(), { set: true, source: 'env', tail: 'hijk', updatedBy: null, updatedAt: null });
   await assert.rejects(stats.setToken('abc', { name: 'Даниил' }), /не похоже на токен/);
   await assert.rejects(stats.setToken('y0_bad_token_value_1234567', { name: 'Даниил' }), /Яндекс не принял токен: Invalid oauth_token/);
