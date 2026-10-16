@@ -60,7 +60,7 @@ test('Метрика: визиты, отказы из доли и сумма д�
 function setup(fetchImpl, token = 'tok') {
   const db = openDb(':memory:');
   db.raw.exec("INSERT INTO clients (name, agency) VALUES ('Сфера', 'korp'), ('Клиника', 'soroka'), ('Без рекламы', 'korp')");
-  return { db, stats: createAdStats({ db: db.raw, token, fetchImpl }) };
+  return { db, stats: createAdStats({ db: db.raw, token, fetchImpl, wait: async () => {} }) };
 }
 
 test('загрузка и сводка: расход, CTR, CPA, отказы, сравнение с прошлым периодом, неподключённые клиенты', async () => {
@@ -200,4 +200,45 @@ test('скрытые клиенты: не в списке неподключён
   o = stats.overview();
   assert.equal(o.hidden.length, 0);
   assert.ok(o.notConnected.some((c) => c.name === 'Без рекламы'));
+});
+
+test('срезы: площадки РСЯ из Директа с фильтром, источники из Метрики; сборка в фоне и кеш', async () => {
+  const bodies = [];
+  const fetchImpl = async (url, init) => {
+    if (String(url).includes('direct')) {
+      bodies.push(JSON.parse(init.body).params);
+      return res(200, 'Placement\tImpressions\tClicks\tCost\tBounceRate\tConversions_9_AUTO\nmail.ru\t1000\t20\t400\t30\t2\navito.ru\t500\t10\t900\t--\t0\n');
+    }
+    return res(200, { data: [{ dimensions: [{ name: 'Поисковые системы' }], metrics: [100, 80, 20, 2.5, 90, 4] }] });
+  };
+  const { stats } = setup(fetchImpl);
+  stats.saveAccount(1, { directEnabled: true, metrikaCounter: '5', goals: '9' });
+  assert.equal(stats.slice(1, 'placements', { from: '2026-10-01', to: '2026-10-07' }).status, 'pending');
+  await stats.settleSlices();
+  const p = stats.slice(1, 'placements', { from: '2026-10-01', to: '2026-10-07' });
+  assert.equal(p.status, 'ready');
+  assert.deepEqual(p.rows.map((r) => [r.name, r.cost, r.conversions, r.cpa, r.bounceRate]), [['avito.ru', 900, 0, null, null], ['mail.ru', 400, 2, 200, 30]]);
+  assert.deepEqual(bodies[0].SelectionCriteria.Filter, [{ Field: 'AdNetworkType', Operator: 'EQUALS', Values: ['AD_NETWORK'] }]);
+  assert.deepEqual(bodies[0].Goals, ['9']);
+  // повторный запрос — из кеша, без нового отчёта
+  stats.slice(1, 'placements', { from: '2026-10-01', to: '2026-10-07' });
+  assert.equal(bodies.length, 1);
+
+  stats.slice(1, 'sources', { from: '2026-10-01', to: '2026-10-07' });
+  await stats.settleSlices();
+  const s = stats.slice(1, 'sources', { from: '2026-10-01', to: '2026-10-07' });
+  assert.equal(s.rows[0].name, 'Поисковые системы');
+  assert.equal(s.rows[0].cr, 4);
+  assert.deepEqual(Object.keys(stats.readySlices(1, { from: '2026-10-01', to: '2026-10-07' })).sort(), ['placements', 'sources']);
+  assert.throws(() => stats.slice(1, 'nope', {}), /Неизвестный срез/);
+});
+
+test('срез без подключённого источника — понятная ошибка в ответе', async () => {
+  const { stats } = setup(async () => res(200, ''));
+  stats.saveAccount(1, { metrikaCounter: '5' });
+  stats.slice(1, 'campaigns', { from: '2026-10-01', to: '2026-10-07' });
+  await stats.settleSlices();
+  const r = stats.slice(1, 'campaigns', { from: '2026-10-01', to: '2026-10-07' });
+  assert.equal(r.status, 'error');
+  assert.match(r.error, /не подключён Директ/);
 });

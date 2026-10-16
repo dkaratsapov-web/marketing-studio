@@ -2006,3 +2006,18 @@ input[type="date"][data-open] { border-color: var(--accent); box-shadow: 0 0 0 3
 .ads-sum-item b { font-size: 22px; line-height: 1.15; color: var(--text); font-family: var(--soroka-font-heading); }
 .ads-sum-item b .ads-delta { font-family: var(--soroka-font-body); vertical-align: middle; }
 @media (max-width: 760px) { .ads-sum { grid-template-columns: 1fr; } .ads-sum-item { border-left: 0; border-top: 1px solid var(--line); } .ads-sum-item:first-child { border-top: 0; } }
+
+/* Срезы в карточке клиента */
+.ads-slices h2 { margin: 0 0 10px; }
+.ads-slice-tabs { display: grid; gap: 8px; margin-bottom: 12px; }
+.ads-slice-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ads-slice-src { min-width: 64px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.ads-slice-group .rating-filter { flex-wrap: wrap; }
+.ads-slice-name { min-width: 260px; max-width: 520px; white-space: normal !important; }
+.ads-slice-name > span { display: block; overflow-wrap: anywhere; }
+.ads-slice-table th.sortable { cursor: pointer; user-select: none; }
+.ads-slice-table th.sorted { color: var(--text); }
+.ads-slice-table th.sorted::after { content: ' ↓'; color: var(--accent-text); }
+.ads-share { min-width: 120px; }
+.ads-share-bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--accent); vertical-align: middle; margin-right: 6px; max-width: 70px; }
+.ads-slice-foot { margin: 8px 0 0; }

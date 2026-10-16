@@ -564,6 +564,18 @@ const MIGRATIONS = [
 
   // Клиент скрыт из статистики (реклама у него не ведётся)
   `ALTER TABLE ad_accounts ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0;`,
+
+  // Срезы статистики клиента за период (кампании, площадки, запросы…) — кеш на несколько часов
+  `CREATE TABLE ad_slices (
+     client_id  INTEGER NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+     slice      TEXT NOT NULL,
+     date_from  TEXT NOT NULL,
+     date_to    TEXT NOT NULL,
+     rows       TEXT NOT NULL,
+     error      TEXT,
+     fetched_at TEXT NOT NULL,
+     PRIMARY KEY (client_id, slice, date_from, date_to)
+   );`,
 ];
 
 /** Номер текущей версии схемы базы. */

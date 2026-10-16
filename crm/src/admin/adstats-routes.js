@@ -63,6 +63,13 @@ export async function adStatsRoutes(api, { adstats }) {
     },
   );
 
+  api.get('/admin/api/ad-stats/slices', async () => ({ slices: adstats.sliceCatalog() }));
+  api.get(
+    '/admin/api/ad-stats/clients/:id/slices/:slice',
+    { schema: { params: { type: 'object', required: ['id', 'slice'], properties: { id: { type: 'integer' }, slice: { type: 'string', maxLength: 30 } } }, querystring: { ...periodQuery, properties: { ...periodQuery.properties, refresh: { type: 'boolean' } } } } },
+    async (req) => adstats.slice(req.params.id, req.params.slice, req.query),
+  );
+
   api.put('/admin/api/ad-stats/clients/:id/hidden', { schema: { params: idParams, body: { type: 'object', required: ['hidden'], additionalProperties: false, properties: { hidden: { type: 'boolean' } } } } }, async (req) => {
     adstats.setHidden(req.params.id, req.body.hidden);
     return { ok: true };

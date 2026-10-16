@@ -441,6 +441,114 @@ function chart(days) {
   return h('div', {}, box, h('p', { class: 'ads-legend muted small' }, h('span', { class: 'ads-key bar' }), 'Расход', hasConv ? [h('span', { class: 'ads-key line' }), days.some((x) => x.conversions) ? 'Конверсии в Директе' : 'Достижения целей в Метрике'] : h('span', { class: 'muted' }, ' · конверсий нет: выберите цели в «Настроить»')));
 }
 
+const fmtDur = (sec) => (sec ? `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}` : '-');
+let sliceCatalogCache = null;
+
+/**
+ * Срезы клиента: вкладки Директа и Метрики, таблица с сортировкой по колонкам.
+ * Срез собирается в фоне: пока Директ готовит отчёт, показываем «Готовлю…» и спрашиваем снова.
+ */
+function slicesPanel(clientId, per, account) {
+  const tabs = h('div', { class: 'ads-slice-tabs' });
+  const body = h('div', { class: 'ads-slice-body' }, h('p', { class: 'muted' }, 'Выберите срез.'));
+  const box = h('section', { class: 'panel ads-slices' }, h('h2', {}, 'Срезы'), tabs, body);
+  let current = null;
+  let sort = null;
+  let showAll = false;
+
+  const DIRECT_COLS = [
+    ['cost', 'Расход', money],
+    ['share', 'Доля расхода', null],
+    ['impressions', 'Показы', int],
+    ['clicks', 'Клики', int],
+    ['ctr', 'CTR', pct],
+    ['cpc', 'Цена клика', money2],
+    ['conversions', 'Конверсии', int],
+    ['cpa', 'Цена конверсии', money2],
+    ['bounceRate', 'Отказы', pct],
+  ];
+  const METRIKA_COLS = [
+    ['visits', 'Визиты', int],
+    ['users', 'Посетители', int],
+    ['bounceRate', 'Отказы', pct],
+    ['depth', 'Глубина', (v) => (v ? nf1.format(v) : '-')],
+    ['duration', 'Время на сайте', fmtDur],
+    ['goals', 'Цели', int],
+    ['cr', 'Конверсия', pct],
+  ];
+
+  async function open(slice, source, { refresh = false } = {}) {
+    current = { slice, source };
+    showAll = false;
+    sort = source === 'direct' ? 'cost' : 'visits';
+    for (const b of tabs.querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.slice === slice));
+    fill(body, h('p', { class: 'muted' }, 'Загружаю…'));
+    let r;
+    try {
+      r = await api(`/admin/api/ad-stats/clients/${clientId}/slices/${slice}?${new URLSearchParams({ from: per.from, to: per.to, ...(refresh ? { refresh: 'true' } : {}) })}`);
+    } catch (err) {
+      fill(body, h('p', { class: 'error' }, err.message));
+      return;
+    }
+    if (current?.slice !== slice || !box.isConnected) return;
+    if (r.status === 'pending') {
+      fill(body, h('p', { class: 'muted' }, source === 'direct' ? 'Готовлю отчёт в Директе. Это может занять до пары минут, страница обновится сама.' : 'Загружаю из Метрики…'));
+      setTimeout(() => current?.slice === slice && box.isConnected && open(slice, source), 5000);
+      return;
+    }
+    if (r.status === 'error') {
+      fill(body, h('p', { class: 'ads-error' }, r.error), h('button', { type: 'button', class: 'btn btn-s', onclick: () => open(slice, source, { refresh: true }) }, 'Повторить'));
+      return;
+    }
+    draw(r.rows, source, r.fetchedAt);
+  }
+
+  function draw(rows, source, fetchedAt) {
+    const cols = source === 'direct' ? DIRECT_COLS : METRIKA_COLS;
+    const totalCost = rows.reduce((t, x) => t + (x.cost ?? 0), 0);
+    const sorted = [...rows].sort((a, b) => (b[sort === 'share' ? 'cost' : sort] ?? -1) - (a[sort === 'share' ? 'cost' : sort] ?? -1));
+    const list = showAll ? sorted : sorted.slice(0, 50);
+    const head = h('tr', {}, h('th', { scope: 'col' }, 'Название'), cols.map(([k, label]) => h('th', { scope: 'col', class: `num sortable${sort === k ? ' sorted' : ''}`, onclick: () => ((sort = k), draw(rows, source, fetchedAt)) }, label)));
+    const row = (x) =>
+      h(
+        'tr',
+        {},
+        h('td', { class: 'ads-slice-name' }, h('span', {}, x.name), x.sub ? h('span', { class: 'muted small' }, x.sub) : null),
+        cols.map(([k, , fmt]) =>
+          k === 'share'
+            ? h('td', { class: 'ads-share' }, h('span', { class: 'ads-share-bar', style: `width:${totalCost ? Math.max(2, (x.cost / totalCost) * 100) : 0}%` }), h('span', { class: 'num small' }, totalCost ? `${nf0.format((x.cost / totalCost) * 100)} %` : '-'))
+            : h('td', { class: 'num nowrap' }, fmt(x[k])),
+        ),
+      );
+    fill(
+      body,
+      rows.length
+        ? [
+            h('div', { class: 'table-wrap' }, h('table', { class: 'leads docs ads-table ads-slice-table' }, h('thead', {}, head), h('tbody', {}, list.map(row)))),
+            h(
+              'p',
+              { class: 'muted small ads-slice-foot' },
+              `${rows.length} ${rows.length % 10 === 1 && rows.length % 100 !== 11 ? 'строка' : 'строк'}${fetchedAt ? `, собрано ${new Date(`${fetchedAt.replace(' ', 'T')}Z`).toLocaleString('ru-RU', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short', timeZone: 'Europe/Moscow' })}` : ''}. `,
+              rows.length > 50 && !showAll ? h('button', { type: 'button', class: 'linkish', onclick: () => ((showAll = true), draw(rows, source, fetchedAt)) }, 'Показать все') : null,
+              ' ',
+              h('button', { type: 'button', class: 'linkish', onclick: () => open(current.slice, source, { refresh: true }) }, 'Пересобрать'),
+            ),
+          ]
+        : h('p', { class: 'muted' }, 'За период данных в этом срезе нет.'),
+    );
+  }
+
+  (async () => {
+    sliceCatalogCache ??= (await api('/admin/api/ad-stats/slices')).slices;
+    const group = (title, list, source, on) =>
+      on ? h('div', { class: 'ads-slice-group' }, h('span', { class: 'ads-slice-src' }, title), h('div', { class: 'rating-filter' }, list.map((x) => h('button', { type: 'button', 'aria-pressed': 'false', dataset: { slice: x.id }, onclick: () => open(x.id, source) }, x.label)))) : null;
+    fill(tabs, group('Директ', sliceCatalogCache.direct, 'direct', account?.direct_enabled), group('Метрика', sliceCatalogCache.metrika, 'metrika', account?.metrika_counter));
+    if (account?.direct_enabled) open('campaigns', 'direct');
+    else if (account?.metrika_counter) open('sources', 'metrika');
+  })().catch((err) => fill(body, h('p', { class: 'error' }, err.message)));
+  return box;
+}
+
 export async function renderAdClient(params) {
   const id = Number(params.get('id'));
   if (!id) return navigate('adstats');
@@ -501,6 +609,7 @@ export async function renderAdClient(params) {
           a.error ? h('p', { class: 'ads-error' }, `Ошибка загрузки: ${a.error}`) : null,
           tiles(d.total),
           h('section', { class: 'panel' }, h('h2', {}, 'По дням'), chart(d.days)),
+          slicesPanel(id, per, a),
           h(
             'div',
             { class: 'table-wrap' },

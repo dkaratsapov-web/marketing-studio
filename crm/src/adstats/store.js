@@ -2,6 +2,7 @@
 // сводка за период по всем клиентам и динамика по одному клиенту.
 
 import { directDaily, metrikaDaily, metrikaGoals, metrikaCounters, AdApiError } from './yandex.js';
+import { createSlices, sliceCatalog } from './slices.js';
 
 export class AdStatsError extends Error {}
 
@@ -16,7 +17,7 @@ const TOKEN_KEY = 'yandex_ads_token';
 const TOKEN_RE = /^[\w.\-]{20,400}$/;
 
 /** token — из .env (YANDEX_ADS_TOKEN); токен, сохранённый администратором в кабинете, важнее. */
-export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, log = null }) {
+export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, log = null, wait = undefined }) {
   const settings = {
     get: db.prepare('SELECT value, updated_by, updated_at FROM app_settings WHERE key = ?'),
     put: db.prepare("INSERT INTO app_settings (key, value, updated_by, updated_at) VALUES (?, ?, ?, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_by = excluded.updated_by, updated_at = excluded.updated_at"),
@@ -148,7 +149,7 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
     const errors = [];
     if (a.direct_enabled) {
       try {
-        const rows = await directDaily({ token, login: a.direct_login, from, to, goals, fetchImpl });
+        const rows = await directDaily({ token, login: a.direct_login, from, to, goals, fetchImpl, wait });
         writeRows(() => rows.forEach((r) => q.putDaily.run(a.client_id, 'direct', r.date, r.impressions, r.clicks, r.cost, r.conversions, 0, 0, 0)));
       } catch (err) {
         errors.push(err instanceof AdApiError ? err.message : `Директ: ${err.message}`);
@@ -285,5 +286,17 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
     q.hide.run(Number(clientId), value ? 1 : 0);
   }
 
-  return { setHidden, saveAccount, account: (id) => publicAccount(q.account.get(Number(id))), syncClient, syncAll, overview, clientStats, goalsFor, hasToken: () => Boolean(currentToken()), tokenInfo, setToken, clearToken };
+  const slices = createSlices({ db, getAccount: (id) => q.account.get(Number(id)), tokenFor, fetchImpl, wait, log });
+  /** Срез клиента за период; первый запрос запускает сборку в фоне. */
+  function slice(clientId, name, { from, to, refresh = false } = {}) {
+    const a = q.account.get(Number(clientId));
+    if (!a) throw new AdStatsError('У клиента не подключены Директ и Метрика');
+    try {
+      return slices.get(Number(clientId), name, { ...period(from, to), refresh });
+    } catch (err) {
+      throw new AdStatsError(err.message);
+    }
+  }
+
+  return { slice, sliceCatalog, readySlices: (id, p) => slices.ready(id, period(p?.from, p?.to)), settleSlices: slices.settle, setHidden, saveAccount, account: (id) => publicAccount(q.account.get(Number(id))), syncClient, syncAll, overview, clientStats, goalsFor, hasToken: () => Boolean(currentToken()), tokenInfo, setToken, clearToken };
 }
