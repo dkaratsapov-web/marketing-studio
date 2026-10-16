@@ -525,6 +525,31 @@ const MIGRATIONS = [
 
   // Чей клиент: Корпорации (korp) или агентства Сорока (soroka) — разделение в списке клиентов
   `ALTER TABLE clients ADD COLUMN agency TEXT NOT NULL DEFAULT 'korp';`,
+
+  // Статистика клиентов из Яндекс Директа и Метрики: настройки подключения и дневные цифры
+  `CREATE TABLE ad_accounts (
+     client_id       INTEGER PRIMARY KEY REFERENCES clients(id) ON DELETE CASCADE,
+     direct_login    TEXT,
+     direct_enabled  INTEGER NOT NULL DEFAULT 0,
+     metrika_counter TEXT,
+     goals           TEXT,
+     synced_at       TEXT,
+     error           TEXT,
+     updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+   );
+   CREATE TABLE ad_daily (
+     client_id   INTEGER NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+     source      TEXT NOT NULL,
+     date        TEXT NOT NULL,
+     impressions INTEGER NOT NULL DEFAULT 0,
+     clicks      INTEGER NOT NULL DEFAULT 0,
+     cost        REAL NOT NULL DEFAULT 0,
+     conversions REAL NOT NULL DEFAULT 0,
+     visits      INTEGER NOT NULL DEFAULT 0,
+     bounces     INTEGER NOT NULL DEFAULT 0,
+     goals       REAL NOT NULL DEFAULT 0,
+     PRIMARY KEY (client_id, source, date)
+   );`,
 ];
 
 /** Номер текущей версии схемы базы. */

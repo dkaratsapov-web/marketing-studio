@@ -91,6 +91,8 @@ export function loadConfig(env = process.env) {
       apiKey: env.YANDEX_SEARCH_API_KEY || env.YANDEX_GPT_API_KEY || null,
       folderId: env.YANDEX_SEARCH_FOLDER_ID || env.YANDEX_GPT_FOLDER_ID || null,
     },
+    // Статистика клиентов: OAuth-токен Яндекса с правами direct:api и metrika:read
+    adsToken: env.YANDEX_ADS_TOKEN || null,
     logLevel: env.LOG_LEVEL || 'info',
   };
 }

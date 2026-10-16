@@ -17,6 +17,7 @@ import { createMediaplans } from './mediaplan/store.js';
 import { createFiles } from './files/store.js';
 import { createHotLeads } from './crm/hot-leads.js';
 import { createMoney } from './crm/money.js';
+import { createAdStats } from './adstats/store.js';
 import { createNotifications } from './notify/store.js';
 import { createCrm } from './crm/store.js';
 import { createCalendar } from './calendar/store.js';
@@ -58,6 +59,8 @@ const hotLeads = createHotLeads({ db: db.raw, crm });
 // деньги по клиентам: счета за ведение каждый месяц, напоминания о сроках оплаты
 const money = createMoney({ db: db.raw, notify: createNotifications({ db: db.raw }) });
 qualifier.onLead((lead) => hotLeads.onLead(lead));
+// статистика клиентов из Яндекс Директа и Метрики
+const adstats = createAdStats({ db: db.raw, token: config.adsToken, log });
 
 const telegramBot = config.telegram.botEnabled ? await initTelegramBot() : null;
 const brand = loadBrand();
@@ -80,6 +83,7 @@ const app = await buildServer({
     media,
     files,
     money,
+    adstats,
     mediaplans: createMediaplans({ db: db.raw, library }),
     crm,
     calendar,
@@ -112,6 +116,10 @@ setTimeout(() => purgeJob(() => abandoned.purge()), 60e3);
 // раз в час: регулярные встречи — продлить серии на полгода вперёд
 const seriesJob = monitor.job('meetings', 'Регулярные встречи: продление на полгода вперёд', 3600e3);
 const seriesTimer = setInterval(() => seriesJob(() => calendar.extendSeries()), 3600e3);
+// раз в 3 часа: статистика клиентов из Директа и Метрики (последние дни цифры ещё уточняются)
+const adsJob = monitor.job('ad-stats', 'Статистика клиентов из Яндекс Директа и Метрики', 3 * 3600e3);
+const adsTimer = config.adsToken ? setInterval(() => adsJob(() => adstats.syncAll()), 3 * 3600e3) : null;
+if (config.adsToken) setTimeout(() => adsJob(() => adstats.syncAll()), 120e3);
 setTimeout(() => seriesJob(() => calendar.extendSeries()), 90e3);
 // Напоминания о встречах и утренний план — в личный Telegram сотрудников (нужен токен бота)
 const reminders = config.telegram.token
@@ -127,6 +135,7 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
     clearInterval(moneyTimer);
     clearInterval(purgeTimer);
     clearInterval(seriesTimer);
+    if (adsTimer) clearInterval(adsTimer);
     reminders?.stop();
     scenarioSource.stop();
     if (telegramBot?.isRunning()) await telegramBot.stop();

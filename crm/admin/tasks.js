@@ -361,7 +361,7 @@ export async function openTask(id, { defaults = {}, onChange = () => {} } = {}) 
       }
     },
   });
-  const description = h('textarea', { class: 'textarea', id: 't-desc', rows: 5, maxlength: 10000, placeholder: 'Подробности, ссылки, критерии готовности', onchange: (e) => patch({ description: e.target.value || null }) }, task.description ?? '');
+  const description = h('textarea', { class: 'textarea', id: 't-desc', rows: 3, maxlength: 10000, placeholder: 'Подробности, ссылки, критерии готовности', onchange: (e) => patch({ description: e.target.value || null }) }, task.description ?? '');
 
   const fields = h(
     'div',

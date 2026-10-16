@@ -13,6 +13,7 @@ import { renderKb } from './kb.js';
 import { renderHome, bellButton } from './home.js';
 import { renderNews, refreshNewsBadge } from './news.js';
 import { renderMoney } from './money.js';
+import { renderAdStats, renderAdClient } from './adstats.js';
 import { renderNotifySettings } from './notify.js';
 import { renderChat, refreshChatBadge } from './chat.js';
 
@@ -190,6 +191,8 @@ const routes = {
   home: renderHome,
   news: renderNews,
   money: renderMoney,
+  adstats: renderAdStats,
+  adclient: renderAdClient,
   'notify-settings': renderNotifySettings,
   chat: renderChat,
   docs: renderDocs,
@@ -247,7 +250,7 @@ const SECTION_TABS = {
   ],
 };
 // Страницы внутри раздела без своей вкладки
-const PAGE_SECTION = { doc: 'docs', plan: 'plans', client: 'tasks', taskboard: 'tasks' };
+const PAGE_SECTION = { doc: 'docs', plan: 'plans', client: 'tasks', taskboard: 'tasks', adclient: 'adstats' };
 
 function currentRoute() {
   const [name, query = ''] = location.hash.replace(/^#\/?/, '').split('?');
@@ -288,6 +291,7 @@ async function boot() {
 // Значки разделов: простые контуры 24×24, цвет берут от текста
 const ICONS = {
   home: 'M3 11l9-7 9 7M5 9.5V20h5v-6h4v6h5V9.5',
+  adstats: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
   news: 'M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5M8 16h3',
   chat: 'M4 5h16v11H9l-5 4zM8 9h8M8 12h5',
   image: 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9.5a1.5 1.5 0 1 0 0-.01',
@@ -650,16 +654,17 @@ const NAV = [
   ['plans', 'Медиапланы'],
   ['tasks', 'Задачи'],
   ['calendar', 'Календарь'],
+  ['adstats', 'Статистика'],
   ['leads', 'Квалификатор'],
   ['kb', 'Регламенты'],
   ['staff', 'Сотрудники'],
 ];
 // Разделы, включённые на этом сервере (ADMIN_SECTIONS); учётная запись и её вкладки доступны всегда
 // «Главное» — сводка по всем включённым разделам, поэтому доступна всегда
-const ALWAYS = new Set(['home', 'account', 'appearance', 'notify-settings']);
+const ALWAYS = new Set(['home', 'adstats', 'account', 'appearance', 'notify-settings']);
 const sectionOf = (route) => PAGE_SECTION[route] ?? Object.keys(SECTION_TABS).find((k) => SECTION_TABS[k].some(([id]) => id === route)) ?? route;
 function sectionAllowed(route) {
-  return !ctx.sections || ALWAYS.has(route) || ctx.sections.includes(sectionOf(route));
+  return !ctx.sections || ALWAYS.has(route) || ALWAYS.has(sectionOf(route)) || ctx.sections.includes(sectionOf(route));
 }
 
 function navItems(pref = ctx.me.prefs?.nav ?? '') {

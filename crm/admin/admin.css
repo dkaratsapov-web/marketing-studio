@@ -1896,3 +1896,54 @@ div.notify-row { cursor: default; }
 
 /* «Мои задачи»: заголовок блока задач без срока */
 .my-section { margin: 18px 0 8px; font-family: var(--soroka-font-heading); font-size: 18px; }
+
+/* Карточки задачи и встречи компактнее: меньше воздуха между полями, ниже поля и подсказки */
+.drawer-body { padding: 16px 18px; gap: 14px; }
+.drawer .work { gap: 10px 12px; }
+.drawer .field { gap: 4px; margin-bottom: 0; }
+.drawer .field label, .drawer .meeting-form .label { font-size: 12.5px; }
+.drawer .input, .drawer .select { min-height: 36px; padding-block: 6px; }
+.drawer .textarea { min-height: 60px; padding-block: 7px; }
+.drawer .textarea.task-title { min-height: 0; }
+.drawer .hint { font-size: 12px; line-height: 1.35; }
+.drawer h3 { margin-bottom: 6px; }
+.drawer .check { min-height: 0; }
+
+/* «Статистика»: Яндекс Директ и Метрика по клиентам */
+.ads { display: grid; gap: 14px; }
+.ads-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ads-dates { display: flex; align-items: center; gap: 6px; }
+.ads-dates .input { width: 150px; min-height: 36px; }
+.ads-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 760px) { .ads-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ads-tile b { font-size: 22px; }
+.ads-delta { font-size: 11.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.ads-delta.up { color: var(--good); }
+.ads-delta.down { color: var(--danger); }
+.ads-table td, .ads-table th { white-space: nowrap; }
+.ads-table td:first-child { white-space: normal; min-width: 200px; }
+.ads-table tfoot td { font-weight: 700; border-top: 2px solid var(--line-strong); }
+.ads-sources { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.ads-src { padding: 1px 7px; border-radius: 999px; background: var(--surface-3); color: var(--muted); font-size: 11.5px; }
+.ads-error { display: block; color: var(--danger); font-size: 12px; max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+p.ads-error { white-space: normal; max-width: none; }
+.ads-setup ol { margin: 6px 0; padding-left: 20px; display: grid; gap: 4px; }
+.ads-off-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.ads-off-list li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+.ads-off-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ads-title { margin: 0; font-family: var(--soroka-font-heading); font-size: 24px; }
+.ads-chart svg { display: block; width: 100%; height: 240px; }
+.ads-bar { fill: color-mix(in srgb, var(--accent) 70%, var(--surface)); }
+.ads-line { stroke: var(--accent-text); stroke-width: 2.5; }
+.ads-dot { fill: var(--accent-text); }
+.ads-label { fill: var(--muted); font-size: 11px; }
+.ads-legend { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; }
+.ads-key { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-left: 10px; }
+.ads-key.bar { background: var(--accent); margin-left: 0; }
+.ads-key.line { height: 3px; background: var(--accent-text); }
+.dialog:has(.ads-form) { width: min(560px, 94vw); }
+.ads-form { display: grid; gap: 10px; min-width: 0; }
+.ads-goal-row { display: flex; gap: 8px; }
+.ads-goal-row .input { flex: 1; min-width: 0; }
+.ads-goal-row .btn { flex: none; }
+.ads-goal-list { display: grid; gap: 4px; max-height: 220px; overflow: auto; margin-top: 6px; }
