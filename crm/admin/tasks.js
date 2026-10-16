@@ -798,10 +798,18 @@ export async function renderProjects(params) {
       p.overdue ? h('span', { class: 'pm-overdue', title: `Просрочено: ${p.overdue}` }) : null,
       h('span', { class: 'pm-count num', title: 'Открытые задачи' }, p.open || ''),
     );
-  const clientsList = h('nav', { class: 'pm-list', 'aria-label': 'Проекты' }, projects.filter((p) => !p.internal).map(item));
+  // проекты клиентов Корпорации и Сороки — двумя группами, если есть клиенты обоих агентств
+  const clientProjects = projects.filter((p) => !p.internal);
+  const groups = AGENCIES.map(([v, label]) => [label, clientProjects.filter((p) => (p.agency ?? 'korp') === v)]).filter(([, list]) => list.length);
+  const clientsList = h(
+    'nav',
+    { class: 'pm-list', 'aria-label': 'Проекты' },
+    groups.length > 1 ? groups.map(([label, list]) => h('div', { class: 'pm-group' }, h('p', { class: 'pm-group-title' }, label), list.map(item))) : clientProjects.map(item),
+  );
   filterInput.addEventListener('input', () => {
     const v = filterInput.value.trim().toLowerCase();
-    for (const a of clientsList.children) a.hidden = Boolean(v) && !a.dataset.name.includes(v);
+    for (const a of clientsList.querySelectorAll('.pm-project')) a.hidden = Boolean(v) && !a.dataset.name.includes(v);
+    for (const g of clientsList.querySelectorAll('.pm-group')) g.hidden = ![...g.querySelectorAll('.pm-project')].some((a) => !a.hidden);
   });
   const side = h(
     'aside',

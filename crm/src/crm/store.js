@@ -296,7 +296,7 @@ export function createCrm({ db }) {
       return { open: r?.open ?? 0, overdue: r?.overdue ?? 0, mine: r?.mine ?? 0 };
     };
     return [
-      ...q.clients.all(0).map((c) => ({ id: c.id, name: c.name, manager_name: c.manager_name, lead_id: c.lead_id, ...counts(c.id) })),
+      ...q.clients.all(0).map((c) => ({ id: c.id, name: c.name, agency: c.agency, manager_name: c.manager_name, lead_id: c.lead_id, ...counts(c.id) })),
       { id: 'none', name: 'Общие задачи', internal: true, manager_name: null, ...counts('none') },
     ];
   }

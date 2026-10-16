@@ -812,7 +812,12 @@ details.menu summary::-webkit-details-marker { display: none; }
 .pm-side-head { display: flex; align-items: center; justify-content: space-between; padding: 0 6px; }
 .pm-side-head h2 { margin: 0; font-family: var(--soroka-font-heading); font-size: 16px; }
 .pm-side .input { min-height: 36px; padding: 6px 10px; font-size: 14px; }
-.pm-list { display: grid; gap: 1px; }
+.pm-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; }
+/* длинные названия проектов обрезаются многоточием, а не растягивают колонку */
+.pm-side { grid-template-columns: minmax(0, 1fr); overflow-x: hidden; }
+.pm-group { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; }
+.pm-group + .pm-group { margin-top: 8px; }
+.pm-group-title { margin: 4px 10px 2px; color: var(--muted); font-size: 12px; font-weight: 600; }
 .pm-pinned { border-top: 1px solid var(--line); padding-top: 8px; }
 .pm-project { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--radius-s); color: var(--text); text-decoration: none; font-size: 14px; }
 .pm-project:hover { background: var(--surface-2); }
@@ -934,6 +939,9 @@ details.menu summary::-webkit-details-marker { display: none; }
   .pm-side .pm-list { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
   .pm-side .pm-pinned { border: 0; padding: 0; }
   .pm-side .pm-project { flex: none; }
+  /* на телефоне проекты идут одной лентой, без заголовков групп */
+  .pm-side .pm-group { display: contents; }
+  .pm-side .pm-group-title { display: none; }
   .pm-side .input { display: none; }
 }
 @media (max-width: 720px) {
