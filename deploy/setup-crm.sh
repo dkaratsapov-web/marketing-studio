@@ -101,7 +101,8 @@ visudo -cf /etc/sudoers.d/korp-cabinet >/dev/null
 
 echo "==> Сборка и запуск (первый раз несколько минут)"
 rm -f "${APP_DIR}/.tree"
-"${UPDATER}" main
+# Первая сборка на маленьком сервере бывает дольше проверки: не обрываем установку, nginx и администратор нужны всё равно
+"${UPDATER}" main || echo "    ! Кабинет ещё запускается, продолжаю установку"
 
 echo "==> nginx: ${DOMAIN} -> 127.0.0.1:${APP_PORT}"
 if [ -f "${NGINX_SITE}" ] && grep -q "managed by Certbot" "${NGINX_SITE}"; then
@@ -141,7 +142,13 @@ echo "==> HTTPS"
 server_ip="$(curl -4 -fsS --max-time 10 https://api.ipify.org || true)"
 domain_ip="$(getent ahostsv4 "${DOMAIN}" 2>/dev/null | awk 'NR==1 {print $1}' || true)"
 if certbot certificates 2>/dev/null | grep -qE "Domains:.*\b${DOMAIN//./\\.}\b"; then
-  echo "    Сертификат для ${DOMAIN} уже есть"
+  if grep -q "managed by Certbot" "${NGINX_SITE}"; then
+    echo "    Сертификат для ${DOMAIN} уже есть и подключён"
+  else
+    # Сертификат выпущен раньше, но раздела nginx тогда не было: подключаем его сейчас
+    certbot install --nginx --cert-name "${DOMAIN}" --redirect --non-interactive \
+      || echo "    ! Не удалось подключить сертификат: certbot install --nginx --cert-name ${DOMAIN} --redirect"
+  fi
 elif [ -n "${domain_ip}" ]; then
   # Свой IP сервер узнаёт через внешний сервис, который бывает недоступен: пробуем выпустить
   # сертификат, как только домен резолвится, а certbot сам проверит, что он ведёт сюда
