@@ -238,17 +238,19 @@ function weekGrid(week, meetings, reload) {
         // встречи до 8:00 и после 21:00 прижимаются к краю сетки
         const top = Math.max(0, Math.min(height - 22, (start - HOUR_FROM * 60) * PX_PER_MIN));
         const hgt = Math.max(22, Math.min(height - top, (end - start) * PX_PER_MIN));
+        const short = hgt < 50;
         return h(
           'button',
           {
             type: 'button',
-            class: `cal-event f-${m.format}${m.cancelled ? ' cancelled' : ''}`,
+            // короткая встреча (до часа): только тема, время видно по сетке и во всплывающей подсказке
+            class: `cal-event f-${m.format}${m.cancelled ? ' cancelled' : ''}${short ? ' short' : ''}`,
             style: `top:${top}px;height:${hgt}px;left:calc(${(lane / total) * 100}% + 2px);width:calc(${100 / total}% - 4px)`,
             onclick: () => openMeeting(m.id, { onChange: reload }),
             title: `${msk(m.starts_at_iso).time}–${endTime(m)} ${m.title}`,
           },
-          h('span', { class: 'ev-time num' }, `${msk(m.starts_at_iso).time}–${endTime(m)}`),
-          h('span', { class: 'ev-title' }, m.series_id ? h('span', { class: 'ev-repeat', title: 'Регулярная встреча', 'aria-label': 'Регулярная встреча' }, '↻ ') : null, m.title),
+          short ? null : h('span', { class: 'ev-time num' }, `${msk(m.starts_at_iso).time}–${endTime(m)}`),
+          h('span', { class: 'ev-title', style: `-webkit-line-clamp:${Math.max(1, Math.floor((hgt - (short ? 6 : 22)) / 15))}` }, m.series_id ? h('span', { class: 'ev-repeat', title: 'Регулярная встреча', 'aria-label': 'Регулярная встреча' }, '↻ ') : null, m.title),
           hgt > 50 && m.client_name ? h('span', { class: 'ev-client' }, m.client_name) : null,
         );
       }),

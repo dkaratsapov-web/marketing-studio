@@ -736,7 +736,8 @@ details.menu summary::-webkit-details-marker { display: none; }
 .cal-event.f-call { border-left-color: var(--muted); background: var(--surface-2); }
 .cal-event.cancelled { opacity: .55; text-decoration: line-through; }
 .ev-time { color: var(--muted); font-size: 11px; }
-.ev-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.ev-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.cal-event.short { justify-content: center; padding-block: 2px; }
 .ev-client { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cal-agenda { display: grid; gap: 12px; max-width: 900px; }
 .cal-agenda h2 { text-transform: none; }
