@@ -897,7 +897,7 @@ function shell(active, content) {
             tabs.map(([id, label]) => h('a', { href: `#/${id}`, 'aria-current': id === active ? 'page' : null }, label)),
           )
         : null,
-      h('main', { class: `page${['doc', 'plan', 'tasks', 'board'].includes(active) ? ' page-wide' : ''}`, id: 'main' }, content),
+      h('main', { class: `page${['doc', 'plan', 'tasks', 'board', 'home', 'adstats', 'adclient'].includes(active) ? ' page-wide' : ''}`, id: 'main' }, content),
     ),
   ];
 }
