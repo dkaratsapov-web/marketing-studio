@@ -63,6 +63,11 @@ export async function adStatsRoutes(api, { adstats }) {
     },
   );
 
+  api.put('/admin/api/ad-stats/clients/:id/hidden', { schema: { params: idParams, body: { type: 'object', required: ['hidden'], additionalProperties: false, properties: { hidden: { type: 'boolean' } } } } }, async (req) => {
+    adstats.setHidden(req.params.id, req.body.hidden);
+    return { ok: true };
+  });
+
   api.post('/admin/api/ad-stats/clients/:id/sync', { schema: { params: idParams } }, async (req) => ({ sync: await adstats.syncClient(req.params.id) }));
 
   api.post('/admin/api/ad-stats/sync', { config: { rateLimit: { max: 6, timeWindow: '1 minute' } } }, async () => ({ sync: await adstats.syncAll() }));

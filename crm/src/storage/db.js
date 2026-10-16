@@ -561,6 +561,9 @@ const MIGRATIONS = [
 
   // Свой токен Яндекса у клиента (доступ к его кабинету без агентского аккаунта)
   `ALTER TABLE ad_accounts ADD COLUMN token TEXT;`,
+
+  // Клиент скрыт из статистики (реклама у него не ведётся)
+  `ALTER TABLE ad_accounts ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0;`,
 ];
 
 /** Номер текущей версии схемы базы. */

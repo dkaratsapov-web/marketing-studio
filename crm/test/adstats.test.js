@@ -189,3 +189,15 @@ test('Директ: «не чаще 1 раза в 10 секунд» — пауз
   assert.equal(rows[0].cost, 10);
   assert.ok(waits.some((ms) => ms > 10_000), 'между запросами отчётов не меньше 10 секунд');
 });
+
+test('скрытые клиенты: не в списке неподключённых, можно вернуть', () => {
+  const { stats } = setup(async () => res(200, ''));
+  stats.setHidden(3, true);
+  let o = stats.overview();
+  assert.deepEqual(o.hidden.map((c) => c.name), ['Без рекламы']);
+  assert.ok(!o.notConnected.some((c) => c.name === 'Без рекламы'));
+  stats.setHidden(3, false);
+  o = stats.overview();
+  assert.equal(o.hidden.length, 0);
+  assert.ok(o.notConnected.some((c) => c.name === 'Без рекламы'));
+});

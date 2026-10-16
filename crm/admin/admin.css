@@ -1992,3 +1992,5 @@ input[type="date"][data-open] { border-color: var(--accent); box-shadow: 0 0 0 3
 .date-day:disabled { opacity: .25; cursor: default; }
 .date-foot { display: flex; justify-content: space-between; margin-top: 8px; font-size: 13px; }
 @media (prefers-reduced-motion: reduce) { .date-pop { animation: none; } }
+.ads-hidden { margin-top: 8px; }
+.ads-hidden summary { cursor: pointer; color: var(--muted); font-size: 13px; padding: 6px 0; }

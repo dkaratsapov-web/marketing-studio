@@ -57,6 +57,8 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
     ),
     clients: db.prepare("SELECT id, name, agency FROM clients WHERE archived = 0 ORDER BY name COLLATE NOCASE"),
     client: db.prepare('SELECT id FROM clients WHERE id = ?'),
+    hide: db.prepare("INSERT INTO ad_accounts (client_id, hidden) VALUES (?, ?) ON CONFLICT(client_id) DO UPDATE SET hidden = excluded.hidden, updated_at = datetime('now')"),
+    hidden: db.prepare('SELECT client_id FROM ad_accounts WHERE hidden = 1'),
   };
 
   // загруженные строки источника пишутся целиком или не пишутся вовсе
@@ -201,13 +203,16 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
     const cur = new Map(q.totals.all(p.from, p.to).map((r) => [r.client_id, r]));
     const before = new Map(q.totals.all(prev.from, prev.to).map((r) => [r.client_id, r]));
     const accounts = new Map(q.accounts.all().map((a) => [a.client_id, a]));
+    const hiddenIds = new Set(q.hidden.all().map((r) => r.client_id));
     const rows = [];
     const notConnected = [];
+    const hidden = [];
     for (const c of q.clients.all()) {
       if (agency && (c.agency ?? 'korp') !== agency) continue;
       const a = accounts.get(c.id);
       if (!a) {
-        notConnected.push({ id: c.id, name: c.name, agency: c.agency ?? 'korp' });
+        // клиенты без рекламы можно скрыть из списка неподключённых
+        (hiddenIds.has(c.id) ? hidden : notConnected).push({ id: c.id, name: c.name, agency: c.agency ?? 'korp' });
         continue;
       }
       rows.push({
@@ -224,7 +229,7 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
       });
     }
     rows.sort((x, y) => y.cost - x.cost || y.visits - x.visits || x.name.localeCompare(y.name, 'ru'));
-    return { period: p, prev, token: Boolean(currentToken()), rows, total: derive(sum(rows)), prevTotal: derive(sum(rows.map((r) => r.prev))), notConnected };
+    return { period: p, prev, token: Boolean(currentToken()), rows, total: derive(sum(rows)), prevTotal: derive(sum(rows.map((r) => r.prev))), notConnected, hidden };
   }
 
   /** Динамика клиента по дням (пустые дни — нулями, чтобы график был без провалов по датам). */
@@ -275,5 +280,10 @@ export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, l
     return tokenInfo();
   }
 
-  return { saveAccount, account: (id) => publicAccount(q.account.get(Number(id))), syncClient, syncAll, overview, clientStats, goalsFor, hasToken: () => Boolean(currentToken()), tokenInfo, setToken, clearToken };
+  function setHidden(clientId, value) {
+    if (!q.client.get(Number(clientId))) throw new AdStatsError('Клиент не найден');
+    q.hide.run(Number(clientId), value ? 1 : 0);
+  }
+
+  return { setHidden, saveAccount, account: (id) => publicAccount(q.account.get(Number(id))), syncClient, syncAll, overview, clientStats, goalsFor, hasToken: () => Boolean(currentToken()), tokenInfo, setToken, clearToken };
 }

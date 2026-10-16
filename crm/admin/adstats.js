@@ -286,6 +286,16 @@ export async function renderAdStats(params) {
     }
   }
 
+  async function hide(c, value) {
+    try {
+      await api(`/admin/api/ad-stats/clients/${c.id}/hidden`, { method: 'PUT', body: { hidden: value } });
+      toast(value ? `«${c.name}» скрыт из статистики` : `«${c.name}» снова в списке`);
+      load();
+    } catch (err) {
+      toast(err.message);
+    }
+  }
+
   async function load() {
     const per = periodOf(params);
     let d;
@@ -305,7 +315,7 @@ export async function renderAdStats(params) {
           'td',
           {},
           h('a', { class: 'row-link company', href: `#/adclient?id=${r.id}` }, r.name),
-          h('span', { class: 'ads-sources' }, h('span', { class: `agency-tag agency-${r.agency}` }, AGENCY[r.agency]), r.sources.direct ? h('span', { class: 'ads-src' }, 'Директ') : null, r.sources.metrika ? h('span', { class: 'ads-src' }, 'Метрика') : null, r.ownToken ? h('span', { class: 'ads-src', title: 'Цифры грузятся по токену клиента' }, 'свой токен') : null),
+          h('span', { class: 'ads-sources' }, h('span', { class: `agency-tag agency-${r.agency}` }, AGENCY[r.agency]), r.sources.direct ? h('span', { class: 'ads-src' }, 'Директ') : null, r.sources.metrika ? h('span', { class: 'ads-src' }, 'Метрика') : null),
           r.noToken ? h('span', { class: 'muted small' }, 'Нет токена: общего или своего') : r.error ? h('span', { class: 'ads-error', title: r.error }, `Ошибка загрузки: ${r.error}`) : !r.syncedAt ? h('span', { class: 'muted small' }, 'Ещё не загружено') : null,
         ),
         h('td', { class: 'num nowrap' }, money(r.cost), ' ', delta(r.cost, r.prev.cost, { neutral: true })),
@@ -343,12 +353,33 @@ export async function renderAdStats(params) {
           )
         : h('div', { class: 'panel empty' }, h('strong', {}, 'Ни один клиент ещё не подключён'), 'Нажмите «Подключить» у клиента ниже: укажите кабинет Директа и счётчик Метрики.'),
       h('p', { class: 'muted small' }, `Период ${fmtDate(d.period.from)} - ${fmtDate(d.period.to)}; сравнение с ${fmtDate(d.prev.from)} - ${fmtDate(d.prev.to)}. Расход с НДС. Конверсии считаются по выбранным целям Метрики.`),
-      d.notConnected.length
+      d.notConnected.length || d.hidden.length
         ? h(
             'section',
             { class: 'panel ads-off' },
             h('h2', {}, `Не подключены: ${d.notConnected.length}`),
-            h('ul', { class: 'ads-off-list' }, d.notConnected.map((c) => h('li', {}, h('span', { class: 'ads-off-name' }, c.name), h('span', { class: `agency-tag agency-${c.agency}` }, AGENCY[c.agency]), h('button', { type: 'button', class: 'btn btn-s', onclick: () => openAccountDialog(c, null, load, { token: d.token }) }, 'Подключить')))),
+            h(
+              'ul',
+              { class: 'ads-off-list' },
+              d.notConnected.map((c) =>
+                h(
+                  'li',
+                  {},
+                  h('span', { class: 'ads-off-name' }, c.name),
+                  h('span', { class: `agency-tag agency-${c.agency}` }, AGENCY[c.agency]),
+                  h('button', { type: 'button', class: 'btn btn-s', onclick: () => openAccountDialog(c, null, load, { token: d.token }) }, 'Подключить'),
+                  h('button', { type: 'button', class: 'btn btn-s', title: 'Убрать из списка: реклама у клиента не ведётся', onclick: () => hide(c, true) }, 'Скрыть'),
+                ),
+              ),
+            ),
+            d.hidden.length
+              ? h(
+                  'details',
+                  { class: 'ads-hidden' },
+                  h('summary', {}, `Скрытые: ${d.hidden.length}`),
+                  h('ul', { class: 'ads-off-list' }, d.hidden.map((c) => h('li', {}, h('span', { class: 'ads-off-name muted' }, c.name), h('span', { class: `agency-tag agency-${c.agency}` }, AGENCY[c.agency]), h('button', { type: 'button', class: 'btn btn-s', onclick: () => hide(c, false) }, 'Вернуть')))),
+                )
+              : null,
           )
         : null,
     );
