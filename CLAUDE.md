@@ -16,13 +16,14 @@
 | Бэкап | /etc/cron.d/korp-cabinet-backup | — |
 | Репозиторий | dkaratsapov-web/marketing-studio | banifaci13-sketch/kvalificator |
 
-На 194.67.101.183 Сороки больше нет. Папку `/opt/kvalificator.soroka-old` удаляет владелец, её не трогать.
+На 194.67.101.183 Сороки больше нет: 16.10.2026 удалены её контейнер и образ, папка /opt/kvalificator,
+сайт kvalificator.conf в nginx, ночной бэкап и сертификат soroka-assistant.ru. Ничего из этого не возвращать.
 Адрес `soroka-assistant.ru` больше не используется.
 
 Запрещено:
 - заходить на сервер Сороки 176.98.177.12 или давать владельцу команды для него;
 - использовать адреса `qual.soroka-marketing.ru` и `soroka-assistant.ru`;
-- трогать `/opt/kvalificator.soroka-old`, а также любые файлы с именем `kvalificator` в nginx и cron;
+- создавать на сервере Корпорации что-либо с именем `kvalificator` или `soroka` (папки, конфиги nginx, cron);
 - использовать ключи, токены и данные Сороки: Telegram-бота, ключи ИИ, Zoom/Телемост, Яндекс ID, сотрудников,
   клиентов, базу, логотип и бренд Soroka Marketing;
 - отправлять что-либо в репозиторий Сороки.
