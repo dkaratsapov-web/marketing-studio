@@ -66,7 +66,7 @@ function hero(d) {
   const parts = [];
   if (todayMeetings) parts.push(`${todayMeetings} ${plural(todayMeetings, 'встреча', 'встречи', 'встреч')}`);
   const dueToday = d.tasks.today.length;
-  if (dueToday) parts.push(`${dueToday} ${plural(dueToday, 'задача', 'задачи', 'задач')} на сегодня`);
+  if (dueToday) parts.push(`${dueToday} ${plural(dueToday, 'задача', 'задачи', 'задач')}`);
   let line = parts.length ? `Сегодня ${parts.join(' и ')}.` : 'На сегодня ничего срочного. Хороший день, чтобы разобрать хвосты.';
   if (d.stats.overdue) line += ` Просрочено: ${d.stats.overdue}.`;
   const quick = (label, onclick, iconName) => h('button', { type: 'button', class: 'btn home-quick', onclick }, icon(iconName), label);
