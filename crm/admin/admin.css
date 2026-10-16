@@ -1027,7 +1027,9 @@ details.menu summary::-webkit-details-marker { display: none; }
 .ai-off { min-width: 300px; padding: 0; }
 .ai-off .ai-notice { border-radius: var(--radius-s); }
 /* уведомления внизу экрана — в стиле кабинета, стопкой */
-.toasts { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 90; display: grid; gap: 8px; width: min(440px, calc(100% - 32px)); pointer-events: none; }
+/* уведомление по ширине текста, без пустоты между текстом и крестиком */
+.toasts { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 90; display: grid; justify-items: center; gap: 8px; width: calc(100% - 32px); pointer-events: none; }
+.toasts .toast { width: fit-content; max-width: min(520px, 100%); }
 .toast {
   pointer-events: auto; display: grid; grid-template-columns: 24px minmax(0, 1fr) 24px; align-items: center; gap: 10px;
   padding: 10px 10px 10px 12px; border-radius: var(--radius-m); background: var(--brand); color: var(--on-brand);
@@ -1994,3 +1996,13 @@ input[type="date"][data-open] { border-color: var(--accent); box-shadow: 0 0 0 3
 @media (prefers-reduced-motion: reduce) { .date-pop { animation: none; } }
 .ads-hidden { margin-top: 8px; }
 .ads-hidden summary { cursor: pointer; color: var(--muted); font-size: 13px; padding: 6px 0; }
+.ads-token-dialog { width: min(720px, 94vw); }
+.ads-token-dialog .panel { border: 0; padding: 0; background: transparent; }
+
+/* «Статистика»: короткая сводка над таблицей клиентов */
+.ads-sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--surface); }
+.ads-sum-item { display: grid; gap: 2px; padding: 14px 18px; border-left: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+.ads-sum-item:first-child { border-left: 0; }
+.ads-sum-item b { font-size: 22px; line-height: 1.15; color: var(--text); font-family: var(--soroka-font-heading); }
+.ads-sum-item b .ads-delta { font-family: var(--soroka-font-body); vertical-align: middle; }
+@media (max-width: 760px) { .ads-sum { grid-template-columns: 1fr; } .ads-sum-item { border-left: 0; border-top: 1px solid var(--line); } .ads-sum-item:first-child { border-top: 0; } }

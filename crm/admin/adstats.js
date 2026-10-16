@@ -85,12 +85,40 @@ function tiles(t, p) {
   );
 }
 
+/** Сводка над таблицей: активные клиенты, площадки и оборот с НДС за период. */
+function summary(d) {
+  const active = d.rows.filter((r) => r.cost > 0 || r.visits > 0);
+  const direct = d.rows.filter((r) => r.sources.direct).length;
+  const metrika = d.rows.filter((r) => r.sources.metrika).length;
+  const item = (value, label, extra = null) => h('div', { class: 'ads-sum-item' }, h('b', { class: 'num' }, value, extra ? [' ', extra] : null), h('span', {}, label));
+  return h(
+    'section',
+    { class: 'ads-sum' },
+    item(active.length, `${active.length === 1 ? 'активный клиент' : active.length > 1 && active.length < 5 ? 'активных клиента' : 'активных клиентов'} из ${d.rows.length} подключённых`),
+    item(money(d.total.cost), 'оборот по клиентам с НДС', delta(d.total.cost, d.prevTotal?.cost, { neutral: true })),
+    item([direct ? `Директ ${direct}` : null, metrika ? `Метрика ${metrika}` : null].filter(Boolean).join(' · ') || '-', 'площадки: клиентов на каждой'),
+  );
+}
+
 const OAUTH_LINK = 'https://oauth.yandex.ru/authorize?response_type=token&client_id=';
 
 /**
  * Токен Яндекса для статистики: администратор вставляет его здесь, кабинет проверяет его в Метрике
  * и сохраняет. Обратно показываются только последние 4 символа.
  */
+/** Окно «Общий токен агентства»: для клиентов без своего токена. */
+function openTokenDialog(onChange) {
+  const dlg = h('dialog', { class: 'dialog ads-token-dialog', 'aria-label': 'Общий токен Яндекса' });
+  const done = () => {
+    dlg.close();
+    onChange();
+  };
+  dlg.append(tokenPanel(done), h('div', { class: 'work-actions' }, h('button', { type: 'button', class: 'btn', onclick: () => dlg.close() }, 'Закрыть')));
+  dlg.addEventListener('close', () => dlg.remove());
+  document.body.append(dlg);
+  dlg.showModal();
+}
+
 function tokenPanel(onChange) {
   const box = h('section', { class: 'panel ads-token' }, h('p', { class: 'muted' }, 'Проверяю подключение…'));
   if (ctx.me.role !== 'admin') {
@@ -144,7 +172,8 @@ function tokenPanel(onChange) {
     const save = h('button', { type: 'submit', class: 'btn btn-primary' }, 'Проверить и сохранить');
     fill(
       box,
-      h('h2', {}, t.set ? 'Заменить токен Яндекса' : 'Подключите Яндекс'),
+      h('h2', {}, t.set ? 'Заменить общий токен' : 'Общий токен агентства'),
+      h('p', { class: 'muted small' }, 'Нужен для клиентов без своего токена. Если у каждого клиента свой токен, его вставляют в «Настроить» у клиента, а общий можно не заполнять.'),
       h(
         'ol',
         { class: 'ads-steps' },
@@ -269,7 +298,9 @@ export function openAccountDialog(client, account, onSaved, { token = true } = {
 export async function renderAdStats(params) {
   const body = h('div', { class: 'ads' }, h('p', { class: 'muted' }, 'Загружаю…'));
   const refresh = h('button', { type: 'button', class: 'btn', onclick: syncAll }, 'Обновить данные');
-  fill(app, shell('adstats', [h('div', { class: 'page-head' }, h('h1', {}, 'Статистика'), h('span', { class: 'spacer' }), refresh), controls('adstats', params), body]));
+  // общий токен агентства — в окне по кнопке, не на странице: у большинства клиентов свои токены
+  const tokenBtn = ctx.me.role === 'admin' ? h('button', { type: 'button', class: 'btn', onclick: () => openTokenDialog(load) }, 'Общий токен') : null;
+  fill(app, shell('adstats', [h('div', { class: 'page-head' }, h('h1', {}, 'Статистика'), h('span', { class: 'spacer' }), tokenBtn, refresh), controls('adstats', params), body]));
 
   async function syncAll() {
     refresh.disabled = true;
@@ -333,8 +364,7 @@ export async function renderAdStats(params) {
     const t = d.total;
     fill(
       body,
-      ctx.me.role === 'admin' || !d.token ? tokenPanel(load) : null,
-      d.rows.length ? tiles(d.total, d.prevTotal) : null,
+      d.rows.length ? summary(d) : null,
       d.rows.length
         ? h(
             'div',
