@@ -241,7 +241,7 @@ test('срезы: площадки РСЯ из Директа с фильтро�
   assert.equal(metrikaUrls[0].searchParams.get('filters'), "ym:s:<attribution>AdvEngine=='ya_direct'");
   assert.deepEqual(Object.keys(stats.readySlices(1, { from: '2026-10-01', to: '2026-10-07' })).sort(), ['landing', 'placements']);
   // среза «Источники трафика» больше нет: при визитах только из Директа он бессмыслен
-  assert.throws(() => stats.slice(1, 'sources', {}), /Неизвестный срез/);
+  assert.throws(() => stats.slice(1, 'sources', {}), /Обновите страницу/);
   assert.throws(() => stats.slice(1, 'nope', {}), /Неизвестный срез/);
 });
 

@@ -113,6 +113,9 @@ export function createSlices({ db, getAccount, tokenFor, fetchImpl = fetch, wait
 
   /** Срез клиента: { status: 'ready' | 'pending' | 'error', rows, error, fetchedAt }. */
   function get(clientId, slice, { from, to, refresh = false }) {
+    // «Источники трафика» убраны вместе с правилом «Метрика только по Директу»: старая вкладка кабинета
+    // может ещё спросить этот срез — просим обновить страницу
+    if (slice === 'sources') throw new Error('Этот срез убран: Метрика теперь считает только визиты из Директа. Обновите страницу (Ctrl+F5)');
     if (!DIRECT_SLICES[slice] && !METRIKA_SLICES[slice]) throw new Error('Неизвестный срез');
     const key = `${clientId}:${slice}:${from}:${to}`;
     const cached = q.get.get(Number(clientId), slice, from, to);
