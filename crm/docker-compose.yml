@@ -1,0 +1,45 @@
+# Квалификатор и HTTPS-прокси. Два режима (выбирает deploy/install.sh, пишет в .env):
+#  - COMPOSE_PROFILES=caddy — сервер только наш: Caddy сам слушает 80/443 и выпускает сертификат;
+#  - COMPOSE_PROFILES пустой — на сервере уже есть nginx с другими сайтами: он проксирует на 127.0.0.1:APP_PORT.
+# Запуск: docker compose up -d --build
+services:
+  app:
+    build:
+      context: .
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-mirror.gcr.io/library/node:22-alpine}
+    env_file: .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      TRUST_PROXY: "true"
+      DB_PATH: /app/data/kvalificator.db
+    volumes:
+      - ./data:/app/data
+    # Только для локального прокси (nginx на этом же сервере); снаружи порт недоступен
+    ports:
+      - "127.0.0.1:${APP_PORT:-3100}:3000"
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+  caddy:
+    profiles: [caddy]
+    image: ${CADDY_IMAGE:-mirror.gcr.io/library/caddy:2}
+    depends_on: [app]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?Укажите DOMAIN в .env}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

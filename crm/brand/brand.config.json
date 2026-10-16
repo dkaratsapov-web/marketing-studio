@@ -1,0 +1,186 @@
+{
+  "$comment": "Единый источник фирменного стиля маркетингового агентства «Корпорация». Меняйте только этот файл, затем: npm run brand:sync. Цвета и шрифты взяты из исходников сайта marketing-studio.pro (src/app/globals.css).",
+  "brand": "Корпорация",
+  "version": "1.0.0",
+  "status": "verified",
+  "updated": "2026-10-16",
+  "sources": [
+    {
+      "file": "src/app/globals.css (репозиторий сайта)",
+      "used_for": "цвета, шрифты"
+    },
+    {
+      "file": "src/components/logoGeometry.ts, Header.module.css",
+      "used_for": "логотип: знак «Этажи» и надпись"
+    },
+    {
+      "url": "https://marketing-studio.pro/",
+      "used_for": "позиционирование"
+    }
+  ],
+  "pending": [],
+  "voice": {
+    "name_ru": "Корпорация",
+    "name_en": "Korporaciya",
+    "wordmark": "КОРПОРАЦИЯ",
+    "positioning": {
+      "value": "Маркетинговое агентство полного цикла",
+      "status": "verified"
+    },
+    "slogan": {
+      "value": "Отчитываемся заявками и продажами, а не кликами",
+      "status": "verified"
+    },
+    "subline": {
+      "value": "Реклама, сайты, аналитика и боты одной командой",
+      "status": "verified"
+    },
+    "founded": {
+      "value": null,
+      "status": "proposed"
+    },
+    "values": {
+      "value": [
+        "Цифры вместо обещаний",
+        "Один человек на канал",
+        "Отказываем до договора"
+      ],
+      "status": "verified"
+    },
+    "tone": "Деловой, прямой, конкретный. Русский язык по умолчанию. Только факты из дел и прайса; оценки и прогнозы подписаны."
+  },
+  "color": {
+    "accent": {
+      "value": "#C4F542",
+      "status": "verified",
+      "role": "салатовый: акценты, маркеры, кнопки на тёмном; не для текста на белом"
+    },
+    "accentText": {
+      "value": "#D1006A",
+      "status": "verified",
+      "role": "акцентный цвет текста на светлом фоне (розовый сайта для светлых блоков)"
+    },
+    "ink": {
+      "value": "#050505",
+      "status": "verified",
+      "role": "заголовки, основной текст, тёмные фоны разделов"
+    },
+    "paper": {
+      "value": "#FFFFFF",
+      "status": "verified",
+      "role": "основной фон"
+    },
+    "mist": {
+      "value": "#F3F3F4",
+      "status": "verified",
+      "role": "вторичный фон, подложки"
+    },
+    "steel": {
+      "value": "#5C5C63",
+      "status": "verified",
+      "role": "подписи и второстепенный текст на светлом"
+    },
+    "line": {
+      "value": "#E1E1E3",
+      "status": "verified",
+      "role": "разделители, сетка графиков"
+    },
+    "onDark": {
+      "value": "#FFFFFF",
+      "status": "verified",
+      "role": "текст на тёмном фоне"
+    },
+    "onDarkMuted": {
+      "value": "#8F8F96",
+      "status": "verified",
+      "role": "второстепенный текст на тёмном фоне"
+    }
+  },
+  "dataviz": {
+    "$comment": "Категориальная: чёрный, розовый, тёмно-салатовый, серый — различимы и на белом; у салатового и серого всегда подписи значений. Порядковая: один оттенок салатового, монотонная светлота.",
+    "categorical": [
+      "#050505",
+      "#D1006A",
+      "#5E8A00",
+      "#8F8F96"
+    ],
+    "ordinal": [
+      "#E4FAA8",
+      "#C4F542",
+      "#94C21F",
+      "#648A0E",
+      "#3A5206"
+    ],
+    "context": "#C9C9CC",
+    "grid": "#E1E1E3",
+    "axisText": "#5C5C63"
+  },
+  "typography": {
+    "heading": {
+      "family": "Geologica",
+      "fallback": "Arial, sans-serif",
+      "status": "verified",
+      "files": [
+        "geologica-cyrillic-wght-normal.woff2",
+        "geologica-latin-wght-normal.woff2"
+      ]
+    },
+    "body": {
+      "family": "Golos Text",
+      "fallback": "Arial, sans-serif",
+      "status": "verified",
+      "files": [
+        "golos-text-cyrillic-wght-normal.woff2",
+        "golos-text-latin-wght-normal.woff2"
+      ]
+    },
+    "license": "SIL Open Font License 1.1 (brand/fonts/LICENSE-*.txt)",
+    "slideScalePx": {
+      "$comment": "Размеры для холста 1920×1080 (кит: заголовок 48–72, текст 20–26, подписи от 16). Подняты к верхней границе, чтобы в PPTX (px × 0.5 = pt) текст был не меньше 14 pt, подписи — 10 pt.",
+      "display": 104,
+      "title": 64,
+      "subtitle": 40,
+      "lead": 34,
+      "kpi": 96,
+      "body": 28,
+      "small": 24,
+      "caption": 20,
+      "minimum": 20
+    }
+  },
+  "slide": {
+    "width": 1920,
+    "height": 1080,
+    "margin": 120,
+    "marginTop": 104,
+    "grid": 8,
+    "columns": 12,
+    "gutter": 32,
+    "footerHeight": 56
+  },
+  "logo": {
+    "status": "verified",
+    "$comment": "Экспорт логотипа из шапки сайта: знак «Этажи» из src/components/logoGeometry.ts и надпись «Корпорация» шрифтом и стилем шапки, прозрачный фон. На тёмном фоне знак белый с салатовым этажом, на светлом чёрный с розовым. Знак не перерисовывать.",
+    "onLight": "korporaciya-logo-light.png",
+    "onDark": "korporaciya-logo-dark.png",
+    "mark": null,
+    "sha256": {
+      "korporaciya-logo-light.png": "dd352fc61a7f40b9f31e634d8949e6e14182bfb4e5f0caf3e4c6437691162bd6",
+      "korporaciya-logo-dark.png": "8b1dd559d4c283a74e83991c6b775eccc142d086c86aeb3ab0274219862ead5a"
+    },
+    "minHeightPx": 40,
+    "clearSpacePx": 40
+  },
+  "documents": {
+    "footer": "Конфиденциально · Корпорация",
+    "dataStatusLabels": {
+      "fact": "Факт",
+      "estimate": "Оценка",
+      "forecast": "Прогноз",
+      "hypothesis": "Гипотеза",
+      "plan": "План"
+    },
+    "currency": "₽",
+    "locale": "ru-RU"
+  }
+}

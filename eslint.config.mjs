@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Сторонние скиллы Claude Code, не код проекта
     ".claude/**",
+    // Кабинет: отдельный проект на Node.js со своими тестами (crm/package.json)
+    "crm/**",
   ]),
 ]);
 

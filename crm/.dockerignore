@@ -1,0 +1,9 @@
+node_modules
+data
+.env
+.git
+test
+wordpress
+# исходники брендбука и полные шрифты для сотрудников серверу не нужны
+brand/kit
+brand/fonts/install
