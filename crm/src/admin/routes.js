@@ -417,7 +417,7 @@ export async function adminRoutes(app, { config, auth, reports, db, scenarioSour
           telemost: Boolean(video?.available.telemost),
           search: Boolean(config.search?.apiKey && config.search?.folderId),
           telegram: { enabled: config.telegram.botEnabled, bot: config.telegram.botUsername ?? null, managerChat: Boolean(config.telegram.managerChatId) },
-          ads: Boolean(config.adsToken),
+          ads: adstats ? adstats.hasToken() : Boolean(config.adsToken),
           pdf,
           publicUrl: config.publicUrl,
         };

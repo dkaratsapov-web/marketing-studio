@@ -1947,3 +1947,12 @@ p.ads-error { white-space: normal; max-width: none; }
 .ads-goal-row .input { flex: 1; min-width: 0; }
 .ads-goal-row .btn { flex: none; }
 .ads-goal-list { display: grid; gap: 4px; max-height: 220px; overflow: auto; margin-top: 6px; }
+
+/* «Статистика»: токен Яндекса */
+.ads-token h2 { margin: 0 0 6px; font-family: var(--soroka-font-heading); font-size: 17px; }
+.ads-token-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ads-token-row > span:nth-child(2) { display: grid; }
+.ads-token-ok { width: 10px; height: 10px; border-radius: 50%; background: var(--good); flex: none; }
+.ads-steps { margin: 4px 0 10px; padding-left: 20px; display: grid; gap: 4px; font-size: 14px; }
+.ads-token-form { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.ads-token-form .input { flex: 1 1 260px; min-width: 0; }

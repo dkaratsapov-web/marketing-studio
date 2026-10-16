@@ -550,6 +550,14 @@ const MIGRATIONS = [
      goals       REAL NOT NULL DEFAULT 0,
      PRIMARY KEY (client_id, source, date)
    );`,
+
+  // Настройки, которые администратор задаёт в кабинете (например, токен Яндекса для статистики)
+  `CREATE TABLE app_settings (
+     key        TEXT PRIMARY KEY,
+     value      TEXT,
+     updated_by TEXT,
+     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+   );`,
 ];
 
 /** Номер текущей версии схемы базы. */

@@ -1,7 +1,7 @@
 // «Статистика»: расход и результаты рекламы всех клиентов из Яндекс Директа и Метрики за период,
 // сравнение с прошлым таким же периодом, динамика клиента по дням и настройки подключения.
 
-import { h, api, app, shell, toast, navigate } from './admin.js';
+import { h, api, app, shell, toast, navigate, ctx, confirmDialog } from './admin.js';
 import { fill, formDialog } from './docs.js';
 
 const nf0 = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
@@ -85,22 +85,102 @@ function tiles(t, p) {
   );
 }
 
-function setupNotice() {
-  return h(
-    'section',
-    { class: 'panel ai-notice ads-setup' },
-    h('h2', {}, 'Подключите Яндекс'),
-    h('p', {}, 'Статистика загружается раз в три часа по токену агентства с доступом к Директу и Метрике клиентов.'),
-    h(
-      'ol',
-      {},
-      h('li', {}, 'На oauth.yandex.ru создайте приложение с правами «Использование API Яндекс Директа» (direct:api) и «Получение статистики Метрики» (metrika:read).'),
-      h('li', {}, 'В Директе подайте заявку на доступ к API для этого приложения (Инструменты → API).'),
-      h('li', {}, 'Получите токен под аккаунтом агентства, у которого есть доступ к кабинетам и счётчикам клиентов.'),
-      h('li', {}, 'Впишите на сервере в /opt/korp-cabinet/.env строку YANDEX_ADS_TOKEN=… и примените: /usr/local/sbin/korp-cabinet-update main.'),
-    ),
-    h('p', { class: 'muted' }, 'Настроить клиентов можно уже сейчас: цифры появятся после подключения токена.'),
-  );
+const OAUTH_LINK = 'https://oauth.yandex.ru/authorize?response_type=token&client_id=';
+
+/**
+ * Токен Яндекса для статистики: администратор вставляет его здесь, кабинет проверяет его в Метрике
+ * и сохраняет. Обратно показываются только последние 4 символа.
+ */
+function tokenPanel(onChange) {
+  const box = h('section', { class: 'panel ads-token' }, h('p', { class: 'muted' }, 'Проверяю подключение…'));
+  if (ctx.me.role !== 'admin') {
+    fill(box, h('h2', {}, 'Яндекс не подключён'), h('p', { class: 'muted' }, 'Токен Яндекса для статистики подключает администратор кабинета в этом разделе.'));
+    return box;
+  }
+  async function draw(editing = false) {
+    let t;
+    try {
+      t = (await api('/admin/api/ad-stats/token')).token;
+    } catch (err) {
+      fill(box, h('p', { class: 'error' }, err.message));
+      return;
+    }
+    if (t.set && !editing) {
+      const when = t.updatedAt ? new Date(`${t.updatedAt.replace(' ', 'T')}Z`).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow' }) : null;
+      fill(
+        box,
+        h(
+          'div',
+          { class: 'ads-token-row' },
+          h('span', { class: 'ads-token-ok', 'aria-hidden': 'true' }),
+          h('span', {}, h('b', {}, 'Токен Яндекса подключён'), h('span', { class: 'muted small' }, ` …${t.tail}${t.source === 'env' ? ', из настроек сервера' : when ? `, ${t.updatedBy ?? ''} ${when}` : ''}`)),
+          h('span', { class: 'spacer' }),
+          h('button', { type: 'button', class: 'btn btn-s', onclick: () => draw(true) }, 'Заменить'),
+          t.source === 'admin'
+            ? h('button', {
+                type: 'button', class: 'btn btn-s',
+                onclick: async () => {
+                  if (!(await confirmDialog('Отключить токен Яндекса? Загрузка статистики остановится, уже загруженные цифры останутся.', { ok: 'Отключить' }))) return;
+                  await api('/admin/api/ad-stats/token', { method: 'DELETE' });
+                  toast('Токен отключён');
+                  onChange();
+                },
+              }, 'Отключить')
+            : null,
+        ),
+      );
+      return;
+    }
+    const clientId = h('input', { class: 'input', id: 'ads-client-id', maxlength: 64, placeholder: 'ClientID приложения', autocomplete: 'off' });
+    const open = h('button', {
+      type: 'button', class: 'btn',
+      onclick: () => {
+        const id = clientId.value.trim();
+        if (!/^[0-9a-f]{32}$/i.test(id)) return toast('ClientID — 32 латинские буквы и цифры со страницы приложения');
+        window.open(OAUTH_LINK + id, '_blank', 'noopener');
+      },
+    }, 'Получить токен');
+    const input = h('input', { class: 'input', id: 'ads-token', type: 'password', maxlength: 400, placeholder: 'y0_…', autocomplete: 'off', spellcheck: 'false' });
+    const save = h('button', { type: 'submit', class: 'btn btn-primary' }, 'Проверить и сохранить');
+    fill(
+      box,
+      h('h2', {}, t.set ? 'Заменить токен Яндекса' : 'Подключите Яндекс'),
+      h(
+        'ol',
+        { class: 'ads-steps' },
+        h('li', {}, 'В приложении на oauth.yandex.ru должны быть права Директа и Метрики и Redirect URI https://oauth.yandex.ru/verification_code.'),
+        h('li', {}, 'Вставьте ClientID приложения и нажмите «Получить токен». Войдите под аккаунтом агентства с доступом к кабинетам и счётчикам клиентов, нажмите «Разрешить».'),
+        h('li', {}, 'Скопируйте токен со страницы Яндекса и вставьте ниже.'),
+      ),
+      h('div', { class: 'ads-token-form' }, clientId, open),
+      h(
+        'form',
+        {
+          class: 'ads-token-form',
+          onsubmit: async (e) => {
+            e.preventDefault();
+            save.disabled = true;
+            save.textContent = 'Проверяю в Яндексе…';
+            try {
+              const r = (await api('/admin/api/ad-stats/token', { method: 'PUT', body: { token: input.value } })).token;
+              toast(`Токен подключён. Счётчиков Метрики доступно: ${r.counters}`);
+              onChange();
+            } catch (err) {
+              toast(err.message);
+              save.disabled = false;
+              save.textContent = 'Проверить и сохранить';
+            }
+          },
+        },
+        input,
+        save,
+        t.set ? h('button', { type: 'button', class: 'btn', onclick: () => draw(false) }, 'Отмена') : null,
+      ),
+      h('p', { class: 'muted small' }, 'Токен хранится на сервере кабинета, видит его только администратор (последние 4 символа). Директ начнёт отдавать цифры после одобрения заявки на доступ к API.'),
+    );
+  }
+  draw();
+  return box;
 }
 
 /** Настройки клиента: Директ (логин клиента у агентского аккаунта), счётчик Метрики, цели-конверсии. */
@@ -230,7 +310,7 @@ export async function renderAdStats(params) {
     const t = d.total;
     fill(
       body,
-      d.token ? null : setupNotice(),
+      ctx.me.role === 'admin' || !d.token ? tokenPanel(load) : null,
       d.rows.length ? tiles(d.total, d.prevTotal) : null,
       d.rows.length
         ? h(

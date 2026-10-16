@@ -66,38 +66,8 @@ export async function renderIntegrations() {
       null,
       'Ссылка на видеовстречу кнопкой в календаре. API доступен организациям Яндекс 360 для бизнеса.',
       [
-        ['На ', h('a', { href: 'https://oauth.yandex.ru/client/new', target: '_blank', rel: 'noopener' }, 'oauth.yandex.ru'), ' создайте приложение с правом ', code('telemost-api:conferences.create'), '.'],
-        ['Откройте под администратором организации ', code('https://oauth.yandex.ru/authorize?response_type=token&client_id=<ClientID>'), ' и скопируйте токен.'],
-        ['Впишите ', code('TELEMOST_TOKEN=…'), ' и примените.'],
-      ],
-    ),
-    card(
-      'Zoom',
-      s.zoom,
-      null,
-      'Ссылка на встречу Zoom кнопкой в календаре; ссылка организатора — отдельно.',
-      [
-        ['На ', h('a', { href: 'https://marketplace.zoom.us', target: '_blank', rel: 'noopener' }, 'marketplace.zoom.us'), ': Develop → Build App → Server-to-Server OAuth, право создавать встречи.'],
-        ['Впишите ', code('ZOOM_ACCOUNT_ID'), ', ', code('ZOOM_CLIENT_ID'), ', ', code('ZOOM_CLIENT_SECRET'), ' и ', code('ZOOM_USER'), ' (почта пользователя Zoom).'],
-        'Примените.',
-      ],
-    ),
-    card(
-      'Telegram-бот',
-      Boolean(s.telegram.enabled && s.telegram.bot),
-      s.telegram.bot ? `@${s.telegram.bot}${s.telegram.managerChat ? ', карточки лидов уходят в чат менеджеров' : ''}` : null,
-      sectionAllowed('leads') ? 'Квалификация в Telegram, карточки лидов, напоминания о встречах и план на день сотрудникам.' : 'Напоминания о встречах и план на день сотрудникам в личный Telegram.',
-      [['Создайте бота у @BotFather, впишите ', code('TELEGRAM_BOT_TOKEN=…'), ' и примените.'], 'Каждый сотрудник подключает напоминания в «Учётной записи».'],
-    ),
-    card(
-      'Яндекс Директ и Метрика',
-      Boolean(s.ads),
-      s.ads ? 'Статистика клиентов загружается раз в три часа' : null,
-      'Расход, клики, конверсии и визиты всех клиентов в разделе «Статистика».',
-      [
-        ['На ', h('a', { href: 'https://oauth.yandex.ru/client/new', target: '_blank', rel: 'noopener' }, 'oauth.yandex.ru'), ' создайте приложение с правами ', code('direct:api'), ' и ', code('metrika:read'), '; в Директе подайте заявку на доступ к API.'],
-        'Получите токен под аккаунтом агентства, у которого есть доступ к кабинетам и счётчикам клиентов.',
-        ['Впишите ', code('YANDEX_ADS_TOKEN=…'), ' и примените: ', code(APPLY), '.'],
+        ['На ', h('a', { href: 'https://oauth.yandex.ru/client/new', target: '_blank', rel: 'noopener' }, 'oauth.yandex.ru'), ' создайте приложение с правами Директа и Метрики; в Директе подайте заявку на доступ к API.'],
+        ['Токен вставьте в разделе ', h('a', { href: '#/adstats' }, '«Статистика»'), ': кабинет проверит его и сохранит, на сервере ничего прописывать не нужно.'],
       ],
     ),
     card(

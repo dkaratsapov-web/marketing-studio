@@ -118,8 +118,9 @@ const seriesJob = monitor.job('meetings', 'Регулярные встречи: 
 const seriesTimer = setInterval(() => seriesJob(() => calendar.extendSeries()), 3600e3);
 // раз в 3 часа: статистика клиентов из Директа и Метрики (последние дни цифры ещё уточняются)
 const adsJob = monitor.job('ad-stats', 'Статистика клиентов из Яндекс Директа и Метрики', 3 * 3600e3);
-const adsTimer = config.adsToken ? setInterval(() => adsJob(() => adstats.syncAll()), 3 * 3600e3) : null;
-if (config.adsToken) setTimeout(() => adsJob(() => adstats.syncAll()), 120e3);
+// токен может появиться позже (администратор вставит его в кабинете) — без токена загрузка просто пропускается
+const adsTimer = setInterval(() => adsJob(() => adstats.syncAll()), 3 * 3600e3);
+setTimeout(() => adsJob(() => adstats.syncAll()), 120e3);
 setTimeout(() => seriesJob(() => calendar.extendSeries()), 90e3);
 // Напоминания о встречах и утренний план — в личный Telegram сотрудников (нужен токен бота)
 const reminders = config.telegram.token
@@ -135,7 +136,7 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
     clearInterval(moneyTimer);
     clearInterval(purgeTimer);
     clearInterval(seriesTimer);
-    if (adsTimer) clearInterval(adsTimer);
+    clearInterval(adsTimer);
     reminders?.stop();
     scenarioSource.stop();
     if (telegramBot?.isRunning()) await telegramBot.stop();

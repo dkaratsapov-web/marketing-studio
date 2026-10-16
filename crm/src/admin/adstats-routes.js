@@ -16,6 +16,23 @@ export async function adStatsRoutes(api, { adstats }) {
 
   api.get('/admin/api/ad-stats', { schema: { querystring: periodQuery } }, async (req) => adstats.overview(req.query));
 
+  // Токен Яндекса задаёт администратор; обратно отдаются только признак и последние 4 символа
+  const adminOnly = async (req, reply) => {
+    if (req.user.role !== 'admin') return reply.code(403).send({ error: 'Токен Яндекса подключает администратор' });
+  };
+  api.get('/admin/api/ad-stats/token', { preHandler: adminOnly }, async () => ({ token: adstats.tokenInfo() }));
+  api.put(
+    '/admin/api/ad-stats/token',
+    { preHandler: adminOnly, config: { rateLimit: { max: 10, timeWindow: '1 minute' } }, schema: { body: { type: 'object', additionalProperties: false, required: ['token'], properties: { token: { type: 'string', maxLength: 400 } } } } },
+    async (req) => {
+      const token = await adstats.setToken(req.body.token, req.user);
+      // сразу подтягиваем цифры подключённых клиентов, не дожидаясь фоновой загрузки
+      adstats.syncAll().catch(() => {});
+      return { token };
+    },
+  );
+  api.delete('/admin/api/ad-stats/token', { preHandler: adminOnly }, async () => ({ token: adstats.clearToken() }));
+
   api.get('/admin/api/ad-stats/clients/:id', { schema: { params: idParams, querystring: periodQuery } }, async (req) => adstats.clientStats(req.params.id, req.query));
 
   api.put(

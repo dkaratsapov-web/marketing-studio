@@ -1,7 +1,7 @@
 // Статистика клиентов: какие кабинеты подключены, загрузка дневных цифр из Директа и Метрики,
 // сводка за период по всем клиентам и динамика по одному клиенту.
 
-import { directDaily, metrikaDaily, metrikaGoals, AdApiError } from './yandex.js';
+import { directDaily, metrikaDaily, metrikaGoals, metrikaCounters, AdApiError } from './yandex.js';
 
 export class AdStatsError extends Error {}
 
@@ -12,7 +12,17 @@ const mskToday = () => iso(new Date(Date.now() + 3 * 3600e3));
 const shift = (date, n) => iso(new Date(Date.parse(`${date}T12:00:00Z`) + n * 86400e3));
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-export function createAdStats({ db, token = null, fetchImpl = fetch, log = null }) {
+const TOKEN_KEY = 'yandex_ads_token';
+
+/** token — из .env (YANDEX_ADS_TOKEN); токен, сохранённый администратором в кабинете, важнее. */
+export function createAdStats({ db, token: envToken = null, fetchImpl = fetch, log = null }) {
+  const settings = {
+    get: db.prepare('SELECT value, updated_by, updated_at FROM app_settings WHERE key = ?'),
+    put: db.prepare("INSERT INTO app_settings (key, value, updated_by, updated_at) VALUES (?, ?, ?, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_by = excluded.updated_by, updated_at = excluded.updated_at"),
+    del: db.prepare('DELETE FROM app_settings WHERE key = ?'),
+  };
+  const saved = () => settings.get.get(TOKEN_KEY);
+  const currentToken = () => saved()?.value || envToken || null;
   const q = {
     account: db.prepare('SELECT * FROM ad_accounts WHERE client_id = ?'),
     accounts: db.prepare(
@@ -61,7 +71,9 @@ export function createAdStats({ db, token = null, fetchImpl = fetch, log = null 
   }
   const goalsOf = (a) => (a?.goals ? a.goals.split(',').filter(Boolean) : []);
   const needToken = () => {
-    if (!token) throw new AdStatsError('Не подключён токен Яндекса: впишите YANDEX_ADS_TOKEN в .env на сервере');
+    const token = currentToken();
+    if (!token) throw new AdStatsError('Не подключён токен Яндекса: администратор вставляет его в «Статистике» → «Токен Яндекса»');
+    return token;
   };
 
   function period(from, to) {
@@ -95,7 +107,7 @@ export function createAdStats({ db, token = null, fetchImpl = fetch, log = null 
 
   /** Загрузка цифр одного клиента за период; ошибка запоминается у клиента, остальные грузятся дальше. */
   async function syncClient(clientId, { days = null } = {}) {
-    needToken();
+    const token = needToken();
     const a = q.account.get(Number(clientId));
     if (!a || (!a.direct_enabled && !a.metrika_counter)) throw new AdStatsError('У клиента не подключены Директ и Метрика');
     const to = mskToday();
@@ -124,7 +136,7 @@ export function createAdStats({ db, token = null, fetchImpl = fetch, log = null 
 
   /** Фоновая загрузка всех подключённых клиентов по очереди. */
   async function syncAll() {
-    if (!token) return { skipped: 'нет токена' };
+    if (!currentToken()) return { skipped: 'нет токена' };
     let ok = 0;
     let failed = 0;
     for (const a of q.accounts.all()) {
@@ -179,7 +191,7 @@ export function createAdStats({ db, token = null, fetchImpl = fetch, log = null 
       });
     }
     rows.sort((x, y) => y.cost - x.cost || y.visits - x.visits || x.name.localeCompare(y.name, 'ru'));
-    return { period: p, prev, token: Boolean(token), rows, total: derive(sum(rows)), prevTotal: derive(sum(rows.map((r) => r.prev))), notConnected };
+    return { period: p, prev, token: Boolean(currentToken()), rows, total: derive(sum(rows)), prevTotal: derive(sum(rows.map((r) => r.prev))), notConnected };
   }
 
   /** Динамика клиента по дням (пустые дни — нулями, чтобы график был без провалов по датам). */
@@ -193,7 +205,7 @@ export function createAdStats({ db, token = null, fetchImpl = fetch, log = null 
   }
 
   async function goalsFor(counter) {
-    needToken();
+    const token = needToken();
     if (!/^\d{1,12}$/.test(String(counter ?? ''))) throw new AdStatsError('Укажите номер счётчика Метрики');
     try {
       return await metrikaGoals({ token, counter, fetchImpl });
@@ -202,5 +214,31 @@ export function createAdStats({ db, token = null, fetchImpl = fetch, log = null 
     }
   }
 
-  return { saveAccount, account: (id) => q.account.get(Number(id)) ?? null, syncClient, syncAll, overview, clientStats, goalsFor, hasToken: () => Boolean(token) };
+  /** Состояние токена без самого токена: откуда он, последние 4 символа, кто и когда сохранил. */
+  function tokenInfo() {
+    const s = saved();
+    const t = currentToken();
+    return { set: Boolean(t), source: s?.value ? 'admin' : envToken ? 'env' : null, tail: t ? t.slice(-4) : null, updatedBy: s?.updated_by ?? null, updatedAt: s?.updated_at ?? null };
+  }
+
+  /** Токен проверяется в Метрике до сохранения: неверный не сохраняем. */
+  async function setToken(value, user) {
+    const t = String(value ?? '').trim();
+    if (!/^[\w.\-]{20,400}$/.test(t)) throw new AdStatsError('Это не похоже на токен Яндекса: скопируйте строку целиком, она начинается с y0_');
+    let counters;
+    try {
+      counters = await metrikaCounters({ token: t, fetchImpl });
+    } catch (err) {
+      throw new AdStatsError(`Яндекс не принял токен: ${err.message}`);
+    }
+    settings.put.run(TOKEN_KEY, t, user?.name ?? null);
+    return { ...tokenInfo(), counters };
+  }
+
+  function clearToken() {
+    settings.del.run(TOKEN_KEY);
+    return tokenInfo();
+  }
+
+  return { saveAccount, account: (id) => q.account.get(Number(id)) ?? null, syncClient, syncAll, overview, clientStats, goalsFor, hasToken: () => Boolean(currentToken()), tokenInfo, setToken, clearToken };
 }

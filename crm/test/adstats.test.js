@@ -108,9 +108,34 @@ test('ошибка источника сохраняется у клиента, 
 test('без токена: понятная ошибка, фоновая загрузка пропускается; проверка полей', async () => {
   const { stats } = setup(async () => res(200, ''), null);
   stats.saveAccount(1, { metrikaCounter: '1' });
-  await assert.rejects(stats.syncClient(1), /YANDEX_ADS_TOKEN/);
+  await assert.rejects(stats.syncClient(1), /Не подключён токен Яндекса/);
   assert.deepEqual(await stats.syncAll(), { skipped: 'нет токена' });
   assert.throws(() => stats.saveAccount(1, { metrikaCounter: 'abc' }), /только цифры/);
   assert.throws(() => stats.saveAccount(1, { goals: '1, x' }), /номера целей/);
   assert.throws(() => stats.saveAccount(99, {}), /не найден/);
+});
+
+test('токен из кабинета: проверка в Метрике, важнее .env, наружу только хвост, отключение', async () => {
+  const seen = [];
+  const fetchImpl = async (url, init) => {
+    seen.push(init?.headers?.Authorization);
+    if (String(url).includes('/management/v1/counters')) return init.headers.Authorization === 'OAuth y0_bad_token_value_1234567' ? res(403, { message: 'Invalid oauth_token', code: 403 }) : res(200, { rows: 3, counters: [] });
+    return res(200, { data: [] });
+  };
+  const db = openDb(':memory:');
+  const stats = createAdStats({ db: db.raw, token: 'env_token_value_abcdefghijk', fetchImpl });
+  assert.deepEqual(stats.tokenInfo(), { set: true, source: 'env', tail: 'hijk', updatedBy: null, updatedAt: null });
+  await assert.rejects(stats.setToken('abc', { name: 'Даниил' }), /не похоже на токен/);
+  await assert.rejects(stats.setToken('y0_bad_token_value_1234567', { name: 'Даниил' }), /Яндекс не принял токен: Invalid oauth_token/);
+  const r = await stats.setToken(' y0_good_token_value_9876543 ', { name: 'Даниил' });
+  assert.equal(r.counters, 3);
+  assert.equal(r.source, 'admin');
+  assert.equal(r.tail, '6543');
+  assert.equal(r.updatedBy, 'Даниил');
+  assert.ok(!JSON.stringify(stats.tokenInfo()).includes('y0_good'), 'полный токен наружу не отдаётся');
+  db.raw.exec("INSERT INTO clients (name) VALUES ('Сфера')");
+  stats.saveAccount(1, { metrikaCounter: '5' });
+  await stats.syncClient(1);
+  assert.equal(seen.at(-1), 'OAuth y0_good_token_value_9876543', 'загрузка идёт с токеном из кабинета');
+  assert.equal(stats.clearToken().source, 'env');
 });

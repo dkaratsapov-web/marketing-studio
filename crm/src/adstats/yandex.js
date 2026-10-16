@@ -110,6 +110,14 @@ export async function metrikaGoals({ token, counter, fetchImpl = fetch }) {
   return ((await res.json()).goals ?? []).map((g) => ({ id: g.id, name: g.name, type: g.type }));
 }
 
+/** Сколько счётчиков видно по токену: проверка, что токен рабочий и с правом на Метрику. */
+export async function metrikaCounters({ token, fetchImpl = fetch }) {
+  const res = await fetchImpl(`${METRIKA_URL}/management/v1/counters?per_page=1`, { headers: { Authorization: `OAuth ${token}` } });
+  if (!res.ok) throw new AdApiError(await metrikaError(res));
+  const json = await res.json();
+  return json.rows ?? json.counters?.length ?? 0;
+}
+
 async function metrikaError(res) {
   const text = await res.text().catch(() => '');
   try {
