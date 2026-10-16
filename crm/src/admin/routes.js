@@ -2,6 +2,7 @@
 // Сессия — httpOnly-cookie с SameSite=Strict; изменения принимаются только JSON-запросами.
 
 import { adStatsRoutes } from './adstats-routes.js';
+import { parserRoutes } from './parser-routes.js';
 import cookie from '@fastify/cookie';
 import fastifyStatic from '@fastify/static';
 import { randomBytes } from 'node:crypto';
@@ -65,7 +66,7 @@ function toFilter(query) {
   };
 }
 
-export async function adminRoutes(app, { config, auth, reports, db, scenarioSource, library, brand, mediaplans, crm, calendar, video, ai, media, files = null, money = null, monitor = null, adstats = null }) {
+export async function adminRoutes(app, { config, auth, reports, db, scenarioSource, library, brand, mediaplans, crm, calendar, video, ai, media, files = null, money = null, monitor = null, adstats = null, parser = null }) {
   const secure = config.publicUrl?.startsWith('https://') ?? false;
   // уведомления в кабинете: задачи шлют их сами, встречам — через маршруты календаря
   const notify = createNotifications({ db: db.raw });
@@ -485,6 +486,7 @@ export async function adminRoutes(app, { config, auth, reports, db, scenarioSour
     if (mediaplans) await api.register(mediaplanRoutes, { mediaplans, brand });
     if (crm) await api.register(crmRoutes, { crm, auth, db, scenarioSource, kb, files, money });
     if (adstats) await api.register(adStatsRoutes, { adstats });
+    if (parser) await api.register(parserRoutes, { parser });
 
     // ---------- уведомления (колокольчик) ----------
     // after — только новые (для всплывающих окон): опрос раз в 20 секунд

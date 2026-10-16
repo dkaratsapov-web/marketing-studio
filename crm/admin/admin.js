@@ -14,6 +14,7 @@ import { renderHome, bellButton } from './home.js';
 import { renderNews, refreshNewsBadge } from './news.js';
 import { renderMoney } from './money.js';
 import { renderAdStats, renderAdClient } from './adstats.js';
+import { renderParser, renderParserJob } from './parser.js';
 import { renderNotifySettings } from './notify.js';
 import { renderChat, refreshChatBadge } from './chat.js';
 
@@ -193,6 +194,8 @@ const routes = {
   money: renderMoney,
   adstats: renderAdStats,
   adclient: renderAdClient,
+  parser: renderParser,
+  parsejob: renderParserJob,
   'notify-settings': renderNotifySettings,
   chat: renderChat,
   docs: renderDocs,
@@ -250,7 +253,7 @@ const SECTION_TABS = {
   ],
 };
 // Страницы внутри раздела без своей вкладки
-const PAGE_SECTION = { doc: 'docs', plan: 'plans', client: 'tasks', taskboard: 'tasks', adclient: 'adstats' };
+const PAGE_SECTION = { doc: 'docs', plan: 'plans', client: 'tasks', taskboard: 'tasks', adclient: 'adstats', parsejob: 'parser' };
 
 function currentRoute() {
   const [name, query = ''] = location.hash.replace(/^#\/?/, '').split('?');
@@ -292,6 +295,7 @@ async function boot() {
 const ICONS = {
   home: 'M3 11l9-7 9 7M5 9.5V20h5v-6h4v6h5V9.5',
   adstats: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  parser: 'M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM15.3 15.3L20 20M8 10.5h5',
   news: 'M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5M8 16h3',
   chat: 'M4 5h16v11H9l-5 4zM8 9h8M8 12h5',
   image: 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9.5a1.5 1.5 0 1 0 0-.01',
@@ -784,13 +788,14 @@ const NAV = [
   ['tasks', 'Задачи'],
   ['calendar', 'Календарь'],
   ['adstats', 'Статистика'],
+  ['parser', 'Парсер'],
   ['leads', 'Квалификатор'],
   ['kb', 'Регламенты'],
   ['staff', 'Сотрудники'],
 ];
 // Разделы, включённые на этом сервере (ADMIN_SECTIONS); учётная запись и её вкладки доступны всегда
 // «Главное» — сводка по всем включённым разделам, поэтому доступна всегда
-const ALWAYS = new Set(['home', 'adstats', 'account', 'appearance', 'notify-settings']);
+const ALWAYS = new Set(['home', 'adstats', 'parser', 'account', 'appearance', 'notify-settings']);
 const sectionOf = (route) => PAGE_SECTION[route] ?? Object.keys(SECTION_TABS).find((k) => SECTION_TABS[k].some(([id]) => id === route)) ?? route;
 function sectionAllowed(route) {
   return !ctx.sections || ALWAYS.has(route) || ALWAYS.has(sectionOf(route)) || ctx.sections.includes(sectionOf(route));
@@ -897,7 +902,7 @@ function shell(active, content) {
             tabs.map(([id, label]) => h('a', { href: `#/${id}`, 'aria-current': id === active ? 'page' : null }, label)),
           )
         : null,
-      h('main', { class: `page${['doc', 'plan', 'tasks', 'board', 'home', 'adstats', 'adclient'].includes(active) ? ' page-wide' : ''}`, id: 'main' }, content),
+      h('main', { class: `page${['doc', 'plan', 'tasks', 'board', 'home', 'adstats', 'adclient', 'parser', 'parsejob'].includes(active) ? ' page-wide' : ''}`, id: 'main' }, content),
     ),
   ];
 }

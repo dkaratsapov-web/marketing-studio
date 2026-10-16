@@ -18,6 +18,7 @@ import { createFiles } from './files/store.js';
 import { createHotLeads } from './crm/hot-leads.js';
 import { createMoney } from './crm/money.js';
 import { createAdStats } from './adstats/store.js';
+import { createParser } from './parser/store.js';
 import { createNotifications } from './notify/store.js';
 import { createCrm } from './crm/store.js';
 import { createCalendar } from './calendar/store.js';
@@ -61,6 +62,8 @@ const money = createMoney({ db: db.raw, notify: createNotifications({ db: db.raw
 qualifier.onLead((lead) => hotLeads.onLead(lead));
 // статистика клиентов из Яндекс Директа и Метрики
 const adstats = createAdStats({ db: db.raw, token: config.adsToken, log });
+// парсер компаний из открытых карт: сборы идут в фоне по одному
+const parser = createParser({ db: db.raw, log });
 
 const telegramBot = config.telegram.botEnabled ? await initTelegramBot() : null;
 const brand = loadBrand();
@@ -84,6 +87,7 @@ const app = await buildServer({
     files,
     money,
     adstats,
+    parser,
     mediaplans: createMediaplans({ db: db.raw, library }),
     crm,
     calendar,
@@ -128,6 +132,8 @@ const reminders = config.telegram.token
   : null;
 
 await app.listen({ port: config.port, host: config.host });
+// прерванные перезапуском сборы — с ошибкой, ждущие в очереди — продолжаем
+parser.resume().catch((err) => log.error({ err: err.message }, 'Парсер: очередь не запустилась'));
 if (telegramBot) await startTelegramBot(telegramBot);
 
 for (const signal of ['SIGINT', 'SIGTERM']) {

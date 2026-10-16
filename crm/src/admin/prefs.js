@@ -20,7 +20,7 @@ export const PREF_OPTIONS = {
 // категории уведомлений, которые можно отключить: «-comments,-news» в notifyMute
 export const NOTIFY_CATEGORIES = ['messages', 'tasks', 'comments', 'mentions', 'meetings', 'payments', 'news'];
 const validMute = (v) => typeof v === 'string' && v.length <= 100 && (v === '' || v.split(',').every((x) => NOTIFY_CATEGORIES.includes(x)));
-export const NAV_IDS = ['home', 'news', 'chat', 'docs', 'templates', 'plans', 'tasks', 'calendar', 'adstats', 'leads', 'kb', 'staff'];
+export const NAV_IDS = ['home', 'news', 'chat', 'docs', 'templates', 'plans', 'tasks', 'calendar', 'adstats', 'parser', 'leads', 'kb', 'staff'];
 const validNav = (v) => typeof v === 'string' && v.length <= 200 && (v === '' || v.split(',').every((x) => NAV_IDS.includes(x.replace(/^-/, ''))));
 // имя ассистента — свободное, но короткое и без разметки
 const NAME_RE = /^[A-Za-zА-Яа-яЁё0-9 .-]{1,24}$/;

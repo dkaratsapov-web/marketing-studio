@@ -576,6 +576,29 @@ const MIGRATIONS = [
      fetched_at TEXT NOT NULL,
      PRIMARY KEY (client_id, slice, date_from, date_to)
    );`,
+
+  // Парсер: сборы компаний по запросу и городу из открытых карт; найденные компании — JSON
+  `CREATE TABLE parse_jobs (
+     id          INTEGER PRIMARY KEY,
+     query       TEXT NOT NULL,
+     geo         TEXT NOT NULL,
+     sources     TEXT NOT NULL,
+     per_source  INTEGER NOT NULL,
+     enrich      INTEGER NOT NULL DEFAULT 1,
+     status      TEXT NOT NULL DEFAULT 'queued',
+     progress    TEXT,
+     error       TEXT,
+     created_by  TEXT,
+     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+     finished_at TEXT
+   );
+   CREATE TABLE parse_places (
+     id     INTEGER PRIMARY KEY,
+     job_id INTEGER NOT NULL REFERENCES parse_jobs(id) ON DELETE CASCADE,
+     name   TEXT NOT NULL,
+     data   TEXT NOT NULL
+   );
+   CREATE INDEX parse_places_job ON parse_places(job_id);`,
 ];
 
 /** Номер текущей версии схемы базы. */
