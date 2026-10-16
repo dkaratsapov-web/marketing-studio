@@ -5,6 +5,8 @@
 #   sudo -n /usr/local/sbin/korp-cabinet-update <коммит> [хеш папки crm]
 # Код берётся из публичного репозитория по номеру коммита, .env и data/ на сервере не трогаются.
 set -euo pipefail
+# Docker не должен читать чужой ввод (скрипт установки приходит через curl | bash)
+exec </dev/null
 
 REPO="dkaratsapov-web/marketing-studio"
 APP_DIR="/opt/korp-cabinet"
