@@ -68,7 +68,8 @@ async function directError(res) {
   const text = await res.text().catch(() => '');
   try {
     const e = JSON.parse(text).error;
-    if (e && DIRECT_LIMITS[Number(e.error_code)]) return `${DIRECT_LIMITS[Number(e.error_code)]} (код ${e.error_code})`;
+    // пояснение Директа оставляем: по нему видно, какой именно лимит сработал и когда он снимется
+    if (e && DIRECT_LIMITS[Number(e.error_code)]) return `${DIRECT_LIMITS[Number(e.error_code)]} (код ${e.error_code}${e.error_detail ? `, Директ: «${e.error_detail}»` : ''})`;
     if (e) return `${e.error_string ?? 'ошибка'}${e.error_detail ? `: ${e.error_detail}` : ''} (код ${e.error_code})`;
   } catch {
     /* не JSON */
