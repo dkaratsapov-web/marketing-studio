@@ -1,7 +1,7 @@
 // Раздел «Документы»: список, создание из шаблона, редактор слайдов с превью, проверка и выгрузка; шаблоны.
 // Формы редактора строятся по описанию полей с сервера (/admin/api/slide-types).
 
-import { h, api, app, shell, toast, navigate, fmtDateTime, plural, ctx, rowActions, rerender, confirmDialog, suggestInput } from './admin.js';
+import { h, api, app, shell, toast, navigate, fmtDateTime, plural, ctx, rowActions, rerender, confirmDialog, suggestInput, sectionAllowed } from './admin.js';
 
 const FORMATS = [
   ['pptx', 'PowerPoint'],
@@ -325,6 +325,7 @@ function createPanel(templates, preselect, onCancel) {
   const error = h('p', { class: 'error', role: 'alert', hidden: true });
   let chosen = choices.find((c) => c.id === preselect) ?? choices.find((c) => c.id === 'builtin:kp') ?? choices[0];
   let leads = null;
+  let crmClients = null;
 
   const radio = (t) =>
     h(
@@ -350,9 +351,21 @@ function createPanel(templates, preselect, onCancel) {
     const vars = chosen.variables.filter((v) => v.key !== 'date' && v.key !== 'manager');
     const inputs = Object.fromEntries(vars.map((v) => [v.key, h('input', { class: 'input', id: `c-${v.key}`, maxlength: 2000, placeholder: v.from.startsWith('lead.') ? 'Из заявки, если она выбрана' : '' })]));
     const lead = h('select', { class: 'select', id: 'c-lead' }, h('option', { value: '' }, 'Без заявки'));
+    // клиент из CRM: его название подставится в документ и в название
+    const client = h('select', {
+      class: 'select', id: 'c-client',
+      onchange: () => {
+        const name = client.selectedOptions[0]?.dataset.name ?? '';
+        if (inputs.client && name) inputs.client.value = name;
+        if (name && !title.value.trim()) title.placeholder = `${chosen.name}: ${name}`;
+      },
+    }, h('option', { value: '' }, 'Не выбран'));
     fill(fields, 
       h('div', { class: 'field' }, h('label', { for: 'c-title' }, 'Название документа'), title),
       chosen.id
+        ? h('div', { class: 'field' }, h('label', { for: 'c-client' }, 'Клиент'), client, h('span', { class: 'hint' }, 'Название клиента подставится на слайды. Пустые поля станут заготовками «[заполнить]».'))
+        : null,
+      chosen.id && sectionAllowed('leads')
         ? h(
             'div',
             { class: 'field' },
@@ -370,7 +383,8 @@ function createPanel(templates, preselect, onCancel) {
       error.hidden = true;
       try {
         const values = Object.fromEntries(Object.entries(inputs).map(([k, el]) => [k, el.value.trim()]));
-        const body = { title: title.value.trim() || undefined };
+        const picked = client.selectedOptions?.[0]?.dataset.name;
+        const body = { title: title.value.trim() || (picked ? `${chosen.name}: ${picked}` : undefined) };
         if (chosen.id) Object.assign(body, { templateId: chosen.id, values });
         if (lead.value) body.leadId = Number(lead.value);
         const { document: doc } = await api('/admin/api/documents', { method: 'POST', body });
@@ -382,6 +396,11 @@ function createPanel(templates, preselect, onCancel) {
       }
     };
     if (chosen.id) {
+      crmClients ??= api('/admin/api/clients').then((d) => d.clients).catch(() => []);
+      const list = await crmClients;
+      client.append(...list.map((c) => h('option', { value: c.id, dataset: { name: c.name } }, c.agency === 'soroka' ? `${c.name} (Сорока)` : c.name)));
+    }
+    if (chosen.id && sectionAllowed('leads')) {
       leads ??= api('/admin/api/leads').then((d) => d.leads).catch(() => []);
       const rows = await leads;
       lead.append(

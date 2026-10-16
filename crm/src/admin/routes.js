@@ -560,8 +560,35 @@ export async function adminRoutes(app, { config, auth, reports, db, scenarioSour
       const recent = [...(library ? mineWork(library.listDocuments(), 'doc') : []), ...(mediaplans ? mineWork(mediaplans.list(), 'plan') : [])]
         .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
         .slice(0, 5);
+      // клиенты: сколько у Корпорации и у Сороки, и кому сейчас нужно внимание (просрочки, долги, открытые задачи)
+      const clientList = crm ? crm.listClients() : [];
+      const clients = {
+        korp: clientList.filter((c) => (c.agency ?? 'korp') === 'korp').length,
+        soroka: clientList.filter((c) => c.agency === 'soroka').length,
+        attention: clientList
+          .filter((c) => c.overdue || c.debt || c.open_tasks)
+          .sort((a, b) => b.overdue - a.overdue || b.debt - a.debt || b.open_tasks - a.open_tasks)
+          .slice(0, 6)
+          .map((c) => ({ id: c.id, name: c.name, agency: c.agency ?? 'korp', open: c.open_tasks, overdue: c.overdue, debt: c.debt })),
+      };
+      // сводка по всему агентству, не только по своим задачам
+      const allOpen = crm ? crm.listTasks({ open: true }) : [];
+      const weekMeetings = calendar ? calendar.list({ from: `${plus(-((new Date(`${today}T12:00:00Z`).getUTCDay() + 6) % 7))}T00:00:00+03:00`, to: `${plus(7 - ((new Date(`${today}T12:00:00Z`).getUTCDay() + 6) % 7))}T00:00:00+03:00` }).filter((m) => !m.cancelled) : [];
+      const docs = library ? library.listDocuments() : [];
+      const agency = {
+        open: allOpen.length,
+        overdue: allOpen.filter(late).length,
+        unassigned: allOpen.filter((t) => !t.assignee_id).length,
+        dueWeek: allOpen.filter((t) => t.due && t.due >= today && t.due <= plus(7)).length,
+        meetingsWeek: weekMeetings.length,
+        meetingsLeft: weekMeetings.filter((m) => `${m.starts_at.replace(' ', 'T')}Z` >= new Date().toISOString()).length,
+        docsMonth: docs.filter((x) => (x.updated_at ?? '').slice(0, 7) === today.slice(0, 7)).length,
+        docs: docs.length,
+      };
       return {
         today,
+        agency,
+        clients,
         stats: { open: open.length, overdue: tasks.overdue.length, doneWeek: home.doneWeek.get(req.user.id).n, meetings: meetings.filter((m) => new Date(Date.parse(m.starts_at) + 3 * 3600e3).toISOString().slice(0, 10) === today).length, leads: leads.length },
         hot,
         tasks,

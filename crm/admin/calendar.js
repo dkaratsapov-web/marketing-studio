@@ -10,7 +10,8 @@ const MSK = 3 * 3600_000;
 const DAY = 24 * 3600_000;
 const HOUR_FROM = 8;
 const HOUR_TO = 21;
-const PX_PER_MIN = 0.8;
+// 1,2 px на минуту: у встречи на 30 минут помещаются две строки темы, на 45 минут три
+const PX_PER_MIN = 1.2;
 const DURATIONS = [15, 30, 45, 60, 90, 120, 180];
 
 let settings = null;
@@ -223,8 +224,8 @@ function weekGrid(week, meetings, reload) {
     const col = h(
       'div',
       {
-        class: `cal-day${date === today ? ' today' : ''}`,
-        style: `height:${height}px`,
+        class: `cal-day${date === today ? ' today' : ''}${weekdayOf(date) > 5 ? ' weekend' : ''}`,
+        style: `height:${height}px;--hour:${60 * PX_PER_MIN}px`,
         onclick: (e) => {
           if (e.target !== col) return;
           const y = e.offsetY / PX_PER_MIN + HOUR_FROM * 60;
@@ -265,7 +266,7 @@ function weekGrid(week, meetings, reload) {
       'div',
       { class: 'cal-head' },
       h('div'),
-      days.map((date) => h('div', { class: `cal-dayname${date === today ? ' today' : ''}` }, h('span', {}, dayLabel(date, { weekday: 'short' })), h('b', { class: 'num' }, dayLabel(date, { day: 'numeric' })))),
+      days.map((date) => h('div', { class: `cal-dayname${date === today ? ' today' : ''}${weekdayOf(date) > 5 ? ' weekend' : ''}` }, h('span', {}, dayLabel(date, { weekday: 'short' })), h('b', { class: 'num' }, dayLabel(date, { day: 'numeric' })))),
     ),
     h(
       'div',

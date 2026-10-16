@@ -1,7 +1,7 @@
 // «Подключения» (только администратор): что работает на сервере и как подключить остальное.
 // Ключи хранятся в .env на сервере — здесь только «подключено / нет» и шаги.
 
-import { h, api, app, shell, navigate, ctx } from './admin.js';
+import { h, api, app, shell, navigate, ctx, sectionAllowed } from './admin.js';
 import { fill } from './docs.js';
 
 const ENV = 'nano /opt/korp-cabinet/.env';
@@ -86,7 +86,7 @@ export async function renderIntegrations() {
       'Telegram-бот',
       Boolean(s.telegram.enabled && s.telegram.bot),
       s.telegram.bot ? `@${s.telegram.bot}${s.telegram.managerChat ? ', карточки лидов уходят в чат менеджеров' : ''}` : null,
-      'Квалификация в Telegram, карточки лидов, напоминания о встречах и план на день сотрудникам.',
+      sectionAllowed('leads') ? 'Квалификация в Telegram, карточки лидов, напоминания о встречах и план на день сотрудникам.' : 'Напоминания о встречах и план на день сотрудникам в личный Telegram.',
       [['Создайте бота у @BotFather, впишите ', code('TELEGRAM_BOT_TOKEN=…'), ' и примените.'], 'Каждый сотрудник подключает напоминания в «Учётной записи».'],
     ),
     card(

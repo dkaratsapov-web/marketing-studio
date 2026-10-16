@@ -642,7 +642,7 @@ function refreshMe() {
 // Разделы меню по умолчанию. Свой порядок и спрятанные разделы каждый задаёт шестерёнкой под меню
 // (настройка nav: «home,tasks,-templates»; минус — раздел спрятан; новые разделы встают в конец).
 const NAV = [
-  ['home', 'Главная'],
+  ['home', 'Главное'],
   ['news', 'Новости'],
   ['chat', 'Сообщения'],
   ['docs', 'Документы'],
@@ -655,7 +655,8 @@ const NAV = [
   ['staff', 'Сотрудники'],
 ];
 // Разделы, включённые на этом сервере (ADMIN_SECTIONS); учётная запись и её вкладки доступны всегда
-const ALWAYS = new Set(['account', 'appearance', 'notify-settings']);
+// «Главное» — сводка по всем включённым разделам, поэтому доступна всегда
+const ALWAYS = new Set(['home', 'account', 'appearance', 'notify-settings']);
 const sectionOf = (route) => PAGE_SECTION[route] ?? Object.keys(SECTION_TABS).find((k) => SECTION_TABS[k].some(([id]) => id === route)) ?? route;
 function sectionAllowed(route) {
   return !ctx.sections || ALWAYS.has(route) || ctx.sections.includes(sectionOf(route));
@@ -1706,7 +1707,7 @@ const APPEARANCE = {
     ['icons', 'Только значки', 'Узкая панель — больше места под работу'],
   ],
   start: [
-    ['home', 'Главная'],
+    ['home', 'Главное'],
     ['news', 'Новости'],
     ['docs', 'Документы'],
     ['tasks', 'Задачи — проекты'],
@@ -1791,7 +1792,7 @@ function renderAppearance() {
         { class: 'panel' },
         h('h2', {}, 'Стартовый раздел'),
         h('p', { class: 'sub' }, 'Что открывается после входа.'),
-        h('select', { class: 'select', 'aria-label': 'Стартовый раздел', onchange: (e) => set({ start: e.target.value }) }, APPEARANCE.start.map(([v, l]) => h('option', { value: v, selected: prefs.start === v }, l))),
+        h('select', { class: 'select', 'aria-label': 'Стартовый раздел', onchange: (e) => set({ start: e.target.value }) }, APPEARANCE.start.filter(([v]) => sectionAllowed(v)).map(([v, l]) => h('option', { value: v, selected: prefs.start === v }, l))),
       ),
     );
   }
@@ -2016,6 +2017,6 @@ function logo(variant = 'dark') {
   return img;
 }
 
-export { h, api, app, shell, toast, confirmDialog, suggestInput, countdown, taskDeadline, navigate, fmtDateTime, plural, ctx, icon, userAvatar, initials, rowActions, answerText, renderRoute as rerender };
+export { sectionAllowed, h, api, app, shell, toast, confirmDialog, suggestInput, countdown, taskDeadline, navigate, fmtDateTime, plural, ctx, icon, userAvatar, initials, rowActions, answerText, renderRoute as rerender };
 
 boot();

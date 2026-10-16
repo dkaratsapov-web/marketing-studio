@@ -3,7 +3,7 @@
 // Тихие часы и отключённые категории — в «Учётная запись» → «Уведомления».
 // Сторонних сервисов нет: всё идёт с нашего сервера прямо в браузер сотрудника.
 
-import { h, api, app, shell, toast, ctx, icon, userAvatar } from './admin.js';
+import { h, api, app, shell, toast, ctx, icon, userAvatar, sectionAllowed } from './admin.js';
 import { fill } from './docs.js';
 import { currentChat, setChatBadge } from './chat.js';
 
@@ -217,6 +217,9 @@ const CATEGORIES = [
   ['payments', 'Оплаты', 'Скоро срок оплаты клиента и просроченные оплаты'],
   ['news', 'Новости', 'Закреплённые важные записи в «Новостях»'],
 ];
+// категории выключенных разделов (сообщения, новости) в настройках не показываем
+const CATEGORY_SECTION = { messages: 'chat', news: 'news' };
+const categories = () => CATEGORIES.filter(([key]) => !CATEGORY_SECTION[key] || sectionAllowed(CATEGORY_SECTION[key]));
 const QUIET = [['off', 'Без тихих часов'], ['22-9', 'С 22:00 до 9:00'], ['21-9', 'С 21:00 до 9:00'], ['20-8', 'С 20:00 до 8:00'], ['23-8', 'С 23:00 до 8:00'], ['19-9', 'С 19:00 до 9:00']];
 
 export function renderNotifySettings() {
@@ -297,7 +300,7 @@ export function renderNotifySettings() {
         { class: 'panel account-form' },
         h('h2', {}, 'Что присылать'),
         h('p', { class: 'muted' }, 'Отключённое не появится ни в колокольчике, ни во всплывающих окнах.'),
-        CATEGORIES.map(([id, label, hint]) =>
+        categories().map(([id, label, hint]) =>
           h('label', { class: 'notify-row' },
             h('span', { class: 'notify-text' }, h('strong', {}, label), h('span', { class: 'muted small' }, hint)),
             h('span', { class: 'switch' }, h('input', {

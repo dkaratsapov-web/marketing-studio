@@ -1,7 +1,7 @@
 // «Состояние» (только администратор): резервные копии и проверка восстановления, место на диске,
 // фоновые задачи, недоставленные заявки, обращения к ИИ, последние ошибки сервера.
 
-import { h, api, app, shell, navigate, ctx } from './admin.js';
+import { h, api, app, shell, navigate, ctx, sectionAllowed } from './admin.js';
 import { fill } from './docs.js';
 
 const BACKUP = 'cd /opt/korp-cabinet && docker compose exec -T app npm run backup';
@@ -42,7 +42,7 @@ export async function renderSystem() {
       if (err.status !== 401) fill(grid, h('p', { class: 'error' }, err.message));
       return;
     }
-    fill(grid, backupCard(s.backup), storageCard(s), jobsCard(s.jobs, s.startedAt), leadsCard(s.leads), aiCard(s.ai), errorsCard(s.errors));
+    fill(grid, backupCard(s.backup), storageCard(s), jobsCard(s.jobs, s.startedAt), sectionAllowed('leads') ? leadsCard(s.leads) : null, aiCard(s.ai), errorsCard(s.errors));
   }
   await load();
 }

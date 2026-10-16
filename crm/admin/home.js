@@ -1,7 +1,8 @@
-// «Главная»: сводка дня одним экраном — что горит, какие встречи, новые заявки, уведомления,
+// «Главное»: сводка дня одним экраном — что горит, какие встречи, клиенты и деньги, уведомления,
 // с чем работали недавно и что поручили коллегам. Администратор видит ещё нагрузку команды.
+// Карточки выключенных разделов (заявки, новости, медиапланы) не показываются.
 
-import { h, api, app, shell, toast, navigate, fmtDateTime, plural, ctx, icon, userAvatar, countdown, taskDeadline } from './admin.js';
+import { sectionAllowed, h, api, app, shell, toast, navigate, fmtDateTime, plural, ctx, icon, userAvatar, countdown, taskDeadline } from './admin.js';
 import { fill } from './docs.js';
 import { watchNotifications, permissionBanner } from './notify.js';
 import { openTask, doneToggle, dueText, dueState, PRIORITY } from './tasks.js';
@@ -42,7 +43,20 @@ export async function renderHome() {
       if (err.status !== 401) fill(body, h('p', { class: 'error' }, err.message));
       return;
     }
-    fill(body, permissionBanner(), hero(d), stats(d), h('div', { class: 'home-grid' }, h('div', { class: 'home-col' }, hot(d, load), week(d, load), delegated(d), team(d)), h('div', { class: 'home-col' }, moneyCard(d), newsCard(d), meetings(d, load), leads(d), notifications(d), recent(d))));
+    const on = (section, el) => (sectionAllowed(section) ? el : null);
+    fill(
+      body,
+      permissionBanner(),
+      hero(d),
+      stats(d),
+      agencyRow(d),
+      h(
+        'div',
+        { class: 'home-grid' },
+        h('div', { class: 'home-col' }, hot(d, load), week(d, load), delegated(d), team(d)),
+        h('div', { class: 'home-col' }, meetings(d, load), clientsCard(d), moneyCard(d), on('news', newsCard(d)), on('leads', leads(d)), notifications(d), recent(d)),
+      ),
+    );
   }
   await load();
 }
@@ -53,7 +67,7 @@ function hero(d) {
   if (todayMeetings) parts.push(`${todayMeetings} ${plural(todayMeetings, 'встреча', 'встречи', 'встреч')}`);
   const dueToday = d.tasks.today.length;
   if (dueToday) parts.push(`${dueToday} ${plural(dueToday, 'задача', 'задачи', 'задач')} на сегодня`);
-  let line = parts.length ? `Сегодня ${parts.join(' и ')}.` : 'На сегодня ничего срочного — хороший день, чтобы разобрать хвосты.';
+  let line = parts.length ? `Сегодня ${parts.join(' и ')}.` : 'На сегодня ничего срочного. Хороший день, чтобы разобрать хвосты.';
   if (d.stats.overdue) line += ` Просрочено: ${d.stats.overdue}.`;
   const quick = (label, onclick, iconName) => h('button', { type: 'button', class: 'btn home-quick', onclick }, icon(iconName), label);
   return h(
@@ -65,8 +79,8 @@ function hero(d) {
       { class: 'home-actions' },
       quick('Задача', () => openTask(null, { defaults: { assignee_id: ctx.me.id }, onChange: () => navigate('home') }), 'tasks'),
       quick('Встреча', () => navigate('calendar', new URLSearchParams({ new: '1' })), 'calendar'),
-      quick('Документ', () => navigate('docs', new URLSearchParams({ new: '1' })), 'docs'),
-      quick('Медиаплан', () => navigate('plans', new URLSearchParams({ new: '1' })), 'plans'),
+      sectionAllowed('docs') ? quick('Документ', () => navigate('docs', new URLSearchParams({ new: '1' })), 'docs') : null,
+      sectionAllowed('plans') ? quick('Медиаплан', () => navigate('plans', new URLSearchParams({ new: '1' })), 'plans') : null,
     ),
   );
 }
@@ -79,8 +93,32 @@ function stats(d) {
     tile(d.stats.open, plural(d.stats.open, 'открытая задача', 'открытые задачи', 'открытых задач'), '#/mytasks'),
     tile(d.stats.overdue, 'просрочено', '#/tasks?mine=1&due=overdue', d.stats.overdue ? 'bad' : ''),
     tile(d.stats.meetings, plural(d.stats.meetings, 'встреча сегодня', 'встречи сегодня', 'встреч сегодня'), '#/calendar?mine=1'),
-    tile(d.stats.leads, plural(d.stats.leads, 'новая заявка', 'новые заявки', 'новых заявок'), '#/leads?status=new', d.stats.leads ? 'accent' : ''),
+    sectionAllowed('leads')
+      ? tile(d.stats.leads, plural(d.stats.leads, 'новая заявка', 'новые заявки', 'новых заявок'), '#/leads?status=new', d.stats.leads ? 'accent' : '')
+      : tile(d.clients.korp + d.clients.soroka, plural(d.clients.korp + d.clients.soroka, 'клиент в работе', 'клиента в работе', 'клиентов в работе'), '#/clients'),
     tile(d.stats.doneWeek, 'сделано за 7 дней', '#/mytasks?done=1', d.stats.doneWeek ? 'good' : ''),
+  );
+}
+
+/** Агентство целиком: все задачи, встречи недели и документы, а не только свои. */
+function agencyRow(d) {
+  const a = d.agency;
+  if (!a) return null;
+  const item = (value, label, href, tone = '') => h('a', { class: `home-agency-item ${tone}`, href }, h('b', { class: 'num' }, value), h('span', {}, label));
+  return h(
+    'section',
+    { class: 'home-agency', 'aria-label': 'Агентство' },
+    h('h2', {}, 'Агентство'),
+    h(
+      'div',
+      { class: 'home-agency-items' },
+      item(a.open, plural(a.open, 'открытая задача', 'открытые задачи', 'открытых задач'), '#/tasks'),
+      item(a.overdue, 'просрочено у всех', '#/tasks?due=overdue', a.overdue ? 'bad' : ''),
+      item(a.unassigned, 'без исполнителя', '#/tasks?assignee=none', a.unassigned ? 'warn' : ''),
+      item(a.dueWeek, 'срок на этой неделе', '#/tasks?due=week'),
+      item(a.meetingsWeek, `${plural(a.meetingsWeek, 'встреча', 'встречи', 'встреч')} на неделе, впереди ${a.meetingsLeft}`, '#/calendar'),
+      sectionAllowed('docs') ? item(a.docsMonth, `${plural(a.docsMonth, 'документ', 'документа', 'документов')} за месяц, всего ${a.docs}`, '#/docs') : null,
+    ),
   );
 }
 
@@ -211,6 +249,38 @@ export function notificationRow(n, onOpen = () => {}) {
       n.text,
       h('span', { class: 'muted small' }, fmtDateTime(n.created_at)),
     ),
+  );
+}
+
+/** Клиенты: сколько у Корпорации и у Сороки и кому сейчас нужно внимание. */
+function clientsCard(d) {
+  const c = d.clients;
+  if (!c || !(c.korp + c.soroka)) return null;
+  const rub = (v) => `${Math.round(v).toLocaleString('ru-RU')} ₽`;
+  const split = (agency, label, n) => h('a', { class: `home-split agency-${agency}`, href: `#/clients?agency=${agency}` }, h('b', { class: 'num' }, n), h('span', {}, label));
+  return card(
+    'Клиенты',
+    { action: h('a', { class: 'linkish small', href: '#/clients' }, 'Все клиенты') },
+    h('div', { class: 'home-splits' }, split('korp', 'Корпорация', c.korp), split('soroka', 'Сорока', c.soroka)),
+    c.attention.length
+      ? h(
+          'ul',
+          { class: 'home-list' },
+          c.attention.map((x) =>
+            h(
+              'li',
+              { class: 'home-recent' },
+              h('span', { class: `home-money-dot${x.overdue || x.debt ? ' bad' : ''}` }),
+              h('a', { class: 'task-link', href: `#/tasks?project=${x.id}` }, x.name),
+              h(
+                'span',
+                { class: `small num ${x.overdue || x.debt ? 'due overdue' : 'muted'}` },
+                [x.overdue ? `просрочено ${x.overdue}` : null, x.debt ? `долг ${rub(x.debt)}` : null, !x.overdue && !x.debt ? `${x.open} ${plural(x.open, 'задача', 'задачи', 'задач')}` : null].filter(Boolean).join(' · '),
+              ),
+            ),
+          ),
+        )
+      : quiet('Открытых задач и долгов по клиентам нет.'),
   );
 }
 

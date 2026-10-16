@@ -102,12 +102,17 @@ export function createDocLibrary({ db, brand, templatesDir, dataDir, media = nul
 
   const parseDoc = (row) => row && { ...row, spec: JSON.parse(row.spec) };
 
-  function createDocument({ templateId = null, values = {}, title = null, spec = null, leadId = null }, user) {
+  function createDocument({ templateId = null, values = {}, title = null, spec = null, leadId = null, keepVariables = false }, user) {
     let source = spec;
-    if (templateId) source = fillVariables(getTemplate(templateId).spec, values);
+    const template = templateId ? getTemplate(templateId) : null;
+    // незаполненные {{переменные}} в документе становятся понятными заготовками «[заполнить: Клиент]»,
+    // их ловит проверка перед выгрузкой; в шаблоне {{…}} остаются как есть
+    if (template) source = fillVariables(template.spec, values);
+    if (template && !keepVariables) source = pendingVariables(source, template.variables);
     if (!source) source = { meta: {}, slides: [] };
     validateSpec(source, { allowEmpty: true });
-    const docTitle = String(title ?? source.meta?.title ?? 'Новый документ').slice(0, 200);
+    const metaTitle = source.meta?.title && (keepVariables || !source.meta.title.includes('[заполнить')) ? source.meta.title : null;
+    const docTitle = String(title ?? metaTitle ?? template?.name ?? 'Новый документ').slice(0, 200);
     const { lastInsertRowid } = q.insertDoc.run(docTitle, JSON.stringify(source), templateId, leadId, user, user);
     return getDocument(lastInsertRowid);
   }
@@ -213,6 +218,12 @@ export function fillVariables(spec, values) {
       return v == null || String(v).trim() === '' ? m : String(v);
     });
   return mapStrings(structuredClone(spec), replace);
+}
+
+/** Оставшиеся {{key}} → «[заполнить: подпись]»: в документе не видно служебных скобок. */
+export function pendingVariables(spec, known = []) {
+  const labels = Object.fromEntries((known ?? []).map((v) => [v.key, v.label]));
+  return mapStrings(spec, (s) => s.replace(VAR_RE, (m, key) => `[заполнить: ${(labels[key] ?? KNOWN_VARIABLES[key]?.label ?? key).toLowerCase()}]`));
 }
 
 /** Значения переменных из карточки лида и текущего сотрудника. */

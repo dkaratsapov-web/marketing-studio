@@ -27,7 +27,7 @@ export function layoutDeck(deck, brand) {
         ],
       };
     }
-    if (built.theme === 'light') built.elements.push(...footer(brand, L, deck, index));
+    if (built.theme === 'light' && slide.chrome !== 'hide') built.elements.push(...footer(brand, L, deck, index));
     return { ...built, index, source: slide };
   });
 }

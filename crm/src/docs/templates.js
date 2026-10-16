@@ -39,7 +39,38 @@ export function renderSlide(slide, ctx) {
   const built = BUILDERS[slide.type](slide, ctx);
   const elements = (Array.isArray(built) ? built : built.elements).filter(Boolean);
   const theme = Array.isArray(built) ? type.theme : built.theme ?? type.theme;
-  return { type: slide.type, theme, elements, notes: slide.notes ?? null };
+  return { type: slide.type, notes: slide.notes ?? null, ...applyDesign(slide, theme, elements) };
+}
+
+// ---------- оформление слайда поверх раскладки: фон, акцент, логотип ----------
+
+/** Типы, у которых можно поменять фон: без таблиц и графиков, их цвета рассчитаны на свою тему. */
+export const BG_SWITCHABLE = new Set(['cover', 'section', 'closing', 'strategy', 'kpi', 'case', 'image', 'gallery']);
+// Цвета для тёмного фона там, где в бренде есть только светлый вариант (как на сайте: карточки #1C1C1F, розовый #FF4D9D)
+const ON_DARK = { pink: '#FF4D9D', card: '#1C1C1F', line: '#2A2A2E', placeholder: '#3A3A3F' };
+const TO_DARK = { text: { ink: 'onDark', steel: 'onDarkMuted', accentText: ON_DARK.pink }, fill: { mist: ON_DARK.card, paper: ON_DARK.card, line: ON_DARK.line, steel: ON_DARK.placeholder } };
+const TO_LIGHT = { text: { onDark: 'ink', onDarkMuted: 'steel', [ON_DARK.pink]: 'accentText' }, fill: { steel: 'mist', [ON_DARK.card]: 'mist' } };
+
+export function applyDesign(slide, theme, elements) {
+  let out = elements;
+  let next = theme;
+  const wanted = slide.bg === 'light' || slide.bg === 'dark' ? slide.bg : null;
+  if (wanted && wanted !== theme && BG_SWITCHABLE.has(slide.type) && !elements.some((e) => e.kind === 'table' || e.kind === 'chart')) {
+    const map = wanted === 'dark' ? TO_DARK : TO_LIGHT;
+    out = out.map((e) => {
+      if (e.kind === 'text') return { ...e, color: map.text[e.color] ?? e.color };
+      if (e.kind === 'rect') return { ...e, fill: map.fill[e.fill] ?? e.fill };
+      if (e.kind === 'logo') return { ...e, variant: wanted === 'dark' ? 'onDark' : 'onLight' };
+      return e;
+    });
+    next = wanted;
+  }
+  if (slide.accent === 'pink') {
+    const pink = next === 'dark' ? ON_DARK.pink : 'accentText';
+    out = out.map((e) => (e.kind === 'rect' && e.fill === 'accent' ? { ...e, fill: pink } : e.kind === 'text' && e.color === 'accent' ? { ...e, color: pink } : e));
+  }
+  if (slide.chrome === 'hide') out = out.filter((e) => e.kind !== 'logo');
+  return { theme: next, elements: out };
 }
 
 /**
@@ -79,7 +110,7 @@ function picture(name, box, img, { fit = 'cover', radius = 16, dark = false } = 
   }
   return [
     { kind: 'rect', name: `${name}-empty`, ...box, fill: dark ? 'steel' : 'mist', radius },
-    text(`${name}-hint`, { x: box.x + 24, y: box.y + box.h / 2 - 20, w: box.w - 48, h: 40 }, 'small', img?.missing ? 'Изображение удалено — выберите другое' : 'Добавьте изображение', {
+    text(`${name}-hint`, { x: box.x + 24, y: box.y + box.h / 2 - 20, w: box.w - 48, h: 40 }, 'small', img?.missing ? 'Изображение удалено, выберите другое' : 'Добавьте изображение', {
       align: 'center',
       color: dark ? 'onDark' : 'steel',
     }),
@@ -117,7 +148,7 @@ const BUILDERS = {
         slide.subtitle ? text('subtitle', { x: L.M + 160, y: 672, w: L.CW - 320, h: 104 }, 'lead', slide.subtitle, { color: 'onDarkMuted', align: 'center' }) : null,
         { kind: 'rect', name: 'accent', x: L.W / 2 - 48, y: 820, w: 96, h: 8, fill: 'accent', radius: 4 },
         meta || slide.author
-          ? text('meta', { x: L.M, y: 864, w: L.CW, h: 40 }, 'small', [meta, slide.author].filter(Boolean).join(' — '), { color: 'onDark', align: 'center' })
+          ? text('meta', { x: L.M, y: 864, w: L.CW, h: 40 }, 'small', [meta, slide.author].filter(Boolean).join(', '), { color: 'onDark', align: 'center' })
           : null,
       ];
     }
@@ -291,11 +322,11 @@ const BUILDERS = {
     const line = (r) => [
       r.channel,
       fmtMoney(r.budget, cur),
-      r.impressions != null ? fmtNumber(r.impressions) : '—',
-      r.clicks != null ? fmtNumber(r.clicks) : '—',
-      ratio(r.budget, r.clicks) != null ? fmtMoney(ratio(r.budget, r.clicks), cur) : '—',
-      r.leads != null ? fmtNumber(r.leads) : '—',
-      ratio(r.budget, r.leads) != null ? fmtMoney(ratio(r.budget, r.leads), cur) : '—',
+      r.impressions != null ? fmtNumber(r.impressions) : '-',
+      r.clicks != null ? fmtNumber(r.clicks) : '-',
+      ratio(r.budget, r.clicks) != null ? fmtMoney(ratio(r.budget, r.clicks), cur) : '-',
+      r.leads != null ? fmtNumber(r.leads) : '-',
+      ratio(r.budget, r.leads) != null ? fmtMoney(ratio(r.budget, r.leads), cur) : '-',
     ];
     const totals = { channel: 'Итого', budget: sum('budget'), impressions: sum('impressions'), clicks: sum('clicks'), leads: sum('leads') };
     return [
@@ -326,15 +357,15 @@ const BUILDERS = {
     const cur = brand.documents.currency;
     const rows = slide.rows;
     const sum = (k) => (rows.every((r) => typeof r[k] === 'number') ? rows.reduce((n, r) => n + r[k], 0) : null);
-    const n = (v) => (v != null ? fmtNumber(v) : '—');
-    const drr = (b, rev) => (typeof b === 'number' && typeof rev === 'number' && rev > 0 ? `${fmtNumber(+((b / rev) * 100).toFixed(1))} %` : '—');
+    const n = (v) => (v != null ? fmtNumber(v) : '-');
+    const drr = (b, rev) => (typeof b === 'number' && typeof rev === 'number' && rev > 0 ? `${fmtNumber(+((b / rev) * 100).toFixed(1))} %` : '-');
     const line = (r) => [
       r.targeting ? `${r.channel}\n${r.targeting}` : r.channel,
       fmtMoney(r.budget, cur),
       n(r.clicks),
       n(r.carts),
       n(r.sales),
-      r.revenue != null ? fmtMoney(r.revenue, cur) : '—',
+      r.revenue != null ? fmtMoney(r.revenue, cur) : '-',
       drr(r.budget, r.revenue),
     ];
     const totals = { channel: 'Итого', budget: sum('budget'), clicks: sum('clicks'), carts: sum('carts'), sales: sum('sales'), revenue: sum('revenue') };
@@ -439,7 +470,7 @@ const BUILDERS = {
     const layout = layoutOf(slide);
     const fit = slide.fit === 'contain' ? 'contain' : 'cover';
     if (layout === 'full') {
-      const lines = [slide.text, slide.caption].filter(Boolean).join(' — ');
+      const lines = [slide.text, slide.caption].filter(Boolean).join('. ');
       return {
         theme: 'dark',
         elements: [

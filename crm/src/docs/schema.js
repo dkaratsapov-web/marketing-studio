@@ -4,7 +4,7 @@
 // image — картинка из медиатеки (номер), layout — вариант расположения элементов на слайде.
 // figure: true — факт (значение KPI, результат кейса, источник, период, клиент, дата): ИИ-правка его не меняет.
 
-import { SLIDE_TYPES, LAYOUTS } from './templates.js';
+import { SLIDE_TYPES, LAYOUTS, BG_SWITCHABLE } from './templates.js';
 
 const DATA_STATUS = {
   key: 'dataStatus',
@@ -211,6 +211,17 @@ export const CHART_TYPES = [
   ['stacked', 'Столбцы с накоплением'],
 ];
 
+/** Оформление поверх раскладки: фон (где это безопасно для таблиц и графиков), акцент, логотип с номером. */
+export function designFields(type) {
+  return [
+    BG_SWITCHABLE.has(type)
+      ? { key: 'bg', label: 'Фон', type: 'select', options: [['', 'Как в шаблоне'], ['light', 'Светлый'], ['dark', 'Тёмный']] }
+      : null,
+    { key: 'accent', label: 'Акцентный цвет', type: 'select', options: [['', 'Салатовый'], ['pink', 'Розовый']] },
+    { key: 'chrome', label: 'Логотип и номер страницы', type: 'select', options: [['', 'Показывать'], ['hide', 'Скрыть']] },
+  ].filter(Boolean);
+}
+
 /** Описание для админки: типы слайдов, их поля и пустой слайд каждого типа. */
 export function slideCatalog() {
   return Object.entries(SLIDE_TYPES).map(([type, t]) => ({
@@ -219,7 +230,7 @@ export function slideCatalog() {
     theme: t.theme,
     data: Boolean(t.data),
     required: t.required,
-    fields: [...SLIDE_FIELDS[type], { key: 'notes', label: 'Заметки докладчика', type: 'textarea' }],
+    fields: [...SLIDE_FIELDS[type], ...designFields(type), { key: 'notes', label: 'Заметки докладчика', type: 'textarea' }],
   }));
 }
 

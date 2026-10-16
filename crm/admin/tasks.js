@@ -1201,37 +1201,49 @@ export async function renderMyTasks(params) {
       fill(list, h('div', { class: 'panel empty' }, h('strong', {}, 'Задач на вас нет'), 'Новые задачи, где вы исполнитель, появятся здесь со всех проектов.'));
       return;
     }
-    const groups = new Map();
-    for (const t of tasks) {
-      const k = projectKey(t.client_id);
-      if (!groups.has(k)) groups.set(k, { name: t.client_name ?? 'Общие задачи', tasks: [] });
-      groups.get(k).tasks.push(t);
+    // сверху всё со сроком — по порядку дедлайна, внизу задачи без срока по проектам, в конце выполненные
+    const row = (t, { project = false } = {}) => {
+      const state = dueState(t);
+      return h(
+        'li',
+        { class: t.status === 'done' ? 'is-done' : '' },
+        doneToggle(t, load),
+        h('button', { type: 'button', class: 'linkish task-link', onclick: () => openTask(t.id, { onChange: load }) }, t.title),
+        project
+          ? h('a', { class: 'col-chip col-gray', href: `#/tasks?project=${projectKey(t.client_id)}` }, t.client_name ?? 'Общие задачи')
+          : h('span', { class: `col-chip col-${t.column_color ?? 'gray'}` }, t.board_name, ' · ', t.column_name),
+        t.priority ? h('span', { class: `chip prio p${t.priority}` }, PRIORITY[t.priority]) : h('span'),
+        t.due ? h('span', { class: `chip due ${state}` }, dueText(t), t.status !== 'done' && Date.parse(taskDeadline(t)) - Date.now() < 3 * 86400e3 ? [' · ', countdown(taskDeadline(t))] : null) : h('span'),
+      );
+    };
+    const panel = (title, items, opts) => h('section', { class: 'panel my-group' }, h('h2', {}, title, ' ', h('span', { class: 'muted num' }, items.length)), h('ul', { class: 'my-list' }, items.map((t) => row(t, opts))));
+
+    const active = tasks.filter((t) => t.status !== 'done');
+    const dated = active.filter((t) => t.due).sort((a, b) => taskDeadline(a).localeCompare(taskDeadline(b)) || b.priority - a.priority);
+    // шапки по срокам: просрочено, сегодня, завтра, эта неделя, позже
+    const day = (n) => new Date(Date.now() + 3 * 3600e3 + n * 86400e3).toISOString().slice(0, 10);
+    const bucket = (t) => (dueState(t) === 'overdue' ? 'Просрочено' : t.due === day(0) ? 'Сегодня' : t.due === day(1) ? 'Завтра' : t.due <= day(7) ? 'На этой неделе' : 'Позже');
+    const buckets = new Map();
+    for (const t of dated) {
+      const b = bucket(t);
+      if (!buckets.has(b)) buckets.set(b, []);
+      buckets.get(b).push(t);
     }
+    const noDue = new Map();
+    for (const t of active.filter((x) => !x.due)) {
+      const k = projectKey(t.client_id);
+      if (!noDue.has(k)) noDue.set(k, { name: t.client_name ?? 'Общие задачи', tasks: [] });
+      noDue.get(k).tasks.push(t);
+    }
+    const done = tasks.filter((t) => t.status === 'done');
     fill(
       list,
-      [...groups.entries()].map(([k, g]) =>
-        h(
-          'section',
-          { class: 'panel my-group' },
-          h('h2', {}, h('a', { href: `#/tasks?project=${k}` }, g.name), ' ', h('span', { class: 'muted num' }, g.tasks.length)),
-          h(
-            'ul',
-            { class: 'my-list' },
-            g.tasks.map((t) => {
-              const state = dueState(t);
-              return h(
-                'li',
-                { class: t.status === 'done' ? 'is-done' : '' },
-                doneToggle(t, load),
-                h('button', { type: 'button', class: 'linkish task-link', onclick: () => openTask(t.id, { onChange: load }) }, t.title),
-                h('span', { class: `col-chip col-${t.column_color ?? 'gray'}` }, t.board_name, ' · ', t.column_name),
-                t.priority ? h('span', { class: `chip prio p${t.priority}` }, PRIORITY[t.priority]) : h('span'),
-                t.due ? h('span', { class: `chip due ${state}` }, dueText(t), t.status !== 'done' && Date.parse(taskDeadline(t)) - Date.now() < 3 * 86400e3 ? [' · ', countdown(taskDeadline(t))] : null) : h('span'),
-              );
-            }),
-          ),
-        ),
+      [...buckets.entries()].map(([title, items]) => panel(title, items, { project: true })),
+      noDue.size ? h('h2', { class: 'my-section' }, 'Без срока') : null,
+      [...noDue.entries()].map(([k, g]) =>
+        h('section', { class: 'panel my-group' }, h('h2', {}, h('a', { href: `#/tasks?project=${k}` }, g.name), ' ', h('span', { class: 'muted num' }, g.tasks.length)), h('ul', { class: 'my-list' }, g.tasks.map((t) => row(t)))),
       ),
+      done.length ? panel('Выполнено за 2 недели', done, { project: true }) : null,
     );
   }
   load();

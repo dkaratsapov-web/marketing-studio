@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { loadBrand } from '../src/brand/index.js';
 import { checkContent, runQa } from '../src/docs/qa.js';
-import { renderDeckHtml } from '../src/docs/render-html.js';
+import { renderDeckHtml, layoutDeck } from '../src/docs/render-html.js';
 import { renderDeckPptx } from '../src/docs/render-pptx.js';
 import { buildDeck, QaError } from '../src/docs/build.js';
 import { chromiumPath, closeBrowser } from '../src/docs/browser.js';
@@ -106,4 +106,20 @@ test('бриф проходит проверку вёрстки', { skip: !hasCh
   spec.slides[2].questions[0].answer = 'Владельцы малого бизнеса 30–50 лет, решение принимает собственник; B2B';
   const { qa } = await buildDeck(spec, brand, { formats: ['pdf'] });
   assert.ok(qa);
+});
+
+test('оформление слайда: тёмный фон, розовый акцент и скрытый логотип одинаково для HTML и PPTX', () => {
+  const brand = loadBrand();
+  const deck = { meta: {}, slides: [
+    { type: 'strategy', title: 'Стратегия', pillars: [{ title: 'Охват', text: 'VK Ads' }], bg: 'dark', accent: 'pink', chrome: 'hide' },
+    { type: 'mediaplan', title: 'Медиаплан', rows: [{ channel: 'VK', budget: 1000 }], dataStatus: 'forecast', bg: 'dark' },
+  ] };
+  const [s1, s2] = layoutDeck(deck, brand);
+  assert.equal(s1.theme, 'dark');
+  assert.ok(!s1.elements.some((e) => e.kind === 'logo'), 'логотип скрыт');
+  assert.ok(!s1.elements.some((e) => e.kind === 'text' && e.color === 'ink'), 'тёмный текст перекрашен');
+  assert.ok(!s1.elements.some((e) => e.kind === 'rect' && e.fill === 'accent'), 'акцент розовый');
+  // у медиаплана таблица: фон не меняется, подвал на месте
+  assert.equal(s2.theme, 'light');
+  assert.ok(s2.elements.some((e) => e.name === 'page'));
 });

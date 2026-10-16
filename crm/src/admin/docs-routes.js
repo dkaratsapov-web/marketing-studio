@@ -159,7 +159,7 @@ export async function docsRoutes(api, { library, brand, db, scenarioSource, medi
       } else {
         values = { ...leadValues(null, scenarioSource.get(), req.user), ...Object.fromEntries(Object.entries(values).filter(([, v]) => v)) };
       }
-      return { document: library.createDocument({ templateId, values, title, leadId }, req.user.name) };
+      return { document: library.createDocument({ templateId, values, title, leadId, keepVariables }, req.user.name) };
     },
   );
 

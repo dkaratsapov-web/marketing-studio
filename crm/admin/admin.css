@@ -721,8 +721,13 @@ details.menu summary::-webkit-details-marker { display: none; }
 .cal-hours span:first-child { transform: none; }
 .cal-day {
   position: relative; border-left: 1px solid var(--line); cursor: copy;
-  background-image: repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px 48px);
+  background-image: repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px var(--hour, 48px));
 }
+/* выходные: розовый оттенок фирменного акцента, чтобы суббота и воскресенье читались сразу */
+.cal-day.weekend { background-color: color-mix(in srgb, var(--accent-text) 7%, transparent); }
+.cal-dayname.weekend { background: color-mix(in srgb, var(--accent-text) 7%, transparent); color: var(--accent-text); }
+.cal-dayname.weekend b { color: var(--accent-text); }
+.cal-dayname.weekend.today b { color: var(--on-accent); }
 .cal-day.today { background-color: color-mix(in srgb, var(--accent) 5%, transparent); }
 .cal-now { position: absolute; left: 0; right: 0; height: 2px; background: var(--danger); z-index: 1; pointer-events: none; }
 .cal-now::before { content: ''; position: absolute; left: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); }
@@ -1870,3 +1875,24 @@ div.notify-row { cursor: default; }
 .agency-tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
 .agency-korp { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--text); }
 .agency-soroka { background: var(--surface-3); color: var(--muted); }
+
+/* «Главное»: клиенты Корпорации и Сороки */
+.home-splits { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.home-split { display: grid; gap: 2px; padding: 10px 12px; border-radius: var(--radius-s); border: 1px solid var(--line); color: var(--muted); text-decoration: none; font-size: 13px; }
+.home-split b { font-size: 22px; line-height: 1.1; color: var(--text); }
+.home-split.agency-korp { box-shadow: inset 3px 0 0 var(--accent); }
+.home-split.agency-soroka { box-shadow: inset 3px 0 0 var(--muted); }
+.home-split:hover { border-color: var(--line-strong); }
+
+/* «Главное»: сводка по всему агентству */
+.home-agency { display: grid; gap: 10px; padding: 16px 18px; border-radius: var(--radius-m); border: 1px solid var(--line); background: var(--surface); }
+.home-agency h2 { margin: 0; font-family: var(--soroka-font-heading); font-size: 16px; }
+.home-agency-items { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 16px; }
+.home-agency-item { display: grid; gap: 2px; padding: 4px 0 4px 12px; border-left: 2px solid var(--line-strong); color: var(--muted); text-decoration: none; font-size: 13px; }
+.home-agency-item b { font-size: 20px; line-height: 1.15; color: var(--text); }
+.home-agency-item:hover { border-left-color: var(--accent); }
+.home-agency-item.bad b { color: var(--danger); }
+.home-agency-item.warn b { color: var(--due-today); }
+
+/* «Мои задачи»: заголовок блока задач без срока */
+.my-section { margin: 18px 0 8px; font-family: var(--soroka-font-heading); font-size: 18px; }
