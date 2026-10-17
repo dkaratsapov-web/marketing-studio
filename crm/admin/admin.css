@@ -952,7 +952,7 @@ details.menu summary::-webkit-details-marker { display: none; }
 .swatches { display: flex; gap: 8px; flex-wrap: wrap; }
 .swatch-btn { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--surface); background: var(--col); cursor: pointer; box-shadow: 0 0 0 1px var(--line); }
 .swatch-btn[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--text); }
-.my-tasks { display: grid; gap: 12px; max-width: 1080px; }
+.my-tasks { display: grid; gap: 12px; }
 .my-group h2 a { color: var(--text); text-decoration: none; }
 .my-group h2 a:hover { text-decoration: underline; }
 .my-list { list-style: none; margin: 8px 0 0; padding: 0; }
