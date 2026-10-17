@@ -635,16 +635,41 @@ function popover(anchor, build) {
   box.querySelector('button, input')?.focus();
 }
 
+/** Окошко срока: дата, время, «Сегодня/Завтра», «Убрать срок». Общее для карточки на доске и списка «Мои задачи». */
+function dueForm(t, save, close) {
+  const date = h('input', { class: 'input', type: 'date', value: t.due ?? '', 'aria-label': 'Дата' });
+  const time = h('input', { class: 'input', type: 'time', value: t.due_time ?? '', 'aria-label': 'Время, по Москве' });
+  const chip = (label, onclick) => h('button', { type: 'button', class: 'btn btn-s', onclick }, label);
+  return [
+    h('div', { class: 'pop-title' }, 'Срок'),
+    h('div', { class: 'pop-due' }, date, time),
+    h('div', { class: 'pop-quick' }, [['Сегодня', 0], ['Завтра', 1]].map(([l, n]) => chip(l, () => (date.value = addDays(n))))),
+    h(
+      'div',
+      { class: 'pop-actions' },
+      h('button', {
+        type: 'button', class: 'btn btn-primary btn-s',
+        onclick: () => save({ due: date.value || (time.value ? today() : null), dueTime: time.value || null }, close),
+      }, 'Сохранить'),
+      t.due ? h('button', { type: 'button', class: 'linkish', onclick: () => save({ due: null }, close) }, 'Убрать срок') : null,
+    ),
+    h('p', { class: 'pop-hint' }, 'Время по Москве. Если время не указать, срок до конца дня.'),
+  ];
+}
+
+/** Сохранить поле задачи из всплывающего окна: закрыть окно, отправить, перерисовать. */
+const patchTask = (t, onChange) => async (body, close) => {
+  close();
+  try {
+    await api(`/admin/api/tasks/${t.id}`, { method: 'PATCH', body });
+    onChange();
+  } catch (err) {
+    toast(err.message);
+  }
+};
+
 function stickers(t, onChange) {
-  const save = async (body, close) => {
-    close();
-    try {
-      await api(`/admin/api/tasks/${t.id}`, { method: 'PATCH', body });
-      onChange();
-    } catch (err) {
-      toast(err.message);
-    }
-  };
+  const save = patchTask(t, onChange);
   const sticker = (cls, label, content, build) => {
     const btn = h('button', {
       type: 'button', class: `sticker ${cls}`, title: label, 'aria-label': label,
@@ -659,26 +684,7 @@ function stickers(t, onChange) {
   const option = (label, active, onclick, extra = null) => h('button', { type: 'button', class: 'pop-item', 'aria-pressed': String(active), onclick }, extra, label);
 
   const state = dueState(t);
-  const due = sticker(`s-due ${state}${t.due ? '' : ' empty'}`, t.due ? `Срок: ${dueText(t)}` : 'Добавить срок', [icon('due'), t.due ? dueText(t) : null], (close) => {
-    const date = h('input', { class: 'input', type: 'date', value: t.due ?? '', 'aria-label': 'Дата' });
-    const time = h('input', { class: 'input', type: 'time', value: t.due_time ?? '', 'aria-label': 'Время, по Москве' });
-    const chip = (label, onclick) => h('button', { type: 'button', class: 'btn btn-s', onclick }, label);
-    return [
-      h('div', { class: 'pop-title' }, 'Срок'),
-      h('div', { class: 'pop-due' }, date, time),
-      h('div', { class: 'pop-quick' }, [['Сегодня', 0], ['Завтра', 1]].map(([l, n]) => chip(l, () => (date.value = addDays(n))))),
-      h(
-        'div',
-        { class: 'pop-actions' },
-        h('button', {
-          type: 'button', class: 'btn btn-primary btn-s',
-          onclick: () => save({ due: date.value || (time.value ? today() : null), dueTime: time.value || null }, close),
-        }, 'Сохранить'),
-        t.due ? h('button', { type: 'button', class: 'linkish', onclick: () => save({ due: null }, close) }, 'Убрать срок') : null,
-      ),
-      h('p', { class: 'pop-hint' }, 'Время по Москве. Если время не указать, срок до конца дня.'),
-    ];
-  });
+  const due = sticker(`s-due ${state}${t.due ? '' : ' empty'}`, t.due ? `Срок: ${dueText(t)}` : 'Добавить срок', [icon('due'), t.due ? dueText(t) : null], (close) => dueForm(t, save, close));
 
   const level = Number(t.priority) || 0;
   const prio = sticker(`s-prio p${level}${level ? '' : ' empty'}`, level ? `Важность: ${PRIORITY[level]}` : 'Добавить важность', [icon('priority'), level ? PRIORITY[level] : null], (close) => [
@@ -1213,8 +1219,21 @@ export async function renderMyTasks(params) {
           ? h('a', { class: 'col-chip col-gray', href: `#/tasks?project=${projectKey(t.client_id)}` }, t.client_name ?? 'Общие задачи')
           : h('span', { class: `col-chip col-${t.column_color ?? 'gray'}` }, t.board_name, ' · ', t.column_name),
         t.priority ? h('span', { class: `chip prio p${t.priority}` }, PRIORITY[t.priority]) : h('span'),
-        t.due ? h('span', { class: `chip due ${state}` }, dueText(t), t.status !== 'done' && Date.parse(taskDeadline(t)) - Date.now() < 3 * 86400e3 ? [' · ', countdown(taskDeadline(t))] : null) : h('span'),
+        dueChip(t, state),
       );
+    };
+    // срок меняется прямо из списка: щелчок по плашке открывает то же окошко, что на доске
+    const dueChip = (t, state) => {
+      if (t.status === 'done') return t.due ? h('span', { class: 'chip due' }, dueText(t)) : h('span');
+      const btn = h(
+        'button',
+        {
+          type: 'button', class: `chip due due-edit ${state}${t.due ? '' : ' empty'}`, title: t.due ? 'Изменить срок' : 'Добавить срок',
+          onclick: () => popover(btn, (close) => dueForm(t, patchTask(t, load), close)),
+        },
+        t.due ? [dueText(t), Date.parse(taskDeadline(t)) - Date.now() < 3 * 86400e3 ? [' · ', countdown(taskDeadline(t))] : null] : [icon('due'), 'Срок'],
+      );
+      return btn;
     };
     const panel = (title, items, opts) => h('section', { class: 'panel my-group' }, h('h2', {}, title, ' ', h('span', { class: 'muted num' }, items.length)), h('ul', { class: 'my-list' }, items.map((t) => row(t, opts))));
 
