@@ -65,3 +65,33 @@ test('деньги: напоминания менеджеру за 3 дня и �
   assert.equal(money.remind(msk('2026-10-17')), 0);
   assert.equal(notify.list(anna.id).length, 0, 'у клиента есть менеджер — администратора не дёргаем');
 });
+
+test('платёжный календарь: счета месяца, долги до периода, план абонплаты на будущие месяцы', () => {
+  const { money, anna, oleg, ira, talle, romashka } = setup();
+  money.setBilling(talle.id, { fee: 80000, payDay: 31 }, oleg);
+  money.add(talle.id, { kind: 'budget', amount: 50000, due: '2026-09-20' }, oleg, msk('2026-09-01'));
+  money.add(romashka.id, { kind: 'other', amount: 40000, due: '2026-11-05', receipt: 'https://lknpd.nalog.ru/api/v1/receipt/123/print' }, ira, msk('2026-10-20'));
+  money.add(romashka.id, { kind: 'other', amount: 7000, paid: true }, ira, msk('2026-10-03'));
+
+  const cal = money.calendar(anna, { from: '2026-10', months: 3, now: msk('2026-10-20') });
+  assert.deepEqual(cal.periods, ['2026-10', '2026-11', '2026-12']);
+  assert.deepEqual(
+    cal.items.map((p) => [p.client_name, p.amount, p.due ?? p.paid_at, p.status]),
+    [
+      ['Ромашка', 7000, '2026-10-03', 'paid'],
+      ['Таллер', 80000, '2026-10-31', 'open'],
+      ['Ромашка', 40000, '2026-11-05', 'open'],
+      ['Таллер', 80000, '2026-11-30', 'plan'],
+      ['Таллер', 80000, '2026-12-31', 'plan'],
+    ],
+    'текущий месяц — настоящий счёт, дальше план; день оплаты 31 сжимается до конца месяца',
+  );
+  assert.equal(cal.items.find((p) => p.amount === 40000).receipt, 'https://lknpd.nalog.ru/api/v1/receipt/123/print');
+  assert.deepEqual(cal.carry.map((p) => [p.client_name, p.amount, p.status]), [['Таллер', 50000, 'overdue']], 'долг сентября — отдельно');
+
+  // счёт за ноябрь появился сам — план на ноябрь больше не показывается
+  money.list(oleg, { now: msk('2026-11-02') });
+  const nov = money.calendar(oleg, { from: '2026-11', months: 1, now: msk('2026-11-02') });
+  assert.deepEqual(nov.items.map((p) => [p.amount, p.status, p.planned ?? false]), [[80000, 'open', false]], 'Олег не видит клиентов Иры');
+  assert.equal(money.calendar(ira, { from: '2026-11', months: 1, now: msk('2026-11-02') }).items.length, 1);
+});

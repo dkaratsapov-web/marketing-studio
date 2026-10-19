@@ -17,10 +17,21 @@ export function createMoney({ db, notify = null }) {
     client: db.prepare('SELECT id, name, manager_id, fee, pay_day, archived FROM clients WHERE id = ?'),
     setBilling: db.prepare('UPDATE clients SET fee = ?, pay_day = ? WHERE id = ?'),
     feeClients: db.prepare('SELECT id, fee, pay_day FROM clients WHERE archived = 0 AND fee > 0 AND pay_day BETWEEN 1 AND 31'),
+    feePlan: db.prepare(
+      `SELECT c.id, c.name, c.fee, c.pay_day, c.manager_id FROM clients c
+       WHERE c.archived = 0 AND c.fee > 0 AND c.pay_day BETWEEN 1 AND 31 AND (? IS NULL OR c.manager_id = ?)`,
+    ),
+    autoPeriods: db.prepare('SELECT client_id, period FROM client_payments WHERE auto = 1 AND period BETWEEN ? AND ?'),
+    range: db.prepare(
+      `SELECT p.*, c.name AS client_name, c.manager_id FROM client_payments p JOIN clients c ON c.id = p.client_id
+       WHERE (? IS NULL OR c.manager_id = ?) AND (
+         COALESCE(p.due, p.paid_at) BETWEEN ? AND ? OR (p.paid_at IS NULL AND p.due < ?)
+       ) ORDER BY COALESCE(p.due, p.paid_at), p.id`,
+    ),
     autoInsert: db.prepare("INSERT OR IGNORE INTO client_payments (client_id, kind, title, amount, period, due, auto, created_by) VALUES (?, 'fee', ?, ?, ?, ?, 1, 'Ассистент')"),
-    insert: db.prepare('INSERT INTO client_payments (client_id, kind, title, amount, period, due, invoice, note, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'),
+    insert: db.prepare('INSERT INTO client_payments (client_id, kind, title, amount, period, due, invoice, receipt, note, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'),
     get: db.prepare('SELECT p.*, c.name AS client_name, c.manager_id FROM client_payments p JOIN clients c ON c.id = p.client_id WHERE p.id = ?'),
-    update: db.prepare('UPDATE client_payments SET kind = ?, title = ?, amount = ?, due = ?, paid_at = ?, invoice = ?, note = ? WHERE id = ?'),
+    update: db.prepare('UPDATE client_payments SET kind = ?, title = ?, amount = ?, due = ?, paid_at = ?, invoice = ?, receipt = ?, note = ? WHERE id = ?'),
     remove: db.prepare('DELETE FROM client_payments WHERE id = ?'),
     list: db.prepare(
       `SELECT p.*, c.name AS client_name, c.manager_id, u.name AS manager_name FROM client_payments p
@@ -89,6 +100,43 @@ export function createMoney({ db, notify = null }) {
     };
   }
 
+  /**
+   * Платёжный календарь: счета со сроком (или датой оплаты) в месяцах from..from+months-1,
+   * неоплаченные долги до начала периода и план абонентской платы на месяцы, где счёта ещё нет.
+   * План не хранится: счёт за ведение появится сам в свой месяц, до тех пор это ожидание.
+   */
+  function calendar(user, { from = null, months = 1, now = new Date() } = {}) {
+    ensureMonthly(now);
+    const today = todayMsk(now);
+    const start = /^\d{4}-\d{2}$/.test(from ?? '') ? from : today.slice(0, 7);
+    const n = Math.min(Math.max(Number(months) || 1, 1), 12);
+    const periods = [];
+    for (let i = 0; i < n; i++) {
+      const d = new Date(Date.UTC(Number(start.slice(0, 4)), Number(start.slice(5, 7)) - 1 + i, 1));
+      periods.push(d.toISOString().slice(0, 7));
+    }
+    const first = `${periods[0]}-01`;
+    const [ly, lm] = periods.at(-1).split('-').map(Number);
+    const last = `${periods.at(-1)}-${String(new Date(Date.UTC(ly, lm, 0)).getUTCDate()).padStart(2, '0')}`;
+    const sc = scope(user);
+    const rows = q.range.all(sc, sc, first, last, first).map((p) => view(p, today));
+    const items = rows.filter((p) => (p.due ?? p.paid_at) >= first);
+    const carry = rows.filter((p) => (p.due ?? p.paid_at) < first);
+    // план: только будущие месяцы — счёт текущего месяца уже создан ensureMonthly
+    const have = new Set(q.autoPeriods.all(periods[0], periods.at(-1)).map((r) => `${r.client_id}:${r.period}`));
+    const plan = [];
+    for (const c of q.feePlan.all(sc, sc)) {
+      for (const period of periods) {
+        if (period <= today.slice(0, 7) || have.has(`${c.id}:${period}`)) continue;
+        const [y, m] = period.split('-').map(Number);
+        const dd = Math.min(c.pay_day, new Date(Date.UTC(y, m, 0)).getUTCDate());
+        plan.push({ id: null, client_id: c.id, client_name: c.name, manager_id: c.manager_id, kind: 'fee', amount: c.fee, period, due: `${period}-${String(dd).padStart(2, '0')}`, paid_at: null, status: 'plan', label: `Ведение за ${periodLabel(period)}`, planned: true });
+      }
+    }
+    const all = [...items, ...plan].sort((a, b) => (a.due ?? a.paid_at).localeCompare(b.due ?? b.paid_at) || a.client_name.localeCompare(b.client_name, 'ru'));
+    return { from: periods[0], periods, today, items: all, carry };
+  }
+
   function checkFields(v, cur = null) {
     const kind = v.kind ?? cur?.kind ?? 'other';
     if (!(kind in PAYMENT_KINDS)) throw new CrmError('Неизвестный вид оплаты');
@@ -103,6 +151,7 @@ export function createMoney({ db, notify = null }) {
       amount: Math.round(amount * 100) / 100,
       due,
       invoice: v.invoice !== undefined ? str(v.invoice, 100) : cur?.invoice ?? null,
+      receipt: v.receipt !== undefined ? str(v.receipt, 300) : cur?.receipt ?? null,
       note: v.note !== undefined ? str(v.note, 1000) : cur?.note ?? null,
     };
   }
@@ -111,7 +160,7 @@ export function createMoney({ db, notify = null }) {
     const c = client(clientId, user);
     const f = checkFields(v);
     const period = v.period ?? (f.due ? f.due.slice(0, 7) : todayMsk(now).slice(0, 7));
-    const { lastInsertRowid } = q.insert.run(c.id, f.kind, f.title, f.amount, period, f.due, f.invoice, f.note, user.name);
+    const { lastInsertRowid } = q.insert.run(c.id, f.kind, f.title, f.amount, period, f.due, f.invoice, f.receipt, f.note, user.name);
     const p = q.get.get(lastInsertRowid);
     if (v.paid) return update(p.id, { paid: true }, user, now);
     return view(p, todayMsk(now));
@@ -123,7 +172,7 @@ export function createMoney({ db, notify = null }) {
     client(cur.client_id, user);
     const f = checkFields(v, cur);
     const paidAt = v.paid === undefined ? cur.paid_at : v.paid ? cur.paid_at ?? (v.paidAt ?? todayMsk(now)) : null;
-    q.update.run(f.kind, f.title, f.amount, f.due, paidAt, f.invoice, f.note, cur.id);
+    q.update.run(f.kind, f.title, f.amount, f.due, paidAt, f.invoice, f.receipt, f.note, cur.id);
     return view(q.get.get(cur.id), todayMsk(now));
   }
 
@@ -166,5 +215,5 @@ export function createMoney({ db, notify = null }) {
     return sent;
   }
 
-  return { list, summary, add, update, remove, setBilling, ensureMonthly, remind, kinds: PAYMENT_KINDS };
+  return { list, summary, calendar, add, update, remove, setBilling, ensureMonthly, remind, kinds: PAYMENT_KINDS };
 }

@@ -1690,6 +1690,69 @@ select.select[data-open] { background-image: url("data:image/svg+xml,%3Csvg xmln
 .pay-main a:hover { color: var(--accent-text); }
 .pay-sum { font-size: 15px; }
 .pay-row.s-paid .pay-sum { color: var(--muted); }
+/* платёжный календарь */
+.paycal { display: grid; gap: 14px; }
+.pc-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; justify-content: space-between; margin: -4px 0 14px; }
+.pc-nav { display: flex; align-items: center; gap: 6px; }
+.pc-nav .icon-btn { font-size: 22px; line-height: 1; }
+.pc-title { min-width: 150px; text-align: center; font-family: var(--soroka-font-heading); font-size: 18px; }
+.pc-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.pc-month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: var(--radius-m); overflow: hidden; background: var(--surface); }
+.pc-wdname { padding: 8px 10px; font-size: 12px; font-weight: 700; color: var(--muted); border-bottom: 1px solid var(--line); }
+.pc-wdname.weekend { color: var(--accent-text); }
+.pc-day { display: grid; align-content: start; gap: 4px; min-height: 104px; padding: 6px; border-top: 1px solid var(--line); border-left: 1px solid var(--line); min-width: 0; }
+.pc-day:nth-child(7n + 1) { border-left: 0; }
+.pc-day.weekend { background: color-mix(in srgb, var(--accent-text) 5%, transparent); }
+.pc-day.today { box-shadow: inset 0 0 0 2px var(--accent); }
+.pc-blank { background: var(--surface-2, transparent); }
+.pc-dhead { display: flex; align-items: baseline; gap: 6px; padding: 0 2px 2px; }
+.pc-dhead b { font-size: 13px; color: var(--muted); }
+.pc-day.today .pc-dhead b { color: var(--text); }
+.pc-wd { display: none; font-size: 12px; color: var(--muted); }
+.pc-dsum { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--muted); }
+.pc-chip { display: grid; gap: 0; width: 100%; padding: 4px 6px; border: 0; border-left: 3px solid var(--line-strong); border-radius: 6px; background: var(--surface-3); color: var(--text); font: inherit; font-size: 12px; text-align: left; cursor: pointer; min-width: 0; }
+.pc-chip:hover { filter: brightness(1.06); box-shadow: 0 0 0 1px var(--line-strong); }
+.pc-chip .pc-cname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pc-chip b { font-size: 12px; }
+.pc-chip.s-overdue { border-left-color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, var(--surface)); }
+.pc-chip.s-open { border-left-color: var(--due-today); background: color-mix(in srgb, var(--due-today) 12%, var(--surface)); }
+.pc-chip.s-paid { border-left-color: var(--good); background: color-mix(in srgb, var(--good) 10%, var(--surface)); color: var(--muted); }
+.pc-chip.s-plan { border-left-style: dashed; background: transparent; box-shadow: inset 0 0 0 1px var(--line); color: var(--muted); }
+.pc-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 0; }
+.pc-key::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 3px; vertical-align: -1px; background: var(--line-strong); }
+.pc-key.s-overdue::before { background: var(--danger); }
+.pc-key.s-open::before { background: var(--due-today); }
+.pc-key.s-paid::before { background: var(--good); }
+.pc-key.s-plan::before { background: transparent; border: 1px dashed var(--muted); }
+.pc-matrix-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--surface); }
+.pc-matrix { width: 100%; border-collapse: collapse; font-size: 13px; }
+.pc-matrix th, .pc-matrix td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.pc-matrix thead th { font-size: 12px; color: var(--muted); font-weight: 700; }
+.pc-matrix th:first-child { text-align: left; position: sticky; left: 0; background: var(--surface); max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+.pc-matrix tbody th a { color: var(--text); text-decoration: none; font-weight: 600; }
+.pc-matrix tbody th a:hover { color: var(--accent-text); }
+.pc-matrix .sel { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.pc-matrix thead .sel { color: var(--text); }
+.pc-matrix tfoot td, .pc-matrix tfoot th { font-weight: 700; border-bottom: 0; }
+.pc-matrix .pc-total { font-weight: 700; }
+.pc-matrix .pc-empty { color: var(--muted); }
+.pc-cell { padding: 4px 6px !important; }
+.pc-cell button { display: grid; justify-items: end; width: 100%; padding: 4px 6px; border: 0; border-radius: 6px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.pc-cell button:hover { box-shadow: 0 0 0 1px var(--line-strong); }
+.pc-cell span { font-size: 11px; color: var(--muted); }
+.pc-cell.s-overdue button { background: color-mix(in srgb, var(--danger) 12%, var(--surface)); }
+.pc-cell.s-overdue b, .pc-cell.s-overdue span { color: var(--danger); }
+.pc-cell.s-open button { background: color-mix(in srgb, var(--due-today) 12%, var(--surface)); }
+.pc-cell.s-paid b { color: var(--good); }
+.pc-cell.s-plan button { box-shadow: inset 0 0 0 1px var(--line); }
+.pc-cell.s-plan b { color: var(--muted); font-weight: 600; }
+@media (max-width: 900px) { .pc-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .pc-month { grid-template-columns: minmax(0, 1fr); }
+  .pc-wdname, .pc-blank, .pc-day.empty { display: none; }
+  .pc-day { min-height: 0; border-left: 0; }
+  .pc-wd { display: inline; }
+}
 .home-money-debt { margin: 8px 0 0; color: var(--muted); }
 .home-money-debt b { color: var(--danger); font-size: 22px; }
 .home-money-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--due-today); justify-self: center; }

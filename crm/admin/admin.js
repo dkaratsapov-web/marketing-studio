@@ -12,7 +12,7 @@ import { assistantEntry } from './assistant.js';
 import { renderKb } from './kb.js';
 import { renderHome, bellButton } from './home.js';
 import { renderNews, refreshNewsBadge } from './news.js';
-import { renderMoney } from './money.js';
+import { renderMoney, renderPayCalendar } from './money.js';
 import { renderAdStats, renderAdClient } from './adstats.js';
 import { renderParser, renderParserJob } from './parser.js';
 import { renderLibrary } from './library.js';
@@ -193,6 +193,7 @@ const routes = {
   home: renderHome,
   news: renderNews,
   money: renderMoney,
+  paycal: renderPayCalendar,
   adstats: renderAdStats,
   adclient: renderAdClient,
   parser: renderParser,
@@ -252,6 +253,7 @@ const SECTION_TABS = {
     ['mytasks', 'Мои задачи'],
     ['clients', 'Клиенты'],
     ['money', 'Оплаты'],
+    ['paycal', 'Платёжный календарь'],
   ],
 };
 // Страницы внутри раздела без своей вкладки

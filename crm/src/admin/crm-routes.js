@@ -174,6 +174,7 @@ export async function crmRoutes(api, { crm, auth, db, scenarioSource, kb = null,
         due: { type: ['string', 'null'], format: 'date' },
         period: { type: 'string', pattern: '^\\d{4}-\\d{2}$' },
         invoice: { type: ['string', 'null'], maxLength: 100 },
+        receipt: { type: ['string', 'null'], maxLength: 300 },
         note: { type: ['string', 'null'], maxLength: 1000 },
         paid: { type: 'boolean' },
       },
@@ -183,6 +184,9 @@ export async function crmRoutes(api, { crm, auth, db, scenarioSource, kb = null,
       summary: req.query.client ? null : money.summary(req.user),
       kinds: money.kinds,
     }));
+    api.get('/admin/api/money/calendar', {
+      schema: { querystring: { type: 'object', properties: { from: { type: 'string', pattern: '^\\d{4}-\\d{2}$' }, months: { type: 'integer', minimum: 1, maximum: 12 } } } },
+    }, async (req) => money.calendar(req.user, { from: req.query.from ?? null, months: req.query.months ?? 1 }));
     api.post('/admin/api/clients/:id/payments', { schema: { params: idParams, body: { ...payBody, required: ['amount'] } } }, async (req) => ({ payment: money.add(req.params.id, req.body, req.user) }));
     api.patch('/admin/api/payments/:id', { schema: { params: idParams, body: { ...payBody, minProperties: 1 } } }, async (req) => ({ payment: money.update(req.params.id, req.body, req.user) }));
     api.delete('/admin/api/payments/:id', { schema: { params: idParams } }, async (req) => {
