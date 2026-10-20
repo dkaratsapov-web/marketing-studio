@@ -1385,6 +1385,15 @@ details.menu summary::-webkit-details-marker { display: none; }
 .bell { position: relative; flex: none; display: grid; place-items: center; width: 34px; height: 34px; margin-top: 2px; border: 0; border-radius: var(--radius-s); background: transparent; color: var(--side-text); cursor: pointer; }
 .bell:hover, .bell[aria-expanded="true"] { color: var(--side-active); background: var(--side-hover); }
 .bell .icon { width: 19px; height: 19px; }
+.side-tools { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+.side-toggle { flex: none; display: grid; place-items: center; width: 34px; height: 34px; margin-top: 2px; border: 0; border-radius: var(--radius-s); background: transparent; color: var(--side-text); cursor: pointer; }
+.side-toggle:hover { color: var(--side-active); background: var(--side-hover); }
+.side-toggle .icon { width: 19px; height: 19px; }
+/* на телефоне меню и так выезжает шторкой — кнопка не нужна */
+@media (max-width: 960px) { .side-toggle { display: none; } }
+@media (min-width: 961px) {
+  :root[data-sidebar="icons"] .side-tools, .sidebar.compact .side-tools { flex-direction: column; margin-left: 0; }
+}
 .bell-badge { position: absolute; top: 2px; right: 1px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: #E5484D; color: #fff; font-size: 10.5px; font-weight: 700; line-height: 17px; text-align: center; box-shadow: 0 0 0 2px var(--side-bg); }
 .bell-pop { width: 360px; max-height: min(520px, calc(100vh - 32px)); overflow: auto; padding: 12px 14px; gap: 6px; }
 .bell-list { margin: 0; }

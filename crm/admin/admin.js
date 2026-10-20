@@ -330,6 +330,7 @@ const ICONS = {
   archive: 'M3 4h18v4H3zM5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4',
   trash: 'M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3',
   kb: 'M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 5v16M8 7h7M8 11h5',
+  sidebar: 'M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM9 4v16M5.5 8h1M5.5 11h1',
 };
 function icon(name) {
   return s('svg', { class: 'icon', viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' }, s('path', { d: ICONS[name] }));
@@ -754,6 +755,22 @@ async function savePrefs(patch) {
   }
 }
 
+/** Кнопка в шапке панели: свернуть меню до значков или развернуть до текста. Выбор хранится в профиле. */
+function sidebarToggle() {
+  const icons = () => (ctx.me?.prefs?.sidebar ?? window.sorokaTheme?.prefs()?.sidebar) === 'icons';
+  const label = () => (icons() ? 'Развернуть меню' : 'Свернуть меню до значков');
+  const btn = h('button', {
+    type: 'button', class: 'side-toggle', title: label(), 'aria-label': label(), 'aria-pressed': String(icons()),
+    onclick: async () => {
+      await savePrefs({ sidebar: icons() ? 'full' : 'icons' });
+      btn.title = label();
+      btn.setAttribute('aria-label', label());
+      btn.setAttribute('aria-pressed', String(icons()));
+    },
+  }, icon('sidebar'));
+  return btn;
+}
+
 function themeSwitch() {
   const current = window.sorokaTheme?.get() ?? 'system';
   const buttons = THEMES.map(([id, label]) =>
@@ -878,7 +895,7 @@ function shell(active, content) {
       'aside',
       // В редакторах документа и медиаплана панель сворачивается до значков — больше места под работу
       { class: `sidebar${active === 'doc' || active === 'plan' ? ' compact' : ''}` },
-      h('div', { class: 'side-head' }, h('a', { class: 'brand', href: '#/home' }, logo(), h('span', { class: 'product' }, 'Кабинет')), bellButton()),
+      h('div', { class: 'side-head' }, h('a', { class: 'brand', href: '#/home' }, logo(), h('span', { class: 'product' }, 'Кабинет')), h('div', { class: 'side-tools' }, bellButton(), sidebarToggle())),
       h(
         'nav',
         { class: 'nav', 'aria-label': 'Разделы' },
