@@ -91,12 +91,13 @@ test('задачи: колонки вместо статусов, выполне
   assert.equal(moved.statusCode, 200);
   await oleg({ method: 'PATCH', url: `/admin/api/tasks/${task.id}`, payload: { assigneeId: id('Ира'), columnId: col['На проверке'].id, priority: 4 } });
   await ira({ method: 'POST', url: `/admin/api/tasks/${task.id}/comments`, payload: { text: 'Проверю до вечера' } });
-  // галочка «выполнено» — задача остаётся в своей колонке
+  // галочка «выполнено» — задача уходит в «Готово», снятая — возвращается, откуда пришла
   const checked = (await ira({ method: 'PATCH', url: `/admin/api/tasks/${task.id}`, payload: { done: true } })).json().task;
   assert.equal(checked.status, 'done');
-  assert.equal(checked.column_name, 'На проверке');
+  assert.equal(checked.column_name, 'Готово');
   assert.ok(checked.done_at);
-  await ira({ method: 'PATCH', url: `/admin/api/tasks/${task.id}`, payload: { done: false } });
+  const back = (await ira({ method: 'PATCH', url: `/admin/api/tasks/${task.id}`, payload: { done: false } })).json().task;
+  assert.deepEqual([back.status, back.column_name], ['todo', 'На проверке']);
   // в колонку «Готово» — выполнена автоматически
   const done = (await ira({ method: 'PATCH', url: `/admin/api/tasks/${task.id}`, payload: { columnId: col['Готово'].id } })).json().task;
   assert.equal(done.status, 'done');
@@ -107,7 +108,9 @@ test('задачи: колонки вместо статусов, выполне
     'Олег: Исполнитель: Ира',
     'Олег: Важность: Критичная',
     'Ира: Проверю до вечера',
+    'Ира: На проверке → Готово',
     'Ира: Выполнена',
+    'Ира: Готово → На проверке',
     'Ира: Снова в работе',
     'Ира: На проверке → Готово',
     'Ира: Выполнена',

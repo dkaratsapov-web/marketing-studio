@@ -122,6 +122,7 @@ export function createCrm({ db }) {
     task: db.prepare(`SELECT ${TASK_COLS} ${TASK_JOINS} WHERE t.id = ?`),
     insertTask: db.prepare('INSERT INTO tasks (client_id, column_id, title, description, status, priority, assignee_id, due, due_time, created_by, created_by_id, done_at, repeat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'),
     setRepeatNext: db.prepare('UPDATE tasks SET repeat_next = ? WHERE id = ?'),
+    setPrevColumn: db.prepare('UPDATE tasks SET prev_column_id = ? WHERE id = ?'),
     taskExists: db.prepare('SELECT 1 FROM tasks WHERE id = ?'),
     updateTask: db.prepare(
       "UPDATE tasks SET client_id = ?, column_id = ?, title = ?, description = ?, status = ?, priority = ?, assignee_id = ?, due = ?, due_time = ?, done_at = ?, repeat = ?, updated_at = datetime('now') WHERE id = ?",
@@ -450,6 +451,18 @@ export function createCrm({ db }) {
       const from = col;
       if (patch.columnId != null || patch.boardId != null) col = placeTask(patch);
       else if (patch.clientId !== undefined && projectId(patch.clientId) !== cur.client_id) col = placeTask({ clientId: patch.clientId });
+      // галочка «выполнено» без явной колонки: в колонку «Готово» этой доски; снятая — обратно, откуда пришла
+      let viaCheck = false;
+      if (col.id === from.id && patch.done !== undefined && patch.columnId == null && patch.boardId == null && Boolean(patch.done) !== Boolean(from.is_done)) {
+        const cols = q.columns.all(from.board_id);
+        const target = patch.done
+          ? cols.find((c) => c.is_done)
+          : cols.find((c) => c.id === cur.prev_column_id && !c.is_done) ?? cols.find((c) => !c.is_done && /работ/i.test(c.name)) ?? cols.find((c) => !c.is_done);
+        if (target) {
+          col = getColumn(target.id);
+          viaCheck = true;
+        }
+      }
       const moved = col.id !== from.id;
 
       let done = cur.status === 'done';
@@ -460,6 +473,7 @@ export function createCrm({ db }) {
       const doneAt = done ? (wasDone ? cur.done_at : now()) : null;
 
       q.updateTask.run(col.client_id, col.id, next.title, next.description, done ? 'done' : 'todo', next.priority, next.assigneeId, next.due, next.dueTime, doneAt, next.repeat, cur.id);
+      if (moved) q.setPrevColumn.run(viaCheck && col.is_done ? from.id : null, cur.id);
       // повторяющаяся выполнена — следующая на той же доске, в первой колонке; повторное «выполнено» копий не плодит
       if (done && !wasDone && next.repeat && !(cur.repeat_next && q.taskExists.get(cur.repeat_next))) {
         const today = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
