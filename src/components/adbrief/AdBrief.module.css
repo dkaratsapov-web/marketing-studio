@@ -1,4 +1,4 @@
-/* Бриф на рекламу: слева название и ход заполнения по разделам, справа анкета */
+/* Бриф на рекламу (светлая страница): слева название и ход заполнения по разделам, справа анкета */
 .page {
   min-height: 100svh;
   background: var(--bg);
@@ -38,7 +38,7 @@
 }
 
 .phone:hover {
-  color: var(--lime);
+  color: var(--accent);
 }
 
 .grid {
@@ -107,11 +107,11 @@
 }
 
 .steps a:hover {
-  color: var(--lime);
+  color: var(--accent);
 }
 
 .steps li[data-done="true"] a::before {
-  color: var(--lime);
+  color: var(--accent);
 }
 
 .count {
@@ -122,7 +122,7 @@
 }
 
 .steps li[data-done="true"] .count {
-  color: var(--lime);
+  color: var(--accent);
 }
 
 .saved {
@@ -164,7 +164,7 @@
   width: 1.8rem;
   height: 1.8rem;
   background: var(--lime);
-  color: var(--accent-ink);
+  color: var(--ink-950);
   font-family: var(--ff-mono);
   font-size: var(--step--1);
   font-weight: 500;
@@ -174,7 +174,7 @@
 .note {
   padding: 0.6rem 0.85rem;
   border-left: 3px solid var(--lime);
-  background: var(--ink-900);
+  background: var(--bg-raised);
   color: var(--fg);
   font-size: var(--step--1);
   line-height: 1.5;
@@ -228,7 +228,7 @@
   padding: 0.55rem 0.8rem;
   border: 1px solid var(--line);
   border-radius: 2px;
-  background: var(--ink-900);
+  background: var(--bg-raised);
   color: var(--fg);
   font: inherit;
   font-size: 0.95rem;
@@ -245,27 +245,27 @@
 .field input:hover,
 .field textarea:hover,
 .detail input:hover {
-  border-color: rgb(255 255 255 / 0.28);
+  border-color: rgb(5 5 5 / 0.35);
 }
 
 .field input:focus,
 .field textarea:focus,
 .detail input:focus {
   outline: none;
-  border-color: var(--lime);
+  border-color: var(--fg);
 }
 
 .field input::placeholder,
 .field textarea::placeholder {
-  color: rgb(255 255 255 / 0.38);
+  color: rgb(5 5 5 / 0.42);
 }
 
 .field [aria-invalid="true"] {
-  border-color: var(--pink);
+  border-color: var(--pink-deep);
 }
 
 .error {
-  color: var(--pink);
+  color: var(--pink-deep);
   font-size: var(--step--1);
   line-height: 1.35;
 }
@@ -298,9 +298,9 @@
 }
 
 .option[aria-pressed="true"] {
-  border-color: var(--lime);
-  background: var(--lime);
-  color: var(--accent-ink);
+  border-color: var(--ink-950);
+  background: var(--ink-950);
+  color: var(--white);
 }
 
 .option:active {
@@ -344,7 +344,7 @@
   width: 1.15rem;
   height: 1.15rem;
   margin: 0.1rem 0 0;
-  accent-color: var(--lime);
+  accent-color: var(--ink-950);
 }
 
 .finish :global(.btn[disabled]) {
@@ -365,7 +365,7 @@
 }
 
 .done a:not(:global(.btn)) {
-  color: var(--lime);
+  color: var(--accent);
 }
 
 .doneTitle {
@@ -381,7 +381,7 @@
   width: 100%;
   padding: 1rem;
   border: 1px solid var(--line);
-  background: var(--ink-900);
+  background: var(--bg-raised);
   color: var(--fg);
   font-family: var(--ff-mono);
   font-size: var(--step--1);

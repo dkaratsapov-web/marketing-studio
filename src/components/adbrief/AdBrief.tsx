@@ -273,7 +273,7 @@ export default function AdBrief() {
   };
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-surface="light">
       <header className={`wrap ${styles.top}`}>
         <Link href="/" className={styles.brand} aria-label="Корпорация, на главную">
           <LogoMark className={styles.mark} />
