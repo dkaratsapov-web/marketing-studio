@@ -89,7 +89,7 @@ export const AD_BRIEF: BriefSection[] = [
     fields: [
       { id: "start", label: "Дата начала кампании" },
       { id: "duration", label: "Длительность кампании" },
-      { id: "budget", label: "Бюджет в месяц", hint: "Реклама и наше сопровождение вместе" },
+      { id: "budget", label: "Бюджет в месяц" },
       { id: "split", label: "Как распределить бюджет по направлениям", kind: "area" },
     ],
   },
