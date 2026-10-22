@@ -34,7 +34,7 @@ export const AD_BRIEF: BriefSection[] = [
       { id: "email", label: "E-mail", kind: "email", autoComplete: "email" },
       { id: "site", label: "Сайт", hint: "Адрес, если сайт уже есть", autoComplete: "url" },
       { id: "needSite", label: "Требуется создание сайта?", kind: "choice", options: YES_NO },
-      { id: "socials", label: "Ссылки на соцсети", kind: "area", wide: true },
+      { id: "socials", label: "Ссылки на соцсети", hint: "VK, Telegram, Instagram" },
     ],
   },
   {
@@ -43,20 +43,20 @@ export const AD_BRIEF: BriefSection[] = [
     fields: [
       { id: "activity", label: "Вид деятельности", kind: "choice", options: ["Продажи", "Услуги", "И то и другое"] },
       { id: "hours", label: "Время работы и приёма заказов", hint: "Например: пн–пт с 9 до 19" },
-      { id: "features", label: "Особенности ваших услуг или товаров", kind: "area", wide: true },
-      { id: "usp", label: "Чем вы лучше конкурентов", hint: "Ваше УТП: цена, сроки, гарантия, опыт, сервис", kind: "area", wide: true },
-      { id: "weak", label: "Чем вы хуже конкурентов", hint: "Где проигрываете: цена, сроки, ассортимент, отзывы. Так мы не пообещаем в рекламе лишнего", kind: "area", wide: true },
-      { id: "audience", label: "Ваша целевая аудитория", hint: "Кто покупает: пол, возраст, доход, интересы, город", kind: "area", wide: true },
+      { id: "features", label: "Особенности ваших услуг или товаров", kind: "area" },
+      { id: "audience", label: "Ваша целевая аудитория", hint: "Кто покупает: пол, возраст, доход, интересы, город", kind: "area" },
+      { id: "usp", label: "Чем вы лучше конкурентов", hint: "Ваше УТП: цена, сроки, гарантия, опыт, сервис", kind: "area" },
+      { id: "weak", label: "Чем вы хуже конкурентов", hint: "Где проигрываете: цена, сроки, ассортимент, отзывы", kind: "area" },
       { id: "seasonality", label: "Есть ли у бизнеса сезонность?", kind: "choice", options: YES_NO, detail: { when: "Да", label: "Какой период — пик и спад" } },
-      { id: "competitors", label: "Конкуренты и ссылки на их сайты", kind: "area", wide: true },
+      { id: "competitors", label: "Конкуренты и ссылки на их сайты", kind: "area" },
     ],
   },
   {
     id: "campaign",
     title: "Рекламная кампания",
     fields: [
-      { id: "direction", label: "Какие товары или услуги рекламируем", hint: "Если направлений несколько, перечислите все", kind: "area", wide: true },
-      { id: "geo", label: "География рекламы", hint: "Город, область, вся Россия", wide: true },
+      { id: "direction", label: "Какие товары или услуги рекламируем", hint: "Если направлений несколько, перечислите все", kind: "area" },
+      { id: "geo", label: "География рекламы", hint: "Город, область, вся Россия", kind: "area" },
       {
         id: "platforms",
         label: "Рекламные площадки",
@@ -73,12 +73,12 @@ export const AD_BRIEF: BriefSection[] = [
     title: "Дополнительная информация",
     note: "Для оценки текущей рекламы откройте гостевой доступ к Яндекс Метрике для d.karatsapov@yandex.ru",
     fields: [
-      { id: "channels", label: "Какие рекламные каналы работают сейчас", kind: "area", wide: true },
-      { id: "access", label: "Можете выдать доступ на просмотр к текущим рекламным кабинетам?", kind: "choice", options: ["Да", "Нет", "Кабинетов пока нет"], wide: true },
+      { id: "channels", label: "Какие рекламные каналы работают сейчас", kind: "area" },
+      { id: "access", label: "Дадите доступ на просмотр к рекламным кабинетам?", kind: "choice", options: ["Да", "Нет", "Кабинетов нет"] },
       { id: "check", label: "Средний чек сделки" },
       { id: "cpl", label: "Приемлемая цена заявки" },
       { id: "volume", label: "Сколько заявок в месяц ждёте" },
-      { id: "goal", label: "Цель рекламной кампании", hint: "Заявки, звонки, продажи в интернет-магазине, узнаваемость", kind: "area", wide: true },
+      { id: "goal", label: "Цель рекламной кампании", hint: "Заявки, звонки, продажи в интернет-магазине, узнаваемость", kind: "area" },
     ],
   },
   {
@@ -87,8 +87,8 @@ export const AD_BRIEF: BriefSection[] = [
     fields: [
       { id: "start", label: "Дата начала кампании" },
       { id: "duration", label: "Длительность кампании" },
-      { id: "budget", label: "Бюджет в месяц", hint: "Реклама и наше сопровождение вместе", wide: true },
-      { id: "split", label: "Как распределить бюджет по направлениям", kind: "area", wide: true },
+      { id: "budget", label: "Бюджет в месяц", hint: "Реклама и наше сопровождение вместе" },
+      { id: "split", label: "Как распределить бюджет по направлениям", kind: "area" },
     ],
   },
 ];

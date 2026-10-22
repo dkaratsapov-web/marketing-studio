@@ -180,7 +180,9 @@ export default function AdBrief() {
   const field = (f: BriefField) => {
     const id = `ab-${f.id}`;
     const err = errors[f.id];
-    const hint = f.hint ? `${id}-hint` : undefined;
+    const choice = f.kind === "choice" || f.kind === "multi";
+    // у полей ввода подсказка — пример внутри поля, у вариантов ответа — строка под вопросом
+    const hint = f.hint && choice ? `${id}-hint` : undefined;
     const describedBy = [hint, err ? `${id}-err` : undefined].filter(Boolean).join(" ") || undefined;
     const label = (
       <span className={styles.label}>
@@ -190,7 +192,7 @@ export default function AdBrief() {
     );
     const help = (
       <>
-        {f.hint ? (
+        {hint ? (
           <span id={hint} className={styles.hint}>
             {f.hint}
           </span>
@@ -203,11 +205,11 @@ export default function AdBrief() {
       </>
     );
 
-    if (f.kind === "choice" || f.kind === "multi") {
+    if (choice) {
       const picked = f.kind === "multi" ? (multi[f.id] ?? []) : [values[f.id]];
       const showDetail = f.detail && (f.kind === "multi" || values[f.id] === f.detail.when);
       return (
-        <fieldset key={f.id} className={`${styles.field} ${styles.wide}`} aria-describedby={describedBy}>
+        <fieldset key={f.id} className={`${styles.field} ${f.wide ? styles.wide : ""}`} aria-describedby={describedBy}>
           <legend className={styles.label}>{f.label}</legend>
           {help}
           <div className={styles.options}>
@@ -239,12 +241,13 @@ export default function AdBrief() {
       "aria-invalid": Boolean(err),
       "aria-describedby": describedBy,
       autoComplete: f.autoComplete ?? "off",
+      placeholder: f.hint,
     };
     return (
-      <div key={f.id} className={`${styles.field} ${f.wide || f.kind === "area" ? styles.wide : ""}`}>
+      <div key={f.id} className={`${styles.field} ${f.wide ? styles.wide : ""}`}>
         <label htmlFor={id}>{label}</label>
         {f.kind === "area" ? (
-          <textarea {...common} rows={3} maxLength={3000} onChange={(e) => set(f.id, e.target.value)} />
+          <textarea {...common} rows={2} maxLength={3000} onChange={(e) => set(f.id, e.target.value)} />
         ) : f.kind === "phone" ? (
           <input
             {...common}

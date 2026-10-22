@@ -10,7 +10,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding-block: 1.5rem;
+  padding-block: 1rem;
   border-bottom: 1px solid var(--line);
 }
 
@@ -45,22 +45,22 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--gutter);
-  padding-block: clamp(2.5rem, 2rem + 3vw, 5rem) clamp(4rem, 3rem + 5vw, 8rem);
+  padding-block: clamp(1.5rem, 1rem + 2vw, 3rem) clamp(3rem, 2rem + 4vw, 6rem);
 }
 
 .side {
   grid-column: 1 / span 4;
   align-self: start;
   position: sticky;
-  top: 2rem;
+  top: 1.5rem;
   display: grid;
-  gap: 1.5rem;
+  gap: 1.1rem;
 }
 
 .title {
   font-family: var(--ff-display);
   font-variation-settings: "SHRP" 100;
-  font-size: clamp(2.4rem, 1.6rem + 2.6vw, 4.4rem);
+  font-size: clamp(2rem, 1.4rem + 1.8vw, 3.2rem);
   font-weight: 600;
   line-height: 0.95;
   letter-spacing: -0.045em;
@@ -68,8 +68,9 @@
 }
 
 .lead {
-  max-width: 38ch;
+  max-width: 40ch;
   color: var(--muted);
+  font-size: var(--step--1);
   line-height: 1.5;
 }
 
@@ -93,7 +94,8 @@
   grid-template-columns: 2rem minmax(0, 1fr) auto;
   align-items: baseline;
   gap: 0.5rem;
-  padding-block: 0.8rem;
+  padding-block: 0.55rem;
+  font-size: 0.95rem;
   transition: color 0.3s var(--ease-out);
 }
 
@@ -134,13 +136,13 @@
 .done {
   grid-column: 6 / -1;
   display: grid;
-  gap: clamp(2.5rem, 2rem + 2vw, 4rem);
+  gap: clamp(2rem, 1.6rem + 1.2vw, 2.75rem);
 }
 
 .section {
   display: grid;
-  gap: 1.5rem;
-  scroll-margin-top: 2rem;
+  gap: 1rem;
+  scroll-margin-top: 1.5rem;
 }
 
 .sectionTitle {
@@ -149,7 +151,7 @@
   gap: 0.9rem;
   font-family: var(--ff-display);
   font-variation-settings: "SHRP" 100;
-  font-size: var(--step-2);
+  font-size: var(--step-1);
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -159,18 +161,18 @@
   display: inline-grid;
   place-items: center;
   flex: none;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 1.8rem;
+  height: 1.8rem;
   background: var(--lime);
   color: var(--accent-ink);
   font-family: var(--ff-mono);
-  font-size: var(--step-0);
+  font-size: var(--step--1);
   font-weight: 500;
   letter-spacing: 0;
 }
 
 .note {
-  padding: 0.9rem 1rem;
+  padding: 0.6rem 0.85rem;
   border-left: 3px solid var(--lime);
   background: var(--ink-900);
   color: var(--fg);
@@ -181,14 +183,14 @@
 .fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem 1.25rem;
+  gap: 0.9rem 1rem;
 }
 
 .field {
   display: grid;
   align-content: start;
   min-width: 0;
-  gap: 0.5rem;
+  gap: 0.35rem;
   margin: 0;
   padding: 0;
   border: 0;
@@ -200,8 +202,9 @@
 
 .label {
   padding: 0;
+  font-size: 0.9rem;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 .req {
@@ -221,20 +224,21 @@
 .detail input {
   width: 100%;
   min-width: 0;
-  min-height: 3.25rem;
-  padding: 0.85rem 1rem;
+  min-height: 2.6rem;
+  padding: 0.55rem 0.8rem;
   border: 1px solid var(--line);
   border-radius: 2px;
   background: var(--ink-900);
   color: var(--fg);
   font: inherit;
-  font-size: var(--step-0);
-  line-height: 1.45;
+  font-size: 0.95rem;
+  line-height: 1.4;
   transition: border-color 0.3s var(--ease-out);
 }
 
 .field textarea {
-  min-height: 6.5rem;
+  min-height: 2.6rem;
+  height: 4.4rem;
   resize: vertical;
 }
 
@@ -251,7 +255,8 @@
   border-color: var(--lime);
 }
 
-.field input::placeholder {
+.field input::placeholder,
+.field textarea::placeholder {
   color: rgb(255 255 255 / 0.38);
 }
 
@@ -269,17 +274,18 @@
 .options {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .option {
-  min-height: 2.75rem;
-  padding: 0.55rem 1.1rem;
+  min-height: 2.6rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.95rem;
   border: 1px solid var(--line);
   border-radius: 2px;
   background: transparent;
   color: var(--fg);
-  font: inherit;
+  font-family: inherit;
   cursor: pointer;
   transition:
     border-color 0.3s var(--ease-out),
@@ -318,8 +324,8 @@
 .finish {
   display: grid;
   justify-items: start;
-  gap: 1.25rem;
-  padding-top: 2rem;
+  gap: 1rem;
+  padding-top: 1.5rem;
   border-top: 1px solid var(--line);
 }
 
@@ -398,6 +404,13 @@
 @media (max-width: 600px) {
   .fields {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* 16px и больше: иначе iPhone приближает страницу при вводе */
+  .field input,
+  .field textarea,
+  .detail input {
+    font-size: 1rem;
   }
 
   .phone {
