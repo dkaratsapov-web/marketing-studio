@@ -45,6 +45,7 @@ export const AD_BRIEF: BriefSection[] = [
       { id: "hours", label: "Время работы и приёма заказов", hint: "Например: пн–пт с 9 до 19" },
       { id: "features", label: "Особенности ваших услуг или товаров", kind: "area", wide: true },
       { id: "usp", label: "Чем вы лучше конкурентов", hint: "Ваше УТП: цена, сроки, гарантия, опыт, сервис", kind: "area", wide: true },
+      { id: "weak", label: "Чем вы хуже конкурентов", hint: "Где проигрываете: цена, сроки, ассортимент, отзывы. Так мы не пообещаем в рекламе лишнего", kind: "area", wide: true },
       { id: "audience", label: "Ваша целевая аудитория", hint: "Кто покупает: пол, возраст, доход, интересы, город", kind: "area", wide: true },
       { id: "seasonality", label: "Есть ли у бизнеса сезонность?", kind: "choice", options: YES_NO, detail: { when: "Да", label: "Какой период — пик и спад" } },
       { id: "competitors", label: "Конкуренты и ссылки на их сайты", kind: "area", wide: true },
