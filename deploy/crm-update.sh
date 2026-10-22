@@ -48,6 +48,12 @@ rsync -a --delete --exclude /.env --exclude /data/ --exclude /.tree --exclude /.
 # Папка кабинета закрыта для всех, кроме root: база с клиентами и .env с ключами лежат внутри
 chown root:root "${APP_DIR}" && chmod 700 "${APP_DIR}"
 
+# Каждая сборка оставляет кэш и старые образы: без очистки диск заполняется, и сборка падает
+echo "▸ Освобождаю место: кэш сборки и неиспользуемые слои"
+docker builder prune -af >/dev/null 2>&1 || true
+docker image prune -f >/dev/null 2>&1 || true
+df -h / | awk 'NR==2 {print "  свободно на диске: " $4}'
+
 echo "▸ Пересобираю и перезапускаю"
 mkdir -p data && chown 1000:1000 data && chmod 700 data
 compose up -d --build
