@@ -200,6 +200,11 @@
   grid-column: 1 / -1;
 }
 
+/* подпись поля без своей строки текста: иначе она ниже подписей у вопросов с вариантами */
+.field > label:not(.detail) {
+  display: flex;
+}
+
 .label {
   padding: 0;
   font-size: 0.9rem;

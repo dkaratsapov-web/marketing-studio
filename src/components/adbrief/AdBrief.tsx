@@ -209,8 +209,11 @@ export default function AdBrief() {
       const picked = f.kind === "multi" ? (multi[f.id] ?? []) : [values[f.id]];
       const showDetail = f.detail && (f.kind === "multi" || values[f.id] === f.detail.when);
       return (
-        <fieldset key={f.id} className={`${styles.field} ${f.wide ? styles.wide : ""}`} aria-describedby={describedBy}>
-          <legend className={styles.label}>{f.label}</legend>
+        // группа вместо fieldset: у legend свой отступ, и подпись вставала выше соседних полей
+        <div key={f.id} role="group" aria-labelledby={`${id}-label`} aria-describedby={describedBy} className={`${styles.field} ${f.wide ? styles.wide : ""}`}>
+          <span id={`${id}-label`} className={styles.label}>
+            {f.label}
+          </span>
           {help}
           <div className={styles.options}>
             {f.options?.map((o) => (
@@ -231,7 +234,7 @@ export default function AdBrief() {
               <input value={values[detailKey(f.id)] ?? ""} onChange={(e) => set(detailKey(f.id), e.target.value)} maxLength={500} />
             </label>
           ) : null}
-        </fieldset>
+        </div>
       );
     }
 
