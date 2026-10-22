@@ -18,6 +18,7 @@ import { renderParser, renderParserJob } from './parser.js';
 import { renderLibrary } from './library.js';
 import { renderNotifySettings } from './notify.js';
 import { renderChat, refreshChatBadge } from './chat.js';
+import { renderBriefs, renderBrief } from './briefs.js';
 
 const app = document.getElementById('app');
 const TZ = 'Europe/Moscow';
@@ -210,6 +211,8 @@ const routes = {
   tasks: renderProjects,
   taskboard: renderTaskBoard,
   mytasks: renderMyTasks,
+  briefs: renderBriefs,
+  brief: renderBrief,
   clients: renderClients,
   client: renderClient,
   calendar: renderCalendar,
@@ -257,7 +260,7 @@ const SECTION_TABS = {
   ],
 };
 // Страницы внутри раздела без своей вкладки
-const PAGE_SECTION = { doc: 'docs', plan: 'plans', client: 'tasks', taskboard: 'tasks', adclient: 'adstats', parsejob: 'parser' };
+const PAGE_SECTION = { brief: 'briefs', doc: 'docs', plan: 'plans', client: 'tasks', taskboard: 'tasks', adclient: 'adstats', parsejob: 'parser' };
 
 function currentRoute() {
   const [name, query = ''] = location.hash.replace(/^#\/?/, '').split('?');
@@ -330,6 +333,7 @@ const ICONS = {
   archive: 'M3 4h18v4H3zM5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4',
   trash: 'M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3',
   kb: 'M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 5v16M8 7h7M8 11h5',
+  briefs: 'M9 4h6v3H9zM9 5.5H6a1 1 0 0 0-1 1V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6.5a1 1 0 0 0-1-1h-3M8.5 12l1.5 1.5L13 10.5M8.5 17h7',
   sidebar: 'M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM9 4v16M5.5 8h1M5.5 11h1',
 };
 function icon(name) {
@@ -811,6 +815,7 @@ const NAV = [
   ['templates', 'Шаблоны'],
   ['plans', 'Медиапланы'],
   ['tasks', 'Задачи'],
+  ['briefs', 'Брифы'],
   ['calendar', 'Календарь'],
   ['adstats', 'Статистика'],
   ['parser', 'Парсер'],
@@ -820,7 +825,7 @@ const NAV = [
 ];
 // Разделы, включённые на этом сервере (ADMIN_SECTIONS); учётная запись и её вкладки доступны всегда
 // «Главное» — сводка по всем включённым разделам, поэтому доступна всегда
-const ALWAYS = new Set(['home', 'adstats', 'parser', 'library', 'account', 'appearance', 'notify-settings']);
+const ALWAYS = new Set(['home', 'briefs', 'adstats', 'parser', 'library', 'account', 'appearance', 'notify-settings']);
 const sectionOf = (route) => PAGE_SECTION[route] ?? Object.keys(SECTION_TABS).find((k) => SECTION_TABS[k].some(([id]) => id === route)) ?? route;
 function sectionAllowed(route) {
   return !ctx.sections || ALWAYS.has(route) || ALWAYS.has(sectionOf(route)) || ctx.sections.includes(sectionOf(route));

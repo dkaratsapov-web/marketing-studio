@@ -647,6 +647,20 @@ const MIGRATIONS = [
 
   // Колонка, из которой задачу перенесла галочка «выполнено»: снятая галочка возвращает задачу туда
   `ALTER TABLE tasks ADD COLUMN prev_column_id INTEGER;`,
+
+  // Брифы клиентов со страницы marketing-studio.pro/brif/: ответы — JSON [{section, q, a}]
+  `CREATE TABLE briefs (
+     id INTEGER PRIMARY KEY AUTOINCREMENT,
+     company TEXT,
+     contact_name TEXT,
+     phone TEXT,
+     email TEXT,
+     answers TEXT NOT NULL,
+     page TEXT,
+     status TEXT NOT NULL DEFAULT 'new',
+     created_at TEXT NOT NULL DEFAULT (datetime('now'))
+   );
+   CREATE INDEX briefs_created ON briefs(created_at);`,
 ];
 
 /** Номер текущей версии схемы базы. */

@@ -2231,3 +2231,17 @@ input[type="date"][data-open] { border-color: var(--accent); box-shadow: 0 0 0 3
 .lib-drop .icon { width: 28px; height: 28px; color: var(--accent-text); }
 .lib-form { display: grid; gap: 4px; min-width: min(480px, 80vw); }
 .lib-form textarea { resize: vertical; }
+
+/* ---------- брифы ---------- */
+.brief-link { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.brief-link > div { flex: 1 1 260px; }
+.brief-link p { margin: 4px 0 0; font-size: 14px; }
+.brief-link code { padding: 8px 10px; border-radius: var(--radius-s, 8px); background: var(--surface-2); font-size: 14px; overflow-wrap: anywhere; }
+table.briefs { min-width: 720px; }
+.brief-status { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 13px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+.brief-status[data-s='new'] { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--text); font-weight: 600; }
+.brief-status[data-s='done'] { color: var(--text); }
+.brief-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.brief-delete:hover:not([disabled]) { color: var(--danger); }
+.brief-section { margin-top: 16px; }
+.brief-section h2 { margin: 0 0 8px; font-size: 17px; }

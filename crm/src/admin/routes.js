@@ -18,6 +18,7 @@ import { docsRoutes } from './docs-routes.js';
 import { chromiumPath } from '../docs/browser.js';
 import { mediaplanRoutes } from './mediaplan-routes.js';
 import { crmRoutes } from './crm-routes.js';
+import { briefsRoutes } from './briefs-routes.js';
 import { calendarRoutes } from './calendar-routes.js';
 import { aiRoutes } from './ai-routes.js';
 import { DEFAULT_PREFS, PrefsError, checkPrefsPatch } from './prefs.js';
@@ -68,11 +69,12 @@ function toFilter(query) {
   };
 }
 
-export async function adminRoutes(app, { config, auth, reports, db, scenarioSource, library, brand, mediaplans, crm, calendar, video, ai, media, files = null, money = null, monitor = null, adstats = null, parser = null }) {
+export async function adminRoutes(app, { config, auth, reports, db, scenarioSource, library, brand, mediaplans, crm, calendar, video, ai, media, files = null, money = null, monitor = null, adstats = null, parser = null, briefs = null }) {
   const secure = config.publicUrl?.startsWith('https://') ?? false;
   // уведомления в кабинете: задачи шлют их сами, встречам — через маршруты календаря
   const notify = createNotifications({ db: db.raw });
   crm?.useNotify?.(notify);
+  briefs?.useNotify(notify);
   const news = createNews({ db: db.raw, files });
   const kb = createKb({ db: db.raw });
   const chat = createChat({ db: db.raw, files });
@@ -490,6 +492,7 @@ export async function adminRoutes(app, { config, auth, reports, db, scenarioSour
     if (library) await api.register(docsRoutes, { library, brand, db, scenarioSource, media });
     if (mediaplans) await api.register(mediaplanRoutes, { mediaplans, brand });
     if (crm) await api.register(crmRoutes, { crm, auth, db, scenarioSource, kb, files, money });
+    if (briefs) await api.register(briefsRoutes, { briefs });
     if (adstats) await api.register(adStatsRoutes, { adstats });
     if (parser) await api.register(parserRoutes, { parser, config });
     await api.register(libraryRoutes, { library: createLibrary({ db: db.raw }), files });

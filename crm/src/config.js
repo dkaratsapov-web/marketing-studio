@@ -18,6 +18,8 @@ export function loadConfig(env = process.env) {
     host: env.HOST || '0.0.0.0',
     trustProxy: env.TRUST_PROXY === 'true',
     allowedOrigins: list(env.ALLOWED_ORIGINS),
+    // Сайт, с которого клиенты отправляют бриф (страница /brif/)
+    briefOrigins: list(env.BRIEF_ORIGINS ?? 'https://marketing-studio.pro,https://www.marketing-studio.pro'),
     dbPath: env.DB_PATH === ':memory:' ? ':memory:' : path(env.DB_PATH, 'data/kvalificator.db'),
     scenarioFile: path(env.SCENARIO_FILE, 'config/scenario.json'),
     scenarioCsvUrl: env.SCENARIO_CSV_URL || null,

@@ -38,6 +38,32 @@ const answerSchema = {
   },
 };
 
+const short = (n) => ({ type: 'string', maxLength: n });
+const briefSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['answers', 'consent'],
+  properties: {
+    company: short(200),
+    contactName: short(200),
+    phone: short(40),
+    email: short(200),
+    page: short(500),
+    consent: { type: 'boolean' },
+    website: short(200),
+    answers: {
+      type: 'array',
+      maxItems: 60,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['q', 'a'],
+        properties: { section: short(200), q: short(300), a: short(3000) },
+      },
+    },
+  },
+};
+
 const sessionParams = {
   type: 'object',
   required: ['id'],
@@ -45,19 +71,24 @@ const sessionParams = {
 };
 
 /** admin — зависимости админки ({ auth, reports, db, scenarioSource }); без них админка не подключается. */
-export async function buildServer({ config, qualifier, logger, admin, brand = null }) {
+export async function buildServer({ config, qualifier, logger, admin, brand = null, briefs = null }) {
   const app = Fastify({
     ...(logger ? { loggerInstance: logger } : { logger: false }),
     trustProxy: config.trustProxy,
     bodyLimit: 16 * 1024,
   });
 
+  // Пустой список — разрешены все источники (удобно при разработке).
+  // Бриф отправляет основной сайт (marketing-studio.pro): для /api/briefs разрешены и его адреса.
+  const origins = config.allowedOrigins.length ? config.allowedOrigins : true;
+  const briefOrigins = origins === true ? true : [...origins, ...(config.briefOrigins ?? [])];
   await app.register(cors, {
-    // Пустой список — разрешены все источники (удобно при разработке)
-    origin: config.allowedOrigins.length ? config.allowedOrigins : true,
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['content-type', 'x-session-token'],
-    maxAge: 86400,
+    delegator: (req, cb) => cb(null, {
+      origin: req.url.split('?')[0] === '/api/briefs' ? briefOrigins : origins,
+      methods: ['GET', 'POST'],
+      allowedHeaders: ['content-type', 'x-session-token'],
+      maxAge: 86400,
+    }),
   });
   // Лимит запросов: для посетителей сайта — по IP; для сотрудников в кабинете — по сессии и выше:
   // в офисе все выходят в интернет с одного адреса, а мессенджер и уведомления опрашивают сервер.
@@ -153,6 +184,26 @@ export async function buildServer({ config, qualifier, logger, admin, brand = nu
           const fresh = qualifier.getSession(session.id);
           return res.code(422).send({ error: err.message, reply: qualifier.resume(fresh) });
         }
+      },
+    );
+  }
+
+  // Бриф на рекламу со страницы сайта /brif/ — ответы попадают в раздел «Брифы» кабинета
+  if (briefs) {
+    app.post(
+      '/api/briefs',
+      {
+        bodyLimit: 64 * 1024,
+        schema: { body: briefSchema },
+        config: { rateLimit: { max: 5, timeWindow: '1 minute' } },
+      },
+      async (req, reply) => {
+        // скрытое поле «website» заполняют только боты: делаем вид, что всё прошло
+        if (req.body.website) return { ok: true };
+        if (!req.body.consent) return reply.code(400).send({ error: 'Нужно согласие на обработку персональных данных' });
+        if (!req.body.phone?.trim() && !req.body.email?.trim()) return reply.code(400).send({ error: 'Укажите телефон или почту для связи' });
+        briefs.add(req.body);
+        return { ok: true };
       },
     );
   }

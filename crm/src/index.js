@@ -17,6 +17,7 @@ import { createMediaplans } from './mediaplan/store.js';
 import { createFiles } from './files/store.js';
 import { createHotLeads } from './crm/hot-leads.js';
 import { createMoney } from './crm/money.js';
+import { createBriefs } from './crm/briefs.js';
 import { createAdStats } from './adstats/store.js';
 import { createParser } from './parser/store.js';
 import { createNotifications } from './notify/store.js';
@@ -65,6 +66,9 @@ const adstats = createAdStats({ db: db.raw, token: config.adsToken, log });
 // парсер компаний из открытых карт: сборы идут в фоне по одному
 const parser = createParser({ db: db.raw, log });
 
+// брифы клиентов со страницы сайта /brif/
+const briefs = createBriefs({ db: db.raw });
+
 const telegramBot = config.telegram.botEnabled ? await initTelegramBot() : null;
 const brand = loadBrand();
 const media = createMedia({ db: db.raw, dir: dirname(config.dbPath) });
@@ -75,6 +79,7 @@ const app = await buildServer({
   config,
   qualifier,
   brand,
+  briefs,
   logger: log,
   admin: {
     auth,
@@ -94,6 +99,7 @@ const app = await buildServer({
     video: createVideo(config),
     ai,
     monitor,
+    briefs,
   },
 });
 

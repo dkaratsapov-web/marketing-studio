@@ -18,9 +18,9 @@ export const PREF_OPTIONS = {
   notifyQuiet: ['off', '22-9', '21-9', '20-8', '23-8', '19-9'],
 };
 // категории уведомлений, которые можно отключить: «-comments,-news» в notifyMute
-export const NOTIFY_CATEGORIES = ['messages', 'tasks', 'comments', 'mentions', 'meetings', 'payments', 'news'];
+export const NOTIFY_CATEGORIES = ['messages', 'tasks', 'comments', 'mentions', 'meetings', 'payments', 'news', 'briefs'];
 const validMute = (v) => typeof v === 'string' && v.length <= 100 && (v === '' || v.split(',').every((x) => NOTIFY_CATEGORIES.includes(x)));
-export const NAV_IDS = ['home', 'news', 'chat', 'docs', 'library', 'templates', 'plans', 'tasks', 'calendar', 'adstats', 'parser', 'leads', 'kb', 'staff'];
+export const NAV_IDS = ['home', 'news', 'chat', 'docs', 'library', 'templates', 'plans', 'tasks', 'briefs', 'calendar', 'adstats', 'parser', 'leads', 'kb', 'staff'];
 const validNav = (v) => typeof v === 'string' && v.length <= 200 && (v === '' || v.split(',').every((x) => NAV_IDS.includes(x.replace(/^-/, ''))));
 // имя ассистента — свободное, но короткое и без разметки
 const NAME_RE = /^[A-Za-zА-Яа-яЁё0-9 .-]{1,24}$/;
