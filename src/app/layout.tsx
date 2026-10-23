@@ -4,7 +4,8 @@ import SmoothScroll from "@/components/SmoothScroll";
 import Cursor from "@/components/Cursor";
 import BriefModal from "@/components/brief/BriefModal";
 import JsonLd from "@/components/JsonLd";
-import { IS_MIRROR, ORGANIZATION, SITE_NAME, SITE_URL, VERIFICATION, WEBSITE } from "@/lib/seo";
+import Metrika from "@/components/Metrika";
+import { IS_MIRROR, METRIKA_ID, ORGANIZATION, SITE_NAME, SITE_URL, VERIFICATION, WEBSITE } from "@/lib/seo";
 import "./globals.css";
 
 const display = Geologica({
@@ -67,6 +68,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Cursor />
         {children}
         <BriefModal />
+        {/* Яндекс Метрика — только на основном сайте, копия на GitHub Pages не считается */}
+        {IS_MIRROR ? null : (
+          <>
+            <Metrika />
+            <noscript>
+              <div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`https://mc.yandex.ru/watch/${METRIKA_ID}`} style={{ position: "absolute", left: "-9999px" }} alt="" />
+              </div>
+            </noscript>
+          </>
+        )}
       </body>
     </html>
   );
