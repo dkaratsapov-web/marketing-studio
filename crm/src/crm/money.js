@@ -1,5 +1,6 @@
 // Деньги по клиентам: абонентская плата за ведение (счёт на каждый месяц появляется сам),
-// рекламные бюджеты и разовые работы; кто оплатил, кто должен; напоминания менеджеру клиента
+// ежемесячные счета (хостинг, бюджет, подписки — тоже появляются сами), рекламные бюджеты и разовые работы;
+// кто оплатил, кто должен; напоминания менеджеру клиента
 // за 3 дня до срока и в день просрочки. Цифры вводят люди — система только считает и напоминает.
 
 import { CrmError } from './store.js';
@@ -11,6 +12,11 @@ const todayMsk = (now = new Date()) => new Date(now.getTime() + 3 * 3600e3).toIS
 const addDays = (iso, n) => new Date(Date.parse(`${iso}T12:00:00Z`) + n * 86400e3).toISOString().slice(0, 10);
 export const rub = (v) => `${Math.round(Number(v) || 0).toLocaleString('ru-RU')} ₽`;
 const periodLabel = (p) => (p ? `${MONTHS[Number(p.slice(5, 7)) - 1]} ${p.slice(0, 4)}` : '');
+const PERIOD_RE = /^\d{4}-\d{2}$/;
+const lastDay = (period) => new Date(Date.UTC(Number(period.slice(0, 4)), Number(period.slice(5, 7)), 0)).getUTCDate();
+const dueIn = (period, payDay) => `${period}-${String(Math.min(payDay, lastDay(period))).padStart(2, '0')}`;
+/** Название счёта ежемесячного платежа: «Хостинг за ноябрь 2026» */
+const recurringTitle = (r, period) => `${r.title || (r.kind === 'other' ? 'Ежемесячный платёж' : PAYMENT_KINDS[r.kind])} за ${periodLabel(period)}`;
 
 export function createMoney({ db, notify = null }) {
   const q = {
@@ -23,19 +29,36 @@ export function createMoney({ db, notify = null }) {
     ),
     autoPeriods: db.prepare('SELECT client_id, period FROM client_payments WHERE auto = 1 AND period BETWEEN ? AND ?'),
     range: db.prepare(
-      `SELECT p.*, c.name AS client_name, c.manager_id FROM client_payments p JOIN clients c ON c.id = p.client_id
+      `SELECT p.*, c.name AS client_name, c.manager_id, r.end_period AS repeat_end FROM client_payments p JOIN clients c ON c.id = p.client_id
+       LEFT JOIN client_recurring r ON r.id = p.recurring_id
        WHERE (? IS NULL OR c.manager_id = ?) AND (
          COALESCE(p.due, p.paid_at) BETWEEN ? AND ? OR (p.paid_at IS NULL AND p.due < ?)
        ) ORDER BY COALESCE(p.due, p.paid_at), p.id`,
     ),
+    // ежемесячные счета, действующие в месяце (у клиентов не в архиве)
+    recurringIn: db.prepare(
+      `SELECT r.*, c.name AS client_name, c.manager_id FROM client_recurring r JOIN clients c ON c.id = r.client_id
+       WHERE c.archived = 0 AND r.start_period <= ? AND (r.end_period IS NULL OR r.end_period >= ?) AND (? IS NULL OR c.manager_id = ?)`,
+    ),
+    recurringPeriods: db.prepare('SELECT recurring_id, period FROM client_payments WHERE recurring_id IS NOT NULL AND period BETWEEN ? AND ?'),
+    recurringGet: db.prepare('SELECT * FROM client_recurring WHERE id = ?'),
+    recurringAdd: db.prepare('INSERT INTO client_recurring (client_id, kind, title, amount, pay_day, start_period, end_period, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'),
+    recurringUpdate: db.prepare('UPDATE client_recurring SET kind = ?, title = ?, amount = ?, pay_day = ? WHERE id = ?'),
+    recurringEnd: db.prepare('UPDATE client_recurring SET end_period = ? WHERE id = ?'),
+    recurringSkip: db.prepare('UPDATE client_recurring SET skip = ? WHERE id = ?'),
+    recurringInsert: db.prepare('INSERT OR IGNORE INTO client_payments (client_id, kind, title, amount, period, due, recurring_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'),
+    setRecurring: db.prepare('UPDATE client_payments SET recurring_id = ?, period = ?, title = ? WHERE id = ?'),
     autoInsert: db.prepare("INSERT OR IGNORE INTO client_payments (client_id, kind, title, amount, period, due, auto, created_by) VALUES (?, 'fee', ?, ?, ?, ?, 1, 'Ассистент')"),
     insert: db.prepare('INSERT INTO client_payments (client_id, kind, title, amount, period, due, invoice, receipt, note, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'),
-    get: db.prepare('SELECT p.*, c.name AS client_name, c.manager_id FROM client_payments p JOIN clients c ON c.id = p.client_id WHERE p.id = ?'),
+    get: db.prepare(
+      `SELECT p.*, c.name AS client_name, c.manager_id, r.end_period AS repeat_end FROM client_payments p JOIN clients c ON c.id = p.client_id
+       LEFT JOIN client_recurring r ON r.id = p.recurring_id WHERE p.id = ?`,
+    ),
     update: db.prepare('UPDATE client_payments SET kind = ?, title = ?, amount = ?, due = ?, paid_at = ?, invoice = ?, receipt = ?, note = ? WHERE id = ?'),
     remove: db.prepare('DELETE FROM client_payments WHERE id = ?'),
     list: db.prepare(
-      `SELECT p.*, c.name AS client_name, c.manager_id, u.name AS manager_name FROM client_payments p
-       JOIN clients c ON c.id = p.client_id LEFT JOIN admin_users u ON u.id = c.manager_id
+      `SELECT p.*, c.name AS client_name, c.manager_id, u.name AS manager_name, r.end_period AS repeat_end FROM client_payments p
+       JOIN clients c ON c.id = p.client_id LEFT JOIN admin_users u ON u.id = c.manager_id LEFT JOIN client_recurring r ON r.id = p.recurring_id
        WHERE (? IS NULL OR p.client_id = ?) AND (? IS NULL OR c.manager_id = ?)
        ORDER BY p.paid_at IS NOT NULL, p.due IS NULL, p.due, p.id DESC LIMIT 500`,
     ),
@@ -49,7 +72,14 @@ export function createMoney({ db, notify = null }) {
 
   const status = (p, today) => (p.paid_at ? 'paid' : p.due && p.due < today ? 'overdue' : 'open');
   const titleOf = (p) => p.title || `${PAYMENT_KINDS[p.kind] ?? 'Оплата'}${p.period ? ` за ${periodLabel(p.period)}` : ''}`;
-  const view = (p, today) => ({ ...p, auto: Boolean(p.auto), status: status(p, today), label: titleOf(p) });
+  // repeats — счёт ежемесячный и после него будут следующие
+  const view = (p, today) => ({
+    ...p,
+    auto: Boolean(p.auto),
+    repeats: Boolean(p.recurring_id) && (!p.repeat_end || p.repeat_end > p.period),
+    status: status(p, today),
+    label: titleOf(p),
+  });
 
   /** Права: администратор видит всё; менеджер — своих клиентов. */
   const scope = (user) => (user.role === 'admin' ? null : user.id);
@@ -69,6 +99,10 @@ export function createMoney({ db, notify = null }) {
     for (const c of q.feeClients.all()) {
       const due = `${period}-${String(Math.min(c.pay_day, last)).padStart(2, '0')}`;
       q.autoInsert.run(c.id, `Ведение за ${periodLabel(period)}`, c.fee, period, due);
+    }
+    for (const r of q.recurringIn.all(period, period, null, null)) {
+      if (r.skip.split(',').includes(period)) continue;
+      q.recurringInsert.run(r.client_id, r.kind, recurringTitle(r, period), r.amount, period, dueIn(period, r.pay_day), r.id, r.created_by);
     }
   }
 
@@ -122,7 +156,7 @@ export function createMoney({ db, notify = null }) {
     const rows = q.range.all(sc, sc, first, last, first).map((p) => view(p, today));
     const items = rows.filter((p) => (p.due ?? p.paid_at) >= first);
     const carry = rows.filter((p) => (p.due ?? p.paid_at) < first);
-    // план: только будущие месяцы — счёт текущего месяца уже создан ensureMonthly
+    // план: только будущие месяцы — счета текущего месяца уже созданы ensureMonthly
     const have = new Set(q.autoPeriods.all(periods[0], periods.at(-1)).map((r) => `${r.client_id}:${r.period}`));
     const plan = [];
     for (const c of q.feePlan.all(sc, sc)) {
@@ -131,6 +165,14 @@ export function createMoney({ db, notify = null }) {
         const [y, m] = period.split('-').map(Number);
         const dd = Math.min(c.pay_day, new Date(Date.UTC(y, m, 0)).getUTCDate());
         plan.push({ id: null, client_id: c.id, client_name: c.name, manager_id: c.manager_id, kind: 'fee', amount: c.fee, period, due: `${period}-${String(dd).padStart(2, '0')}`, paid_at: null, status: 'plan', label: `Ведение за ${periodLabel(period)}`, planned: true });
+      }
+    }
+    const haveRec = new Set(q.recurringPeriods.all(periods[0], periods.at(-1)).map((r) => `${r.recurring_id}:${r.period}`));
+    for (const period of periods) {
+      if (period <= today.slice(0, 7)) continue;
+      for (const r of q.recurringIn.all(period, period, sc, sc)) {
+        if (haveRec.has(`${r.id}:${period}`) || r.skip.split(',').includes(period)) continue;
+        plan.push({ id: null, client_id: r.client_id, client_name: r.client_name, manager_id: r.manager_id, kind: r.kind, amount: r.amount, period, due: dueIn(period, r.pay_day), paid_at: null, status: 'plan', label: recurringTitle(r, period), planned: true, repeats: true });
       }
     }
     const all = [...items, ...plan].sort((a, b) => (a.due ?? a.paid_at).localeCompare(b.due ?? b.paid_at) || a.client_name.localeCompare(b.client_name, 'ru'));
@@ -156,14 +198,37 @@ export function createMoney({ db, notify = null }) {
     };
   }
 
+  /**
+   * Счёт становится ежемесячным: дальше счёт на каждый месяц с тем же днём оплаты появится сам.
+   * until — последний месяц (ГГГГ-ММ) или null — без конца.
+   */
+  function startRepeat(p, f, until, user) {
+    if (p.auto) throw new CrmError('Ведение повторяется само: сумму и день оплаты задают в карточке клиента');
+    if (!f.due) throw new CrmError('Для ежемесячного счёта укажите срок оплаты: в этот день месяца он и будет');
+    const period = f.due.slice(0, 7);
+    if (until != null && (!PERIOD_RE.test(until) || until < period)) throw new CrmError('Последний месяц — не раньше первого счёта');
+    const { lastInsertRowid } = q.recurringAdd.run(p.client_id, f.kind, f.title, f.amount, Number(f.due.slice(8, 10)), period, until ?? null, user.name);
+    const r = q.recurringGet.get(lastInsertRowid);
+    q.setRecurring.run(r.id, period, recurringTitle(r, period), p.id);
+  }
+
   function add(clientId, v, user, now = new Date()) {
     const c = client(clientId, user);
     const f = checkFields(v);
+    if (v.repeat && !f.due) throw new CrmError('Для ежемесячного счёта укажите срок оплаты: в этот день месяца он и будет');
     const period = v.period ?? (f.due ? f.due.slice(0, 7) : todayMsk(now).slice(0, 7));
-    const { lastInsertRowid } = q.insert.run(c.id, f.kind, f.title, f.amount, period, f.due, f.invoice, f.receipt, f.note, user.name);
-    const p = q.get.get(lastInsertRowid);
-    if (v.paid) return update(p.id, { paid: true }, user, now);
-    return view(p, todayMsk(now));
+    db.exec('BEGIN');
+    let id;
+    try {
+      ({ lastInsertRowid: id } = q.insert.run(c.id, f.kind, f.title, f.amount, period, f.due, f.invoice, f.receipt, f.note, user.name));
+      if (v.repeat) startRepeat(q.get.get(id), f, v.repeatUntil ?? null, user);
+      db.exec('COMMIT');
+    } catch (err) {
+      db.exec('ROLLBACK');
+      throw err;
+    }
+    if (v.paid) return update(id, { paid: true }, user, now);
+    return view(q.get.get(id), todayMsk(now));
   }
 
   function update(id, v, user, now = new Date()) {
@@ -172,7 +237,26 @@ export function createMoney({ db, notify = null }) {
     client(cur.client_id, user);
     const f = checkFields(v, cur);
     const paidAt = v.paid === undefined ? cur.paid_at : v.paid ? cur.paid_at ?? (v.paidAt ?? todayMsk(now)) : null;
-    q.update.run(f.kind, f.title, f.amount, f.due, paidAt, f.invoice, f.receipt, f.note, cur.id);
+    const rec = cur.recurring_id ? q.recurringGet.get(cur.recurring_id) : null;
+    const repeats = view(cur, todayMsk(now)).repeats;
+    db.exec('BEGIN');
+    try {
+      q.update.run(f.kind, f.title, f.amount, f.due, paidAt, f.invoice, f.receipt, f.note, cur.id);
+      if (v.repeat === true && !rec) startRepeat(cur, f, v.repeatUntil ?? null, user);
+      else if (rec && v.repeat === true && !repeats) q.recurringEnd.run(v.repeatUntil ?? null, rec.id);
+      // повтор снят: этот счёт — последний
+      else if (rec && v.repeat === false && repeats) q.recurringEnd.run(cur.period, rec.id);
+      else if (rec && v.repeatUntil !== undefined) q.recurringEnd.run(v.repeatUntil, rec.id);
+      // правка суммы, вида, названия и дня оплаты и для следующих месяцев
+      if (rec && v.applyToNext) {
+        const base = v.title !== undefined ? (v.title ?? '').trim().replace(/ за [а-яё]+ \d{4}$/i, '') || null : rec.title;
+        q.recurringUpdate.run(f.kind, base, f.amount, f.due ? Number(f.due.slice(8, 10)) : rec.pay_day, rec.id);
+      }
+      db.exec('COMMIT');
+    } catch (err) {
+      db.exec('ROLLBACK');
+      throw err;
+    }
     return view(q.get.get(cur.id), todayMsk(now));
   }
 
@@ -180,6 +264,11 @@ export function createMoney({ db, notify = null }) {
     const cur = q.get.get(Number(id));
     if (!cur) throw new CrmError('Оплата не найдена');
     client(cur.client_id, user);
+    // удалённый счёт ежемесячного платежа не появится в этом месяце снова
+    if (cur.recurring_id && cur.period) {
+      const r = q.recurringGet.get(cur.recurring_id);
+      if (r) q.recurringSkip.run([...r.skip.split(',').filter(Boolean), cur.period].join(','), r.id);
+    }
     q.remove.run(cur.id);
   }
 

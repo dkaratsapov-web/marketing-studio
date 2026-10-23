@@ -2245,3 +2245,9 @@ table.briefs { min-width: 720px; }
 .brief-delete:hover:not([disabled]) { color: var(--danger); }
 .brief-section { margin-top: 16px; }
 .brief-section h2 { margin: 0 0 8px; font-size: 17px; }
+
+/* ---------- ежемесячный счёт в окне «Новый счёт» ---------- */
+.pm-checks { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 12px; }
+.pm-repeat { display: grid; gap: 8px; margin-top: 10px; padding: 12px; border-radius: var(--radius-m); background: var(--surface-2); }
+.pm-repeat p { margin: 0; }
+.pm-repeat .field { max-width: 240px; }

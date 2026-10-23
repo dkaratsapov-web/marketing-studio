@@ -198,9 +198,12 @@ test('итоги встречи: резюме, список договорённ
   const m = (await anna({ method: 'POST', url: '/admin/api/meetings', payload: { title: 'Стратсессия Таллер', startsAt: '2026-10-20T14:00:00+03:00', clientId: client.id, participants: [users.anna.id, users.oleg.id] } })).json().meeting;
 
   const parsed = (await anna({ method: 'POST', url: `/admin/api/meetings/${m.id}/followup/parse`, payload: { text: '- Олег — креативы для РСЯ до 24.10 срочно\n- Анне: согласовать бюджет с клиентом 22.10 в 12\n- отправить клиенту отчёт' } })).json().items;
+  // дата без года — ближайшая будущая (прошедшая в этом году — значит, в следующем)
+  const today = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+  const nearest = (md) => (`${today.slice(0, 4)}-${md}` >= today ? `${today.slice(0, 4)}-${md}` : `${Number(today.slice(0, 4)) + 1}-${md}`);
   assert.deepEqual(parsed.map((i) => [i.title, i.assigneeName, i.due, i.dueTime, i.priority]), [
-    ['Креативы для РСЯ', 'Олег', '2026-10-24', null, 3],
-    ['Согласовать бюджет с клиентом', 'Анна', '2026-10-22', '12:00', 0],
+    ['Креативы для РСЯ', 'Олег', nearest('10-24'), null, 3],
+    ['Согласовать бюджет с клиентом', 'Анна', nearest('10-22'), '12:00', 0],
     ['Отправить клиенту отчёт', null, null, null, 0],
   ]);
 

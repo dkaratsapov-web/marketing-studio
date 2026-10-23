@@ -95,3 +95,41 @@ test('платёжный календарь: счета месяца, долги
   assert.deepEqual(nov.items.map((p) => [p.amount, p.status, p.planned ?? false]), [[80000, 'open', false]], 'Олег не видит клиентов Иры');
   assert.equal(money.calendar(ira, { from: '2026-11', months: 1, now: msk('2026-11-02') }).items.length, 1);
 });
+
+test('ежемесячные счета: появляются сами каждый месяц, удалённый не возвращается, повтор можно остановить', () => {
+  const { money, anna, oleg, ira, talle } = setup();
+  const first = money.add(talle.id, { kind: 'other', title: 'Хостинг', amount: 3000, due: '2026-10-15', repeat: true }, oleg, msk('2026-10-05'));
+  assert.deepEqual([first.label, first.period, first.repeats], ['Хостинг за октябрь 2026', '2026-10', true]);
+  assert.throws(() => money.add(talle.id, { amount: 10, repeat: true }, oleg), /срок оплаты/);
+  assert.throws(() => money.add(talle.id, { amount: 10, due: '2026-10-15', repeat: true }, ira), /менеджер/);
+
+  // в ноябре счёт появился сам, день оплаты тот же
+  const nov = money.list(oleg, { clientId: talle.id, now: msk('2026-11-02') }).filter((p) => p.recurring_id);
+  assert.deepEqual(nov.map((p) => [p.label, p.due, p.amount]).sort((a, b) => a[1].localeCompare(b[1])), [['Хостинг за октябрь 2026', '2026-10-15', 3000], ['Хостинг за ноябрь 2026', '2026-11-15', 3000]]);
+  money.list(oleg, { clientId: talle.id, now: msk('2026-11-20') });
+  assert.equal(money.list(oleg, { clientId: talle.id, now: msk('2026-11-20') }).filter((p) => p.recurring_id).length, 2, 'один счёт на месяц');
+
+  // календарь показывает план на следующие месяцы
+  const cal = money.calendar(anna, { from: '2026-11', months: 3, now: msk('2026-11-20') });
+  assert.deepEqual(cal.items.filter((p) => p.repeats).map((p) => [p.label, p.status]), [['Хостинг за ноябрь 2026', 'overdue'], ['Хостинг за декабрь 2026', 'plan'], ['Хостинг за январь 2027', 'plan']]);
+
+  // удалённый счёт месяца не возвращается
+  const novBill = money.list(oleg, { clientId: talle.id, now: msk('2026-11-20') }).find((p) => p.period === '2026-11' && p.recurring_id);
+  money.remove(novBill.id, oleg);
+  assert.equal(money.list(oleg, { clientId: talle.id, now: msk('2026-11-21') }).some((p) => p.period === '2026-11' && p.recurring_id), false);
+
+  // новая сумма и для следующих месяцев; снятый повтор — счёт декабря последний
+  const dec = money.list(oleg, { clientId: talle.id, now: msk('2026-12-01') }).find((p) => p.period === '2026-12' && p.recurring_id);
+  money.update(dec.id, { amount: 3500, applyToNext: true }, oleg, msk('2026-12-01'));
+  const decStop = money.update(dec.id, { repeat: false }, oleg, msk('2026-12-01'));
+  assert.equal(decStop.repeats, false);
+  const jan = money.list(oleg, { clientId: talle.id, now: msk('2027-01-10') }).filter((p) => p.recurring_id);
+  assert.deepEqual(jan.map((p) => [p.period, p.amount]).sort(), [['2026-10', 3000], ['2026-12', 3500]]);
+
+  // обычный счёт можно сделать ежемесячным позже
+  const once = money.add(talle.id, { kind: 'budget', amount: 50000, due: '2027-01-20' }, oleg, msk('2027-01-10'));
+  assert.equal(once.repeats, false);
+  const again = money.update(once.id, { repeat: true }, oleg, msk('2027-01-10'));
+  assert.deepEqual([again.repeats, again.label], [true, 'Рекламный бюджет за январь 2027']);
+  assert.equal(money.list(oleg, { clientId: talle.id, now: msk('2027-02-01') }).filter((p) => p.recurring_id === again.recurring_id).length, 2);
+});

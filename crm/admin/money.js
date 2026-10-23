@@ -21,6 +21,24 @@ function paymentDialog({ clientId = null, clients = [], payment = null, onSaved 
   const invoice = h('input', { class: 'input', id: 'pm-invoice', maxlength: 100, value: payment?.invoice ?? '', placeholder: '№ счёта' });
   const receipt = h('input', { class: 'input', id: 'pm-receipt', maxlength: 300, value: payment?.receipt ?? '', placeholder: 'Ссылка или номер чека' });
   const paid = h('input', { type: 'checkbox', checked: Boolean(payment?.paid_at) });
+  // Ежемесячный счёт: следующие появятся сами в тот же день месяца. Ведение из карточки клиента повторяется своей настройкой
+  const canRepeat = !payment?.auto;
+  const repeat = h('input', { type: 'checkbox', checked: Boolean(payment?.repeats) });
+  const until = h('input', { class: 'input', id: 'pm-until', type: 'month', value: payment?.repeats ? payment.repeat_end ?? '' : '' });
+  const applyToNext = h('input', { type: 'checkbox' });
+  const repeatHint = h('p', { class: 'muted small' });
+  const repeatBox = h('div', { class: 'pm-repeat' },
+    repeatHint,
+    h('div', { class: 'field' }, h('label', { for: 'pm-until' }, 'Последний месяц'), until, h('span', { class: 'muted small' }, 'Пусто — пока не отключите')),
+  );
+  const syncRepeat = () => {
+    repeatBox.hidden = !repeat.checked;
+    const d = Number((due.value || '').slice(8, 10));
+    repeatHint.textContent = d ? `Счёт будет появляться сам каждый месяц со сроком оплаты ${d}\u2011го числа.` : 'Укажите срок оплаты: в этот день месяца и будут следующие счета.';
+  };
+  repeat.addEventListener('change', syncRepeat);
+  due.addEventListener('change', syncRepeat);
+  syncRepeat();
   const row = (id, label, el) => h('div', { class: 'field' }, h('label', { for: id }, label), el);
   formDialog({
     title: payment ? 'Изменить оплату' : 'Новый счёт',
@@ -35,12 +53,23 @@ function paymentDialog({ clientId = null, clients = [], payment = null, onSaved 
         row('pm-invoice', 'Счёт', invoice),
         row('pm-receipt', 'Чек «Мой налог»', receipt),
       ),
-      h('label', { class: 'check' }, paid, 'Уже оплачено'),
+      h('div', { class: 'pm-checks' },
+        h('label', { class: 'check' }, paid, 'Уже оплачено'),
+        canRepeat ? h('label', { class: 'check' }, repeat, 'Повторять каждый месяц') : null,
+        payment?.recurring_id ? h('label', { class: 'check' }, applyToNext, 'Сумму и срок изменить и в следующих месяцах') : null,
+      ),
+      canRepeat ? repeatBox : h('p', { class: 'muted small' }, 'Счёт за ведение появляется каждый месяц сам: сумма и день оплаты — в карточке клиента.'),
     ],
     onSubmit: async () => {
       const sum = parseSum(amount.value);
       if (!(sum > 0)) throw new Error('Укажите сумму');
       const body = { kind: kind.value, amount: sum, due: due.value || null, title: title.value.trim() || null, invoice: invoice.value.trim() || null, receipt: receipt.value.trim() || null, paid: paid.checked };
+      if (canRepeat && (repeat.checked || payment?.recurring_id)) body.repeat = repeat.checked;
+      if (repeat.checked) {
+        if (!due.value) throw new Error('Для ежемесячного счёта укажите срок оплаты');
+        body.repeatUntil = until.value || null;
+      }
+      if (payment?.recurring_id && applyToNext.checked) body.applyToNext = true;
       if (payment) await api(`/admin/api/payments/${payment.id}`, { method: 'PATCH', body });
       else {
         const cid = clientId ?? Number(client.value);
@@ -78,7 +107,7 @@ function paymentRows(list, { reload, showClient = false }) {
           'div',
           { class: 'pay-main' },
           h('strong', {}, showClient ? h('a', { href: `#/client?id=${p.client_id}` }, p.client_name) : p.label),
-          h('span', { class: 'muted small' }, [showClient ? p.label : null, p.invoice ? `счёт ${p.invoice}` : null, p.paid_at ? `оплачено ${day(p.paid_at)}` : p.due ? `срок ${day(p.due)}` : 'без срока'].filter(Boolean).join(' · '), p.receipt ? [' · ', receiptLink(p.receipt)] : null),
+          h('span', { class: 'muted small' }, [showClient ? p.label : null, p.repeats ? 'каждый месяц' : null, p.invoice ? `счёт ${p.invoice}` : null, p.paid_at ? `оплачено ${day(p.paid_at)}` : p.due ? `срок ${day(p.due)}` : 'без срока'].filter(Boolean).join(' · '), p.receipt ? [' · ', receiptLink(p.receipt)] : null),
         ),
         h('b', { class: 'pay-sum num' }, rub(p.amount)),
         p.status === 'paid'

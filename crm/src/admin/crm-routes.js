@@ -177,6 +177,10 @@ export async function crmRoutes(api, { crm, auth, db, scenarioSource, kb = null,
         receipt: { type: ['string', 'null'], maxLength: 300 },
         note: { type: ['string', 'null'], maxLength: 1000 },
         paid: { type: 'boolean' },
+        // ежемесячный счёт: повторять каждый месяц, до какого месяца, правка и для следующих месяцев
+        repeat: { type: 'boolean' },
+        repeatUntil: { type: ['string', 'null'], pattern: '^\\d{4}-\\d{2}$' },
+        applyToNext: { type: 'boolean' },
       },
     };
     api.get('/admin/api/money', { schema: { querystring: { type: 'object', properties: { client: { type: 'integer' } } } } }, async (req) => ({

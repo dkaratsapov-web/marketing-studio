@@ -661,6 +661,24 @@ const MIGRATIONS = [
      created_at TEXT NOT NULL DEFAULT (datetime('now'))
    );
    CREATE INDEX briefs_created ON briefs(created_at);`,
+
+  // Ежемесячные счета клиента (хостинг, бюджет, подписки): счёт на каждый месяц появляется сам.
+  // skip — месяцы, где счёт удалили вручную: заново он не создаётся
+  `CREATE TABLE client_recurring (
+     id           INTEGER PRIMARY KEY AUTOINCREMENT,
+     client_id    INTEGER NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+     kind         TEXT NOT NULL DEFAULT 'other',
+     title        TEXT,
+     amount       REAL NOT NULL,
+     pay_day      INTEGER NOT NULL,
+     start_period TEXT NOT NULL,
+     end_period   TEXT,
+     skip         TEXT NOT NULL DEFAULT '',
+     created_by   TEXT,
+     created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+   );
+   ALTER TABLE client_payments ADD COLUMN recurring_id INTEGER REFERENCES client_recurring(id) ON DELETE SET NULL;
+   CREATE UNIQUE INDEX client_payments_recurring ON client_payments (recurring_id, period) WHERE recurring_id IS NOT NULL;`,
 ];
 
 /** Номер текущей версии схемы базы. */
