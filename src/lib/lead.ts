@@ -1,3 +1,5 @@
+import { METRIKA_ID } from "@/lib/seo";
+
 const PREFIX = "+7 ";
 
 /** Кабинет агентства: принимает заявки и брифы с сайта и пересылает их в Telegram-группу */
@@ -71,9 +73,58 @@ function utm(): Record<string, string> {
   }
 }
 
-/** Запоминает метки сразу при заходе на сайт, до первой формы */
+const VISIT_STORE = "lead-visit";
+
+/** Первая страница визита и сайт, с которого пришли: запоминаются при заходе, до переходов по сайту */
+function visit(): { landing?: string; firstReferrer?: string } {
+  try {
+    const saved = sessionStorage.getItem(VISIT_STORE);
+    if (saved) return JSON.parse(saved);
+    const ref = document.referrer && new URL(document.referrer).host !== location.host ? document.referrer : "";
+    const v = { landing: location.href.slice(0, 500), firstReferrer: ref.slice(0, 500) };
+    sessionStorage.setItem(VISIT_STORE, JSON.stringify(v));
+    return v;
+  } catch {
+    return {};
+  }
+}
+
+/** ClientID Метрики — по нему визит находится в вебвизоре; ждём не дольше 400 мс */
+function metrikaClientId(): Promise<string> {
+  return new Promise((resolve) => {
+    const timer = window.setTimeout(() => resolve(""), 400);
+    try {
+      window.ym?.(METRIKA_ID, "getClientID", (id: unknown) => {
+        window.clearTimeout(timer);
+        resolve(String(id ?? ""));
+      });
+    } catch {
+      resolve("");
+    }
+  });
+}
+
+/** Данные браузера к заявке: экран, часовой пояс, язык, ClientID Метрики, вход на сайт */
+async function client() {
+  let tz = "";
+  try {
+    tz = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
+  } catch {
+    tz = "";
+  }
+  return {
+    screen: `${window.screen.width}×${window.screen.height}`,
+    tz,
+    lang: (navigator.language ?? "").slice(0, 20),
+    ymClientId: await metrikaClientId(),
+    ...visit(),
+  };
+}
+
+/** Запоминает метки и страницу входа сразу при заходе на сайт, до первой формы */
 export function rememberUtm() {
   utm();
+  visit();
 }
 
 /**
@@ -104,6 +155,7 @@ export async function submitLead(lead: Lead, fallbackLines: (string | null | fal
         ...lead,
         utm: utm(),
         referrer: document.referrer,
+        client: await client(),
         page: window.location.href,
       }),
       signal: ctrl.signal,

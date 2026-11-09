@@ -2266,3 +2266,4 @@ table.site-leads { min-width: 860px; }
 .sl-relay { margin-top: 12px; }
 .sl-relay summary { cursor: pointer; color: var(--muted); font-size: 14px; }
 .sl-relay .input[type=url] { flex: 1 1 240px; }
+.site-leads td:nth-child(2) .task { display: block; max-width: none; white-space: nowrap; -webkit-line-clamp: unset; }

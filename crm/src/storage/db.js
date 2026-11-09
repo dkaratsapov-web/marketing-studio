@@ -697,6 +697,10 @@ const MIGRATIONS = [
      sent_at    TEXT,
      created_at TEXT NOT NULL DEFAULT (datetime('now'))
    );`,
+
+  // Заявки с сайта: IP посетителя и подробности визита (город, устройство, источник, экран, ClientID Метрики)
+  `ALTER TABLE site_leads ADD COLUMN ip TEXT;
+   ALTER TABLE site_leads ADD COLUMN meta TEXT NOT NULL DEFAULT '{}';`,
 ];
 
 /** Номер текущей версии схемы базы. */

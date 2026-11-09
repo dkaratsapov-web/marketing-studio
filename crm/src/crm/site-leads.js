@@ -3,6 +3,8 @@
 // на сервере, обратно не отдаётся (видно имя бота и последние 4 символа) и в журнал не пишется.
 // Не дошла до Telegram — заявка остаётся в кабинете, досылка пробует ещё раз в течение суток.
 
+import { deviceFromUa, sourceOf } from './geo.js';
+
 const TOKEN_KEY = 'site_leads.tg_token';
 const BOT_KEY = 'site_leads.tg_bot';
 const CHAT_KEY = 'site_leads.tg_chat';
@@ -61,20 +63,37 @@ export function leadMessage(l) {
     out.push('');
     for (const [q, a] of answers) out.push(`<b>${esc(q)}</b>\n${esc(a)}`);
   }
+  const m = l.meta ?? {};
+  const path = (u) => {
+    try {
+      const x = new URL(u);
+      return decodeURI(x.pathname + x.search);
+    } catch {
+      return u;
+    }
+  };
+  out.push('');
+  out.push(`🔎 Источник: ${esc(m.source ?? sourceOf(l))}`);
   const marks = Object.entries(l.utm ?? {}).map(([k, v]) => `${k}=${esc(v)}`);
-  if (marks.length || l.referrer) {
-    out.push('');
-    if (marks.length) out.push(`Метки: ${marks.join(', ')}`);
-    if (l.referrer) out.push(`Пришёл с: ${esc(l.referrer)}`);
-  }
+  if (marks.length) out.push(`🏷 Метки: ${marks.join(', ')}`);
+  const from = m.firstReferrer || l.referrer;
+  if (from) out.push(`↩️ Пришёл с: ${esc(from)}`);
+  if (m.landing && m.landing !== l.page) out.push(`🚪 Вход на сайт: ${esc(path(m.landing))}`);
+  if (l.page) out.push(`📝 Заявка на странице: ${esc(path(l.page))}`);
+  if (m.geo || l.ip) out.push(`📍 ${esc(m.geo ?? 'город не определён')}${l.ip ? ` · IP ${esc(l.ip)}` : ''}`);
+  const dev = [m.device, m.screen].filter(Boolean).join(' · ');
+  if (dev) out.push(`📱 ${esc(dev)}`);
+  const env = [m.tz, m.lang].filter(Boolean).join(' · ');
+  if (env) out.push(`🕐 Часовой пояс и язык: ${esc(env)}`);
+  if (m.ymClientId) out.push(`🆔 ClientID Метрики: <code>${esc(m.ymClientId)}</code>`);
   out.push('', `<i>${msk(l.created_at)} МСК · заявка №${l.id} в кабинете</i>`);
   return out.join('\n');
 }
 
-export function createSiteLeads({ db, notify = null, fetchImpl = globalThis.fetch, apiBase = 'https://api.telegram.org', log = null }) {
+export function createSiteLeads({ db, notify = null, fetchImpl = globalThis.fetch, apiBase = 'https://api.telegram.org', log = null, geo = null }) {
   const base = String(apiBase).replace(/\/$/, '');
   const q = {
-    add: db.prepare('INSERT INTO site_leads (source, name, phone, contact, service, answers, utm, referrer, page) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'),
+    add: db.prepare('INSERT INTO site_leads (source, name, phone, contact, service, answers, utm, referrer, page, ip, meta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'),
     get: db.prepare('SELECT * FROM site_leads WHERE id = ?'),
     list: db.prepare('SELECT * FROM site_leads ORDER BY id DESC LIMIT 300'),
     pending: db.prepare("SELECT * FROM site_leads WHERE delivered = 0 AND created_at > datetime('now', '-1 day') ORDER BY id LIMIT 20"),
@@ -89,7 +108,7 @@ export function createSiteLeads({ db, notify = null, fetchImpl = globalThis.fetc
     del: db.prepare('DELETE FROM app_settings WHERE key = ?'),
   };
   const setting = (k) => settings.get.get(k)?.value ?? null;
-  const parse = (r) => r && { ...r, answers: JSON.parse(r.answers || '{}'), utm: JSON.parse(r.utm || '{}'), delivered: Boolean(r.delivered) };
+  const parse = (r) => r && { ...r, answers: JSON.parse(r.answers || '{}'), utm: JSON.parse(r.utm || '{}'), meta: JSON.parse(r.meta || '{}'), delivered: Boolean(r.delivered) };
   let notifier = notify;
 
   /**
@@ -233,7 +252,8 @@ export function createSiteLeads({ db, notify = null, fetchImpl = globalThis.fetc
       notifier = n;
     },
     /** Заявка с сайта: проверяем, сохраняем, уведомляем администраторов и отправляем в Telegram. */
-    async add(data) {
+    /** visitor — что знает сервер: IP (через nginx) и User-Agent браузера. */
+    async add(data, visitor = {}) {
       const source = str(data.source, 20);
       if (!(source in SITE_LEAD_SOURCES)) throw new SiteLeadError('Неизвестная форма');
       const lead = {
@@ -248,7 +268,23 @@ export function createSiteLeads({ db, notify = null, fetchImpl = globalThis.fetc
         page: str(data.page, 300),
       };
       if (!phoneOk(lead.phone) && !contactOk(lead.contact)) throw new SiteLeadError('Укажите телефон или ник в Telegram');
-      const { lastInsertRowid } = q.add.run(lead.source, lead.name || null, lead.phone || null, lead.contact || null, lead.service || null, JSON.stringify(lead.answers), JSON.stringify(lead.utm), lead.referrer || null, lead.page || null);
+      // откуда и с чего пришёл: город по IP (своя база), устройство, источник; с сайта — экран, пояс, язык, ClientID Метрики, страница входа
+      const c = data.client ?? {};
+      const ip = str(visitor.ip, 45) || null;
+      const meta = Object.fromEntries(
+        Object.entries({
+          geo: ip ? geo?.lookup(ip) ?? null : null,
+          device: deviceFromUa(visitor.ua),
+          source: sourceOf({ utm: lead.utm, referrer: str(c.firstReferrer, 300) || lead.referrer }),
+          screen: /^\d{2,5}×\d{2,5}$/.test(c.screen ?? '') ? c.screen : null,
+          tz: str(c.tz, 60) || null,
+          lang: str(c.lang, 20) || null,
+          ymClientId: /^\d{5,30}$/.test(c.ymClientId ?? '') ? c.ymClientId : null,
+          landing: str(c.landing, 300) || null,
+          firstReferrer: str(c.firstReferrer, 300) || null,
+        }).filter(([, v]) => v),
+      );
+      const { lastInsertRowid } = q.add.run(lead.source, lead.name || null, lead.phone || null, lead.contact || null, lead.service || null, JSON.stringify(lead.answers), JSON.stringify(lead.utm), lead.referrer || null, lead.page || null, ip, JSON.stringify(meta));
       const saved = parse(q.get.get(lastInsertRowid));
       const who = [saved.name, saved.phone || saved.contact].filter(Boolean).join(', ');
       for (const a of q.admins.all()) notifier?.add(a.id, { kind: 'site_lead', text: `Заявка с сайта: ${who}`, href: '#/siteleads' });

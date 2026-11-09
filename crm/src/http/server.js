@@ -55,6 +55,12 @@ const siteLeadSchema = {
     page: short(500),
     answers: { type: 'object', maxProperties: 12, additionalProperties: short(1000) },
     utm: { type: 'object', additionalProperties: short(200) },
+    // данные браузера: размер экрана, часовой пояс, язык, ClientID Метрики, страница входа и откуда пришёл
+    client: {
+      type: 'object',
+      additionalProperties: false,
+      properties: { screen: short(20), tz: short(60), lang: short(20), ymClientId: short(30), landing: short(500), firstReferrer: short(500) },
+    },
   },
 };
 const briefSchema = {
@@ -235,7 +241,7 @@ export async function buildServer({ config, qualifier, logger, admin, brand = nu
       async (req, reply) => {
         if (req.body.website) return { ok: true };
         try {
-          await siteLeads.add(req.body);
+          await siteLeads.add(req.body, { ip: req.ip, ua: req.headers['user-agent'] });
         } catch (err) {
           if (err instanceof SiteLeadError) return reply.code(400).send({ ok: false, error: err.message });
           throw err;

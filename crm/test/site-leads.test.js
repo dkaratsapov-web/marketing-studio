@@ -7,6 +7,7 @@ import { loadConfig } from '../src/config.js';
 import { createAuth } from '../src/admin/auth.js';
 import { createReports } from '../src/admin/reports.js';
 import { createSiteLeads, leadMessage } from '../src/crm/site-leads.js';
+import { createGeo, deviceFromUa, sourceOf } from '../src/crm/geo.js';
 import { createNotifications } from '../src/notify/store.js';
 import { rules, staticSource, silentLog } from './helpers.js';
 
@@ -40,13 +41,15 @@ function fakeTelegram() {
 }
 
 async function setup() {
-  const config = loadConfig({ DB_PATH: ':memory:', ALLOWED_ORIGINS: 'https://crm.marketing-studio.pro', ADMIN_SECTIONS: 'tasks,calendar,docs,staff' });
+  const config = loadConfig({ DB_PATH: ':memory:', ALLOWED_ORIGINS: 'https://crm.marketing-studio.pro', ADMIN_SECTIONS: 'tasks,calendar,docs,staff', TRUST_PROXY: 'true' });
   const db = openDb(':memory:');
   const auth = createAuth(db.raw);
   auth.addUser('anna', 'Анна', { password: PASSWORD, role: 'admin' });
   auth.addUser('oleg', 'Олег', { password: PASSWORD });
   const tg = fakeTelegram();
-  const siteLeads = createSiteLeads({ db: db.raw, fetchImpl: tg.fetch });
+  // база городов: подменная, отвечает за один адрес
+  const reader = { get: (ip) => (ip === '95.31.0.1' ? { city: { names: { ru: 'Тверь', en: 'Tver' } }, subdivisions: [{ names: { ru: 'Тверская область' } }], country: { names: { ru: 'Россия' } } } : null) };
+  const siteLeads = createSiteLeads({ db: db.raw, fetchImpl: tg.fetch, geo: createGeo({ dir: '/nonexistent', reader }) });
   const qualifier = createQualifier({ db, scenarioSource: staticSource(), rules, log: silentLog });
   const app = await buildServer({
     config, qualifier, logger: false, siteLeads,
@@ -111,9 +114,22 @@ test('Telegram для заявок: токен вставляет админис
   assert.equal(chat.json().telegram.chatTitle, 'Заявки Корпорации');
   assert.equal(tg.calls.at(-1).method, 'sendMessage', 'при выборе группы — проверка связи');
 
-  // заявка уходит в группу; данные посетителя экранированы
-  await app.inject({ method: 'POST', url: '/api/lead', payload: lead });
+  // заявка уходит в группу; данные посетителя экранированы; город по IP, устройство, источник, данные браузера
+  const iphone = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
+  await app.inject({
+    method: 'POST', url: '/api/lead',
+    headers: { 'x-forwarded-for': '95.31.0.1', 'user-agent': iphone },
+    payload: { ...lead, utm: { yclid: '123', utm_campaign: 'tver_context' }, client: { screen: '393×852', tz: 'Europe/Moscow', lang: 'ru-RU', ymClientId: '1731234567890123456', landing: `${SITE}/uslugi/kontekstnaya-reklama/?yclid=123`, firstReferrer: 'https://yandex.ru/' } },
+  });
   const sent = tg.calls.at(-1);
+  assert.match(sent.body.text, /🔎 Источник: Яндекс Директ/);
+  assert.match(sent.body.text, /🏷 Метки: utm_campaign=tver_context, yclid=123/);
+  assert.match(sent.body.text, /↩️ Пришёл с: https:\/\/yandex\.ru\//);
+  assert.match(sent.body.text, /🚪 Вход на сайт: \/uslugi\/kontekstnaya-reklama\/\?yclid=123/);
+  assert.match(sent.body.text, /📍 Тверь, Тверская область, Россия · IP 95\.31\.0\.1/);
+  assert.match(sent.body.text, /📱 Телефон · iOS 17 · Safari · 393×852/);
+  assert.match(sent.body.text, /🕐 Часовой пояс и язык: Europe\/Moscow · ru-RU/);
+  assert.match(sent.body.text, /🆔 ClientID Метрики: <code>1731234567890123456<\/code>/);
   assert.equal(sent.body.chat_id, '-1001234567890');
   assert.match(sent.body.text, /Имя: Иван &lt;b&gt;/);
   assert.match(sent.body.text, /Телефон: \+79001234567/);
@@ -152,4 +168,18 @@ test('текст заявки для Telegram: ник, метки, номер з
   assert.match(text, /Telegram: <a href="https:\/\/t.me\/ivan_petrov">@ivan_petrov<\/a>/);
   assert.match(text, /Метки: utm_campaign=tg/);
   assert.match(text, /09\.11\.2026 10:30 МСК · заявка №7/);
+});
+
+test('устройство и источник визита', () => {
+  assert.equal(deviceFromUa('Mozilla/5.0 (Linux; Android 14; SM-A546B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 YaBrowser/24.10 Mobile Safari/537.36'), 'Телефон · Android 14 · Яндекс Браузер');
+  assert.equal(deviceFromUa('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'), 'Компьютер · Windows · Chrome');
+  assert.equal(deviceFromUa('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15'), 'Компьютер · macOS · Safari');
+  assert.equal(deviceFromUa(''), null);
+  assert.equal(sourceOf({ utm: { utm_source: 'vk_ads' } }), 'Реклама VK: vk_ads');
+  assert.equal(sourceOf({ referrer: 'https://www.google.com/' }), 'Поиск Google');
+  assert.equal(sourceOf({ referrer: 'https://marketing-studio.pro/o-nas/' }), 'Прямой заход');
+  assert.equal(sourceOf({}), 'Прямой заход');
+  assert.equal(createGeo({ dir: '/nonexistent' }).lookup('95.31.0.1'), null, 'нет базы — без города');
+  assert.equal(createGeo({ dir: '/nonexistent', reader: { get: () => ({ city: { names: { en: 'Boardman' } }, country: { names: { ru: 'США' } } }) } }).lookup('3.3.3.3'), 'Boardman, США');
+  assert.equal(createGeo({ dir: '/nonexistent', reader: { get: () => { throw new Error('x'); } } }).lookup('192.168.1.1'), null, 'внутренние адреса не ищем');
 });

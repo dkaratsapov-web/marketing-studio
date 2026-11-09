@@ -5,6 +5,15 @@ import { h, api, app, shell, toast, confirmDialog, fmtDateTime, ctx, rowActions,
 import { fill } from './docs.js';
 
 const contactText = (l) => [l.phone, l.contact].filter(Boolean).join(', ');
+// ответы формы, метки и подробности визита: город, устройство, источник, вход на сайт, ClientID Метрики
+const META = { source: 'Источник', geo: 'Город', device: 'Устройство', screen: 'Экран', tz: 'Часовой пояс', lang: 'Язык', landing: 'Вход на сайт', firstReferrer: 'Пришёл с', ymClientId: 'ClientID Метрики' };
+const details = (l) => [
+  ...Object.entries(l.answers),
+  ...Object.entries(l.utm),
+  ...Object.entries(META).filter(([k]) => l.meta?.[k]).map(([k, label]) => [label, l.meta[k]]),
+  ...(l.ip ? [['IP', l.ip]] : []),
+  ...(l.page ? [['Страница заявки', l.page]] : []),
+];
 
 export async function renderSiteLeads() {
   const box = h('div', {}, h('p', { class: 'muted' }, 'Загружаю…'));
@@ -54,9 +63,7 @@ export async function renderSiteLeads() {
               h(
                 'td',
                 {},
-                Object.keys(l.answers).length || Object.keys(l.utm).length
-                  ? h('details', { class: 'sl-more' }, h('summary', {}, 'Подробнее'), h('dl', { class: 'answers' }, [...Object.entries(l.answers), ...Object.entries(l.utm)].map(([k, v]) => [h('dt', {}, k), h('dd', {}, v)])))
-                  : h('span', { class: 'muted' }, '—'),
+                h('details', { class: 'sl-more' }, h('summary', {}, 'Подробнее'), h('dl', { class: 'answers' }, details(l).map(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]))),
               ),
               h('td', {}, l.delivered ? h('span', { class: 'sl-ok' }, 'Отправлена') : h('span', { class: 'sl-fail', title: l.error ?? '' }, l.error ?? 'Не отправлена')),
               ctx.me.role === 'admin'
