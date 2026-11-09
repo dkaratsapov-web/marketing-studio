@@ -7,6 +7,9 @@ const TOKEN_KEY = 'site_leads.tg_token';
 const BOT_KEY = 'site_leads.tg_bot';
 const CHAT_KEY = 'site_leads.tg_chat';
 const CHAT_TITLE_KEY = 'site_leads.tg_chat_title';
+// ретранслятор (deploy/relay/worker.js), если Telegram недоступен с сервера: адрес и секретный ключ
+const RELAY_URL_KEY = 'site_leads.relay_url';
+const RELAY_KEY_KEY = 'site_leads.relay_key';
 const TOKEN_RE = /^\d{6,12}:[A-Za-z0-9_-]{30,60}$/;
 
 export const SITE_LEAD_SOURCES = {
@@ -93,11 +96,13 @@ export function createSiteLeads({ db, notify = null, fetchImpl = globalThis.fetc
    * Запрос к Bot API. В ошибку не попадают ни токен, ни адрес запроса: только ответ Telegram или причина сбоя сети.
    */
   async function tg(token, method, body = null) {
+    const relayUrl = setting(RELAY_URL_KEY);
+    const relayKey = setting(RELAY_KEY_KEY);
     let res;
     try {
-      res = await fetchImpl(`${base}/bot${token}/${method}`, {
+      res = await fetchImpl(`${relayUrl ?? base}/bot${token}/${method}`, {
         method: body ? 'POST' : 'GET',
-        headers: body ? { 'content-type': 'application/json' } : {},
+        headers: { ...(body ? { 'content-type': 'application/json' } : {}), ...(relayUrl && relayKey ? { 'x-relay-key': relayKey } : {}) },
         body: body ? JSON.stringify(body) : undefined,
         signal: AbortSignal.timeout(10_000),
       });
@@ -121,6 +126,7 @@ export function createSiteLeads({ db, notify = null, fetchImpl = globalThis.fetc
       bot: setting(BOT_KEY),
       chat: setting(CHAT_KEY),
       chatTitle: setting(CHAT_TITLE_KEY),
+      relay: setting(RELAY_URL_KEY),
       updatedBy: t?.updated_by ?? null,
       updatedAt: t?.updated_at ?? null,
     };
@@ -133,6 +139,36 @@ export function createSiteLeads({ db, notify = null, fetchImpl = globalThis.fetc
     const me = await tg(token, 'getMe');
     settings.put.run(TOKEN_KEY, token, user?.name ?? null);
     settings.put.run(BOT_KEY, me.username ? `@${me.username}` : str(me.first_name, 64), user?.name ?? null);
+    return info();
+  }
+
+  /**
+   * Ретранслятор: адрес https://…, ключ — тот же, что в секрете RELAY_KEY воркера. Проверяем, что он отвечает
+   * «relay ok» и пускает с этим ключом; ключ обратно не отдаётся.
+   */
+  async function setRelay(url, key, user) {
+    const u = str(url, 200).replace(/\/$/, '');
+    if (!/^https:\/\/[a-z0-9.-]+\.[a-z]{2,}$/i.test(u)) throw new SiteLeadError('Адрес ретранслятора — вида https://имя.workers.dev, без пути');
+    const k = str(key, 200);
+    if (k.length < 16) throw new SiteLeadError('Ключ ретранслятора — не короче 16 символов');
+    let res;
+    try {
+      res = await fetchImpl(`${u}/`, { signal: AbortSignal.timeout(10_000) });
+    } catch (err) {
+      const code = /^[A-Z_]{3,30}$/.test(err?.cause?.code ?? '') ? ` (${err.cause.code})` : '';
+      throw new SiteLeadError(`Ретранслятор не отвечает с сервера${code}`);
+    }
+    if ((await res.text().catch(() => '')).trim() !== 'relay ok') throw new SiteLeadError('По этому адресу не ретранслятор: откройте его в браузере, должно быть «relay ok»');
+    const probe = await fetchImpl(`${u}/bot0:check/getMe`, { headers: { 'x-relay-key': k }, signal: AbortSignal.timeout(10_000) }).catch(() => null);
+    if (probe?.status === 403) throw new SiteLeadError('Ретранслятор не принял ключ: он должен совпадать с секретом RELAY_KEY в Cloudflare');
+    settings.put.run(RELAY_URL_KEY, u, user?.name ?? null);
+    settings.put.run(RELAY_KEY_KEY, k, user?.name ?? null);
+    return info();
+  }
+
+  function clearRelay() {
+    settings.del.run(RELAY_URL_KEY);
+    settings.del.run(RELAY_KEY_KEY);
     return info();
   }
 
@@ -230,6 +266,8 @@ export function createSiteLeads({ db, notify = null, fetchImpl = globalThis.fetc
     info,
     setToken,
     clearToken,
+    setRelay,
+    clearRelay,
     findChats,
     setChat,
     test,

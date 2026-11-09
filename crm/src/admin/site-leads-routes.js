@@ -34,5 +34,11 @@ export async function siteLeadsRoutes(api, { siteLeads }) {
     { preHandler: adminOnly, config: limit, schema: { body: { type: 'object', additionalProperties: false, required: ['id'], properties: { id: { type: 'string', maxLength: 30 }, title: { type: 'string', maxLength: 200 } } } } },
     async (req) => ({ telegram: await siteLeads.setChat(req.body.id, req.body.title, req.user) }),
   );
+  api.put(
+    '/admin/api/site-leads/telegram/relay',
+    { preHandler: adminOnly, config: limit, schema: { body: { type: 'object', additionalProperties: false, required: ['url', 'key'], properties: { url: { type: 'string', maxLength: 200 }, key: { type: 'string', maxLength: 200 } } } } },
+    async (req) => ({ telegram: await siteLeads.setRelay(req.body.url, req.body.key, req.user) }),
+  );
+  api.delete('/admin/api/site-leads/telegram/relay', { preHandler: adminOnly }, async () => ({ telegram: siteLeads.clearRelay() }));
   api.post('/admin/api/site-leads/telegram/test', { preHandler: adminOnly, config: limit }, async () => ({ telegram: await siteLeads.test() }));
 }

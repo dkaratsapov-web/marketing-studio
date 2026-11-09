@@ -18,7 +18,15 @@ const TOKEN = '1234567890:AAH_test_token_value_abcdefghijklmnopq';
 function fakeTelegram() {
   const t = { calls: [], offline: false };
   t.fetch = async (url, init) => {
-    if (t.offline) throw new TypeError('fetch failed');
+    // ретранслятор: отвечает «relay ok» и пускает только с ключом
+    if (url.startsWith('https://relay.example.dev')) {
+      if (url === 'https://relay.example.dev/') return { status: 200, text: async () => 'relay ok' };
+      if (init?.headers?.['x-relay-key'] !== 'relay-key-0123456789abcdef') return { status: 403, json: async () => null, text: async () => 'forbidden' };
+      t.relayed = (t.relayed ?? 0) + 1;
+      url = url.replace('https://relay.example.dev', 'https://api.telegram.org');
+      if (url.includes('/bot0:check/')) return { status: 401, json: async () => ({ ok: false }) };
+    }
+    if (t.offline) throw Object.assign(new TypeError('fetch failed'), { cause: { code: 'ETIMEDOUT' } });
     const [, token, method] = /\/bot([^/]+)\/([A-Za-z]+)/.exec(url);
     t.calls.push({ token, method, body: init?.body ? JSON.parse(init.body) : null });
     const json = (data, status = 200) => ({ status, json: async () => data });
@@ -117,12 +125,23 @@ test('Telegram для заявок: токен вставляет админис
   assert.equal(off.json().ok, true);
   let last = (await app.inject({ url: '/admin/api/site-leads', headers: anna })).json().leads[0];
   assert.deepEqual([last.name, last.delivered], ['Пётр', false]);
-  assert.match(last.error, /Нет связи с Telegram/);
+  assert.match(last.error, /Нет связи с Telegram с сервера \(ETIMEDOUT\)/);
   assert.ok(!last.error.includes(TOKEN));
   tg.offline = false;
   assert.equal(await siteLeads.retryUndelivered(), 1);
   last = (await app.inject({ url: '/admin/api/site-leads', headers: anna })).json().leads[0];
   assert.equal(last.delivered, true);
+
+  // ретранслятор: неверный ключ не сохраняется; с верным запросы идут через него, ключ обратно не отдаётся
+  const relay = (key) => app.inject({ method: 'PUT', url: '/admin/api/site-leads/telegram/relay', headers: anna, payload: { url: 'https://relay.example.dev/', key } });
+  assert.match((await relay('wrong-key-0123456789')).json().error, /не принял ключ/);
+  const ok = await relay('relay-key-0123456789abcdef');
+  assert.equal(ok.json().telegram.relay, 'https://relay.example.dev');
+  assert.ok(!ok.body.includes('relay-key-0123456789abcdef'));
+  assert.equal((await app.inject({ method: 'PUT', url: '/admin/api/site-leads/telegram/relay', headers: oleg, payload: { url: 'https://relay.example.dev', key: 'x'.repeat(20) } })).statusCode, 403);
+  const before = tg.relayed ?? 0;
+  await app.inject({ method: 'POST', url: '/admin/api/site-leads/telegram/test', headers: anna });
+  assert.equal(tg.relayed, before + 1, 'проверка связи ушла через ретранслятор');
 
   assert.equal((await app.inject({ method: 'DELETE', url: '/admin/api/site-leads/telegram', headers: anna })).json().telegram.set, false);
 });

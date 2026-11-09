@@ -2263,3 +2263,6 @@ table.site-leads { min-width: 860px; }
 .sl-form .input { flex: 1 1 320px; }
 .sl-actions, .sl-chats { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
 .sl-chats p { width: 100%; margin: 0; }
+.sl-relay { margin-top: 12px; }
+.sl-relay summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+.sl-relay .input[type=url] { flex: 1 1 240px; }

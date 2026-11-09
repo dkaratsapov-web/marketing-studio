@@ -91,6 +91,43 @@ export function siteLeadsTelegramPanel() {
       btn.disabled = false;
     }
   };
+  // Ретранслятор: если хостинг не пускает к Telegram. Ключ только вводится, обратно не показывается
+  function relayBlock(t) {
+    if (t.relay) {
+      const drop = h('button', { type: 'button', class: 'btn btn-s' }, 'Убрать');
+      drop.onclick = () => run(drop, async () => draw((await api('/admin/api/site-leads/telegram/relay', { method: 'DELETE' })).telegram));
+      return h('p', { class: 'integration-state sl-relay' }, `Через ретранслятор ${t.relay}. `, drop);
+    }
+    const url = h('input', { id: 'sl-relay-url', type: 'url', class: 'input', autocomplete: 'off', placeholder: 'https://имя.workers.dev', maxlength: 200 });
+    const key = h('input', { id: 'sl-relay-key', type: 'text', class: 'input secret-input', autocomplete: 'off', 'data-lpignore': 'true', 'data-1p-ignore': 'true', 'data-bwignore': 'true', 'data-form-type': 'other', spellcheck: 'false', maxlength: 200, placeholder: 'ключ RELAY_KEY' });
+    const save = h('button', { type: 'submit', class: 'btn' }, 'Подключить ретранслятор');
+    return h(
+      'details',
+      { class: 'sl-relay' },
+      h('summary', {}, 'Telegram недоступен с сервера? Подключите ретранслятор'),
+      h('p', { class: 'muted' }, 'Ретранслятор стоит за границей и передаёт запросы в Telegram. Адрес и ключ — из Cloudflare Worker; ключ после сохранения не показывается.'),
+      h(
+        'form',
+        {
+          class: 'sl-form',
+          onsubmit: (e) => {
+            e.preventDefault();
+            run(save, async () => {
+              const r = (await api('/admin/api/site-leads/telegram/relay', { method: 'PUT', body: { url: url.value, key: key.value } })).telegram;
+              key.value = '';
+              toast('Ретранслятор подключён');
+              draw(r);
+            });
+          },
+        },
+        h('label', { for: 'sl-relay-url', class: 'sr-only' }, 'Адрес ретранслятора'),
+        url,
+        h('label', { for: 'sl-relay-key', class: 'sr-only' }, 'Ключ ретранслятора'),
+        key,
+        save,
+      ),
+    );
+  }
   async function draw(t) {
     if (!t) {
       try {
@@ -128,6 +165,7 @@ export function siteLeadsTelegramPanel() {
           input,
           save,
         ),
+        relayBlock(t),
       );
     }
     const chatsBox = h('div', { class: 'sl-chats' });
@@ -171,6 +209,7 @@ export function siteLeadsTelegramPanel() {
       ),
       h('div', { class: 'sl-actions' }, find, t.chat ? testBtn : null, off),
       chatsBox,
+      relayBlock(t),
     );
   }
   draw();
