@@ -102,7 +102,9 @@ export function createSiteLeads({ db, notify = null, fetchImpl = globalThis.fetc
         signal: AbortSignal.timeout(10_000),
       });
     } catch (err) {
-      throw new SiteLeadError(err?.name === 'TimeoutError' ? 'Telegram не ответил за 10 секунд: возможно, он недоступен с сервера' : 'Нет связи с Telegram с сервера');
+      // код сетевой ошибки (ENOTFOUND, ECONNRESET…) помогает понять причину; адреса и токена в нём нет
+      const code = /^[A-Z_]{3,30}$/.test(err?.cause?.code ?? '') ? ` (${err.cause.code})` : '';
+      throw new SiteLeadError(err?.name === 'TimeoutError' ? 'Telegram не ответил за 10 секунд: возможно, он недоступен с сервера' : `Нет связи с Telegram с сервера${code}`);
     }
     const data = await res.json().catch(() => null);
     if (!data?.ok) throw new SiteLeadError(`Telegram ответил: ${str(data?.description ?? `код ${res.status}`, 200)}`);
