@@ -7,10 +7,11 @@ import { PHONES, TELEGRAM } from "@/content/contacts";
 /** Оператор персональных данных и владелец сайта: самозанятый (плательщик налога на профессиональный доход) */
 export const OPERATOR = {
   /** Полностью: «Иванов Иван Иванович» */
-  fio: "ЗАПОЛНИТЬ",
-  inn: "ЗАПОЛНИТЬ",
+  fio: "Карацапов Даниил Сергеевич",
+  /** Пусто — строка ИНН в документах не выводится */
+  inn: "",
   /** Только город, без улицы: адрес публикуется на сайте */
-  city: "ЗАПОЛНИТЬ",
+  city: "г. Тверь",
   /** Почта для запросов по персональным данным */
   email: "d.karatsapov@yandex.ru",
 };
@@ -30,7 +31,14 @@ export type Section = { title: string; body: Block[] };
 export type LegalDoc = { label: string; title: string; description: string; sections: Section[] };
 
 const operatorLine = () =>
-  `${OPERATOR.fio}, плательщик налога на профессиональный доход (самозанятый), ИНН ${OPERATOR.inn}, ${OPERATOR.city}, e-mail: ${OPERATOR.email}`;
+  [
+    `${OPERATOR.fio}, плательщик налога на профессиональный доход (самозанятый)`,
+    OPERATOR.inn && `ИНН ${OPERATOR.inn}`,
+    OPERATOR.city,
+    `e-mail: ${OPERATOR.email}`,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
 const contactsLine = () =>
   `e-mail ${OPERATOR.email}, телефоны ${PHONES.map((p) => p.display).join(" и ")}, Telegram ${TELEGRAM.handle}, мессенджер MAX`;
