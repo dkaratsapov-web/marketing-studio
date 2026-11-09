@@ -7,7 +7,7 @@ import { readPrefs } from '../admin/prefs.js';
 // вид уведомления → категория, которую сотрудник может отключить в настройках
 export const NOTIFY_KINDS = {
   task_assigned: 'tasks', task_done: 'tasks', task_file: 'tasks',
-  comment: 'comments', mention: 'mentions', meeting: 'meetings', payment: 'payments', news: 'news', brief: 'briefs',
+  comment: 'comments', mention: 'mentions', meeting: 'meetings', payment: 'payments', news: 'news', brief: 'briefs', site_lead: 'briefs',
 };
 
 export function createNotifications({ db }) {

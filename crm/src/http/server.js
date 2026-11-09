@@ -7,6 +7,7 @@ import fastifyStatic from '@fastify/static';
 import { resolve } from 'node:path';
 import { AnswerError, SessionError } from '../core/qualifier.js';
 import { adminRoutes } from '../admin/routes.js';
+import { SiteLeadError } from '../crm/site-leads.js';
 
 const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'yclid', 'gclid'];
 
@@ -39,6 +40,23 @@ const answerSchema = {
 };
 
 const short = (n) => ({ type: 'string', maxLength: n });
+const SITE_PATHS = new Set(['/api/briefs', '/api/lead']);
+const siteLeadSchema = {
+  type: 'object',
+  required: ['source'],
+  properties: {
+    source: short(20),
+    name: short(200),
+    phone: short(40),
+    contact: short(100),
+    service: short(200),
+    website: short(200),
+    referrer: short(500),
+    page: short(500),
+    answers: { type: 'object', maxProperties: 12, additionalProperties: short(1000) },
+    utm: { type: 'object', additionalProperties: short(200) },
+  },
+};
 const briefSchema = {
   type: 'object',
   additionalProperties: false,
@@ -71,7 +89,7 @@ const sessionParams = {
 };
 
 /** admin — зависимости админки ({ auth, reports, db, scenarioSource }); без них админка не подключается. */
-export async function buildServer({ config, qualifier, logger, admin, brand = null, briefs = null }) {
+export async function buildServer({ config, qualifier, logger, admin, brand = null, briefs = null, siteLeads = null }) {
   const app = Fastify({
     ...(logger ? { loggerInstance: logger } : { logger: false }),
     trustProxy: config.trustProxy,
@@ -79,12 +97,12 @@ export async function buildServer({ config, qualifier, logger, admin, brand = nu
   });
 
   // Пустой список — разрешены все источники (удобно при разработке).
-  // Бриф отправляет основной сайт (marketing-studio.pro): для /api/briefs разрешены и его адреса.
+  // Бриф и заявки отправляет основной сайт (marketing-studio.pro): для /api/briefs и /api/lead разрешены и его адреса.
   const origins = config.allowedOrigins.length ? config.allowedOrigins : true;
   const briefOrigins = origins === true ? true : [...origins, ...(config.briefOrigins ?? [])];
   await app.register(cors, {
     delegator: (req, cb) => cb(null, {
-      origin: req.url.split('?')[0] === '/api/briefs' ? briefOrigins : origins,
+      origin: SITE_PATHS.has(req.url.split('?')[0]) ? briefOrigins : origins,
       methods: ['GET', 'POST'],
       allowedHeaders: ['content-type', 'x-session-token'],
       maxAge: 86400,
@@ -203,6 +221,25 @@ export async function buildServer({ config, qualifier, logger, admin, brand = nu
         if (!req.body.consent) return reply.code(400).send({ error: 'Нужно согласие на обработку персональных данных' });
         if (!req.body.phone?.trim() && !req.body.email?.trim()) return reply.code(400).send({ error: 'Укажите телефон или почту для связи' });
         briefs.add(req.body);
+        return { ok: true };
+      },
+    );
+  }
+
+  // Заявки с форм сайта: сохраняются в кабинете и уходят копией в Telegram-группу.
+  // Ответ «принято», как только заявка сохранена: Telegram может быть недоступен, заявка всё равно не потеряется.
+  if (siteLeads) {
+    app.post(
+      '/api/lead',
+      { schema: { body: siteLeadSchema }, config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
+      async (req, reply) => {
+        if (req.body.website) return { ok: true };
+        try {
+          await siteLeads.add(req.body);
+        } catch (err) {
+          if (err instanceof SiteLeadError) return reply.code(400).send({ ok: false, error: err.message });
+          throw err;
+        }
         return { ok: true };
       },
     );

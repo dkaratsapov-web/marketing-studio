@@ -19,6 +19,7 @@ import { renderLibrary } from './library.js';
 import { renderNotifySettings } from './notify.js';
 import { renderChat, refreshChatBadge } from './chat.js';
 import { renderBriefs, renderBrief } from './briefs.js';
+import { renderSiteLeads } from './site-leads.js';
 
 const app = document.getElementById('app');
 const TZ = 'Europe/Moscow';
@@ -213,6 +214,7 @@ const routes = {
   mytasks: renderMyTasks,
   briefs: renderBriefs,
   brief: renderBrief,
+  siteleads: renderSiteLeads,
   clients: renderClients,
   client: renderClient,
   calendar: renderCalendar,
@@ -230,6 +232,10 @@ const routes = {
 };
 // Разделы со своими вкладками: ключ — первая вкладка (на неё ведёт пункт меню)
 const SECTION_TABS = {
+  briefs: [
+    ['briefs', 'Брифы'],
+    ['siteleads', 'Заявки с сайта'],
+  ],
   leads: [
     ['leads', 'Лиды'],
     ['board', 'Воронка'],

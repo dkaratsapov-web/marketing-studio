@@ -3,6 +3,7 @@
 
 import { h, api, app, shell, navigate, ctx, sectionAllowed } from './admin.js';
 import { fill } from './docs.js';
+import { siteLeadsTelegramPanel } from './site-leads.js';
 
 const ENV = 'nano /opt/korp-cabinet/.env';
 const APPLY = '/usr/local/sbin/korp-cabinet-update main';
@@ -15,6 +16,7 @@ export async function renderIntegrations() {
     shell('integrations', [
       h('div', { class: 'page-head' }, h('h1', {}, 'Подключения')),
       h('p', { class: 'lead-text' }, `Ключи вписываются на сервере в файл .env (${ENV}), затем: ${APPLY}. Пока сервис не подключён, кнопки в разделах подсказывают, что нужно сделать.`),
+      siteLeadsTelegramPanel(),
       grid,
     ]),
   );

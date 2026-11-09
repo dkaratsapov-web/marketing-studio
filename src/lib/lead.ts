@@ -1,5 +1,8 @@
 const PREFIX = "+7 ";
 
+/** Кабинет агентства: принимает заявки и брифы с сайта и пересылает их в Telegram-группу */
+export const CRM_URL = (process.env.NEXT_PUBLIC_CRM_URL ?? "https://crm.marketing-studio.pro").replace(/\/$/, "");
+
 /** Десять цифр номера после +7 из того, что ввёл или вставил человек */
 function localDigits(raw: string) {
   // Префикс +7 уже в поле: его семёрка не часть номера
@@ -89,12 +92,12 @@ async function fallback(lines: (string | null | false | undefined)[]) {
   return { delivered: false as const, text, copied };
 }
 
-/** Отправляет заявку на сервер (бот перешлёт её в Telegram); при сбое уходит в запасной путь */
+/** Отправляет заявку в кабинет (он сохранит её и перешлёт в Telegram); при сбое уходит в запасной путь */
 export async function submitLead(lead: Lead, fallbackLines: (string | null | false | undefined)[]): Promise<LeadResult> {
   const ctrl = new AbortController();
   const timer = window.setTimeout(() => ctrl.abort(), 8000);
   try {
-    const res = await fetch("/api/lead", {
+    const res = await fetch(`${CRM_URL}/api/lead`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

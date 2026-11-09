@@ -18,6 +18,7 @@ import { createFiles } from './files/store.js';
 import { createHotLeads } from './crm/hot-leads.js';
 import { createMoney } from './crm/money.js';
 import { createBriefs } from './crm/briefs.js';
+import { createSiteLeads } from './crm/site-leads.js';
 import { createAdStats } from './adstats/store.js';
 import { createParser } from './parser/store.js';
 import { createNotifications } from './notify/store.js';
@@ -68,6 +69,8 @@ const parser = createParser({ db: db.raw, log });
 
 // брифы клиентов со страницы сайта /brif/
 const briefs = createBriefs({ db: db.raw });
+// заявки с форм сайта: хранятся в кабинете, копия уходит в Telegram-группу
+const siteLeads = createSiteLeads({ db: db.raw, apiBase: config.telegramApi, log });
 
 const telegramBot = config.telegram.botEnabled ? await initTelegramBot() : null;
 const brand = loadBrand();
@@ -80,6 +83,7 @@ const app = await buildServer({
   qualifier,
   brand,
   briefs,
+  siteLeads,
   logger: log,
   admin: {
     auth,
@@ -100,6 +104,7 @@ const app = await buildServer({
     ai,
     monitor,
     briefs,
+    siteLeads,
   },
 });
 
@@ -115,6 +120,9 @@ if (telegramBot && config.telegram.webhookUrl) {
 const leadsJob = monitor.job('leads', 'Досылка заявок менеджерам', RETRY_INTERVAL_MS);
 const moneyJob = monitor.job('money', 'Счета за ведение и напоминания об оплате', 3600e3);
 const retryTimer = setInterval(() => leadsJob(() => qualifier.retryUndelivered()), RETRY_INTERVAL_MS);
+// заявки с сайта, которые не дошли до Telegram, — ещё раз каждые 5 минут в течение суток
+const siteJob = monitor.job('site-leads', 'Досылка заявок с сайта в Telegram', RETRY_INTERVAL_MS);
+const siteTimer = setInterval(() => siteJob(() => siteLeads.retryUndelivered()), RETRY_INTERVAL_MS);
 // раз в час: счета за ведение на новый месяц и напоминания об оплате
 const moneyTimer = setInterval(() => moneyJob(() => money.remind()), 3600e3);
 setTimeout(() => moneyJob(() => money.remind()), 30e3);
@@ -145,6 +153,7 @@ if (telegramBot) await startTelegramBot(telegramBot);
 for (const signal of ['SIGINT', 'SIGTERM']) {
   process.once(signal, async () => {
     clearInterval(retryTimer);
+    clearInterval(siteTimer);
     clearInterval(moneyTimer);
     clearInterval(purgeTimer);
     clearInterval(seriesTimer);

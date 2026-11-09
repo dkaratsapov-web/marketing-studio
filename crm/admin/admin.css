@@ -2251,3 +2251,15 @@ table.briefs { min-width: 720px; }
 .pm-repeat { display: grid; gap: 8px; margin-top: 10px; padding: 12px; border-radius: var(--radius-m); background: var(--surface-2); }
 .pm-repeat p { margin: 0; }
 .pm-repeat .field { max-width: 240px; }
+
+/* ---------- заявки с сайта ---------- */
+table.site-leads { min-width: 860px; }
+.site-leads .sl-more summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+.site-leads .sl-more dl { margin-top: 6px; min-width: 260px; }
+.sl-ok { color: var(--muted); font-size: 13px; }
+.sl-fail { color: var(--danger); font-size: 13px; }
+.sl-tg { margin-bottom: 16px; }
+.sl-form { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.sl-form .input { flex: 1 1 320px; }
+.sl-actions, .sl-chats { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+.sl-chats p { width: 100%; margin: 0; }

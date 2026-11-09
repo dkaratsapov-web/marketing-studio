@@ -679,6 +679,24 @@ const MIGRATIONS = [
    );
    ALTER TABLE client_payments ADD COLUMN recurring_id INTEGER REFERENCES client_recurring(id) ON DELETE SET NULL;
    CREATE UNIQUE INDEX client_payments_recurring ON client_payments (recurring_id, period) WHERE recurring_id IS NOT NULL;`,
+
+  // Заявки с форм сайта: хранятся в кабинете, в Telegram уходят копией (delivered — дошла ли)
+  `CREATE TABLE site_leads (
+     id         INTEGER PRIMARY KEY AUTOINCREMENT,
+     source     TEXT NOT NULL,
+     name       TEXT,
+     phone      TEXT,
+     contact    TEXT,
+     service    TEXT,
+     answers    TEXT NOT NULL DEFAULT '{}',
+     utm        TEXT NOT NULL DEFAULT '{}',
+     referrer   TEXT,
+     page       TEXT,
+     delivered  INTEGER NOT NULL DEFAULT 0,
+     error      TEXT,
+     sent_at    TEXT,
+     created_at TEXT NOT NULL DEFAULT (datetime('now'))
+   );`,
 ];
 
 /** Номер текущей версии схемы базы. */

@@ -4,12 +4,10 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { AD_BRIEF, type BriefField } from "@/content/adBrief";
 import { PHONES, TELEGRAM } from "@/content/contacts";
-import { maskPhone, phoneBlur, phoneFocus, phoneOk } from "@/lib/lead";
+import { CRM_URL, maskPhone, phoneBlur, phoneFocus, phoneOk } from "@/lib/lead";
 import { LogoMark } from "@/components/Logo";
 import styles from "./AdBrief.module.css";
 
-/** Кабинет агентства принимает бриф и показывает его в разделе «Брифы» */
-const CRM_URL = (process.env.NEXT_PUBLIC_CRM_URL ?? "https://crm.marketing-studio.pro").replace(/\/$/, "");
 const DRAFT_KEY = "ad-brief-draft";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Контакты уходят отдельными полями и в кабинете стоят отдельным блоком
