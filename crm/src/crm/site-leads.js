@@ -20,6 +20,7 @@ export const SITE_LEAD_SOURCES = {
   brief: 'Бриф',
   service: 'Консультация · страница услуги',
   estimate: 'Смета · калькулятор на странице услуги',
+  audit: 'Запись на аудит · кнопка на телефоне',
 };
 const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'yclid', 'gclid'];
 

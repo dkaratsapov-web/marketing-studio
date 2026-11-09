@@ -3,6 +3,7 @@ import { Geologica, Golos_Text, IBM_Plex_Mono } from "next/font/google";
 import SmoothScroll from "@/components/SmoothScroll";
 import Cursor from "@/components/Cursor";
 import BriefModal from "@/components/brief/BriefModal";
+import MobileBar from "@/components/mobilebar/MobileBar";
 import JsonLd from "@/components/JsonLd";
 import Metrika from "@/components/Metrika";
 import { IS_MIRROR, METRIKA_ID, ORGANIZATION, SITE_NAME, SITE_URL, VERIFICATION, WEBSITE } from "@/lib/seo";
@@ -68,6 +69,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Cursor />
         {children}
         <BriefModal />
+        <MobileBar />
         {/* Яндекс Метрика — только на основном сайте, копия на GitHub Pages не считается */}
         {IS_MIRROR ? null : (
           <>

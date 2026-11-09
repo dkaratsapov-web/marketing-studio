@@ -8,6 +8,13 @@
   max-width: 30rem;
 }
 
+.bare {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+  max-width: none;
+}
+
 .kicker {
   display: flex;
   align-items: baseline;

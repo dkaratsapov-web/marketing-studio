@@ -5,11 +5,20 @@ import { TELEGRAM } from "@/content/contacts";
 import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type LeadResult } from "@/lib/lead";
 import styles from "./QuickLead.module.css";
 
+type Props = {
+  /** Форма для кабинета: «Протокол» на главной или запись на аудит с кнопки на телефоне */
+  source?: "protocol" | "audit";
+  /** Без верхней линии и отступа: внутри окна */
+  bare?: boolean;
+};
+
 /**
- * Короткая заявка «Шаг 00» в шапке «Протокола»: имя и телефон.
+ * Короткая заявка: имя и телефон. «Шаг 00» в шапке «Протокола» и окно «Записаться на аудит».
  * Уходит на сервер, бот пересылает её в Telegram; если сервер недоступен, текст копируется.
  */
-export default function QuickLead() {
+export default function QuickLead({ source = "protocol", bare = false }: Props) {
+  const audit = source === "audit";
+  const box = bare ? `${styles.lead} ${styles.bare}` : styles.lead;
   const id = useId();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -27,8 +36,8 @@ export default function QuickLead() {
     setTouched(true);
     if (!phoneOk(phone) || !consent || busy) return;
     setBusy(true);
-    const res = await submitLead({ source: "protocol", name: name.trim(), phone }, [
-      "Заявка с сайта Корпорации",
+    const res = await submitLead({ source, name: name.trim(), phone }, [
+      audit ? "Запись на аудит с сайта Корпорации" : "Заявка с сайта Корпорации",
       name.trim() && `Имя: ${name.trim()}`,
       `Телефон: ${phone.trim()}`,
     ]);
@@ -38,12 +47,14 @@ export default function QuickLead() {
 
   if (sent?.delivered) {
     return (
-      <div className={styles.lead} role="status" aria-live="polite">
+      <div className={box} role="status" aria-live="polite">
         <p className={styles.kicker}>
           <span className={styles.num}>01</span> Заявка у нас
         </p>
         <p className={styles.doneText}>
-          Перезвоним в течение часа в рабочее время. Это и есть первый шаг протокола.
+          {audit
+            ? "Перезвоним в течение часа в рабочее время и договоримся о времени аудита."
+            : "Перезвоним в течение часа в рабочее время. Это и есть первый шаг протокола."}
         </p>
       </div>
     );
@@ -51,7 +62,7 @@ export default function QuickLead() {
 
   if (sent) {
     return (
-      <div className={styles.lead} role="status" aria-live="polite">
+      <div className={box} role="status" aria-live="polite">
         <p className={styles.kicker}>
           <span className={styles.num}>00</span> Почти готово
         </p>
@@ -71,10 +82,12 @@ export default function QuickLead() {
   }
 
   return (
-    <form className={styles.lead} onSubmit={send} noValidate>
-      <p className={styles.kicker}>
-        <span className={styles.num}>00</span> Шаг до первого шага
-      </p>
+    <form className={box} onSubmit={send} noValidate>
+      {audit ? null : (
+        <p className={styles.kicker}>
+          <span className={styles.num}>00</span> Шаг до первого шага
+        </p>
+      )}
 
       <div className={styles.fields}>
         <label className={styles.field}>
@@ -121,7 +134,7 @@ export default function QuickLead() {
       </span>
 
       <button type="submit" className={`btn btn--primary ${styles.submit}`} disabled={busy}>
-        {busy ? "Отправляем…" : "Отправить заявку"}
+        {busy ? "Отправляем…" : audit ? "Записаться на аудит" : "Отправить заявку"}
         <svg className="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M1 8h13M9 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" />
         </svg>

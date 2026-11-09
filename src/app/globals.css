@@ -314,3 +314,10 @@ canvas {
     padding-top: calc(var(--section-y) * 0.55);
   }
 }
+
+/* Телефон: место под плавающими кнопками MAX и «Аудит», чтобы они не закрывали низ подвала */
+@media (max-width: 860px) {
+  body:has([data-mobile-bar]) {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
