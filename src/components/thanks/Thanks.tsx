@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { TELEGRAM, HOURS } from "@/content/contacts";
+import Return from "./Return";
 import styles from "./Thanks.module.css";
 
 const STEPS = [
@@ -19,6 +20,7 @@ export default function Thanks() {
             Спасибо<span className={styles.dot}>.</span>
           </h1>
           <p className={styles.lead}>Заявка у нас. Дальше всё по порядку:</p>
+          <Return />
         </header>
         <ol className={styles.steps}>
           {STEPS.map(([name, text], i) => (
