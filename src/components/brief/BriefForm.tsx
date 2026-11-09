@@ -83,7 +83,7 @@ export default function BriefForm({ idPrefix, service }: Props) {
         <div className={styles.done} role="status" aria-live="polite">
           <p className={styles.doneTitle}>Бриф у нас</p>
           <p className={styles.doneText}>
-            Максим изучит ответы и свяжется с вами в течение часа в рабочее время. На созвоне не
+            Изучим ответы и свяжемся с вами в течение часа в рабочее время. На созвоне не
             придётся объяснять всё с нуля.
           </p>
         </div>

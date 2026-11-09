@@ -62,7 +62,7 @@ export default function ReserveBrief({ data, service }: { data: Data; service: s
               <a href={TELEGRAM.href} target="_blank" rel="noopener noreferrer">
                 в Telegram
               </a>
-              , и Максим перезвонит.
+              , и мы перезвоним.
             </p>
           </div>
         ) : sent ? (

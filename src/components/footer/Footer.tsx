@@ -16,9 +16,9 @@ const WORD = "Корпорация";
 
 const NAV = [
   { href: "#dossier", label: "Досье" },
+  { href: "#contract", label: "Контракт" },
   { href: "#departments", label: "Отделы" },
   { href: "#protocol", label: "Протокол" },
-  { href: "#contract", label: "Контракт" },
   { href: "#faq", label: "Вопросы" },
   { href: "#brief", label: "Бриф" },
 ];

@@ -75,7 +75,7 @@ export default function PinBrief({ data, service }: { data: Data; service: strin
                 <a href={TELEGRAM.href} target="_blank" rel="noopener noreferrer">
                   в Telegram
                 </a>
-                , и Максим перезвонит.
+                , и мы перезвоним.
               </p>
             )}
           </div>

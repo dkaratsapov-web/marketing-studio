@@ -43,7 +43,7 @@ export default function QuickLead() {
           <span className={styles.num}>01</span> Заявка у нас
         </p>
         <p className={styles.doneText}>
-          Максим перезвонит на {phone} в течение часа в рабочее время. Это и есть первый шаг протокола.
+          Перезвоним в течение часа в рабочее время. Это и есть первый шаг протокола.
         </p>
       </div>
     );
@@ -126,7 +126,7 @@ export default function QuickLead() {
           <path d="M1 8h13M9 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" />
         </svg>
       </button>
-      <p className={styles.promise}>Максим перезвонит в течение часа в рабочее время</p>
+      <p className={styles.promise}>Перезвоним в течение часа в рабочее время</p>
     </form>
   );
 }

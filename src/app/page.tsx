@@ -30,15 +30,16 @@ export default function Home() {
         <Manifest />
         <Seam from="light" to="dark" label="Досье" />
         <Dossier />
+        {/* цены сразу после кейсов: посетитель видит результат и сразу — сколько это стоит */}
+        <Seam from="dark" to="dark" label="Контракт" />
+        <Contract />
         <Seam from="dark" to="light" label="Отделы" />
         <Departments />
         <Seam from="light" to="dark" label="Протокол" />
         <Protocol />
         <Seam from="dark" to="light" label="Допуск" />
         <Refusal />
-        <Seam from="light" to="dark" label="Контракт" />
-        <Contract />
-        <Seam from="dark" to="light" label="Справочная" />
+        <Seam from="light" to="light" label="Справочная" />
         <Faq />
         <Seam from="light" to="dark" label="Новое дело" />
         <Brief />

@@ -44,7 +44,7 @@ export default function HeroLead({ source = "hero", service, cta = "Получи
       <div className={styles.done} role="status" aria-live="polite">
         <span className={styles.doneMark} aria-hidden="true" />
         {sent.delivered ? (
-          <p>Заявка у нас. Максим перезвонит на {phone} в течение часа в рабочее время.</p>
+          <p>Заявка у нас. Перезвоним в течение часа в рабочее время.</p>
         ) : (
           <p>
             Не получилось отправить автоматически.{" "}
@@ -52,7 +52,7 @@ export default function HeroLead({ source = "hero", service, cta = "Получи
             <a href={TELEGRAM.href} target="_blank" rel="noopener noreferrer" className={styles.link}>
               в Telegram
             </a>
-            , и Максим перезвонит.
+            , и мы перезвоним.
           </p>
         )}
       </div>

@@ -63,7 +63,7 @@ export default function VisitorPass({ data }: { data: Data }) {
                 <a href={TELEGRAM.href} target="_blank" rel="noopener noreferrer">
                   в Telegram
                 </a>
-                , и Максим перезвонит.
+                , и мы перезвоним.
               </p>
             )}
           </div>
