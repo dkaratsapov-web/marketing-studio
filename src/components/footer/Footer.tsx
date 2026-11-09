@@ -8,6 +8,8 @@ import { HOURS, MAX, PHONES, TELEGRAMS } from "@/content/contacts";
 import { QUOTE } from "@/components/Logo";
 import Link from "next/link";
 import HomeLink from "@/components/HomeLink";
+import { LEGAL_LINKS } from "@/content/legal";
+import { openCookieSettings } from "@/lib/consent";
 import styles from "./Footer.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -145,6 +147,16 @@ export default function Footer() {
           полного цикла
         </p>
         <p>Работаем онлайн по всей России</p>
+        <nav className={styles.legal} aria-label="Документы">
+          {Object.values(LEGAL_LINKS).map((l) => (
+            <Link key={l.href} href={l.href}>
+              {l.title}
+            </Link>
+          ))}
+          <button type="button" onClick={openCookieSettings}>
+            Настройки cookie
+          </button>
+        </nav>
       </div>
     </footer>
   );

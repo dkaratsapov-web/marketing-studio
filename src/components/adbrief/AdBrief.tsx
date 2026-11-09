@@ -7,6 +7,7 @@ import { PHONES, TELEGRAM } from "@/content/contacts";
 import { CRM_URL, maskPhone, phoneBlur, phoneFocus, phoneOk } from "@/lib/lead";
 import { LogoMark } from "@/components/Logo";
 import styles from "./AdBrief.module.css";
+import ConsentNote from "@/components/legal/ConsentNote";
 
 const DRAFT_KEY = "ad-brief-draft";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -365,7 +366,9 @@ export default function AdBrief() {
                   aria-describedby={errors.consent ? "ab-consent-err" : undefined}
                   onChange={(e) => setConsent(e.target.checked)}
                 />
-                <span>Согласен на обработку персональных данных для подготовки предложения</span>
+                <span>
+                  <ConsentNote checkbox />
+                </span>
               </label>
               {errors.consent ? (
                 <span id="ab-consent-err" className={styles.error}>

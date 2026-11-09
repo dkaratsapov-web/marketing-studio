@@ -5,6 +5,7 @@ import { TELEGRAM } from "@/content/contacts";
 import type { WEB } from "@/content/web";
 import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type LeadResult } from "@/lib/lead";
 import styles from "./StructureBrief.module.css";
+import ConsentNote from "@/components/legal/ConsentNote";
 
 type Data = (typeof WEB)["brief"];
 
@@ -199,7 +200,7 @@ export default function StructureBrief({ data, service }: { data: Data; service:
                 </svg>
               </button>
               <p id={`${id}-note`} className={styles.note} data-error={Boolean(error) || undefined}>
-                {error ?? data.consent}
+                {error ?? <ConsentNote />}
               </p>
             </div>
           </form>

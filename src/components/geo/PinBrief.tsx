@@ -5,6 +5,7 @@ import { TELEGRAM } from "@/content/contacts";
 import type { GEO } from "@/content/geo";
 import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type LeadResult } from "@/lib/lead";
 import styles from "./PinBrief.module.css";
+import ConsentNote from "@/components/legal/ConsentNote";
 
 type Data = (typeof GEO)["brief"];
 
@@ -167,7 +168,7 @@ export default function PinBrief({ data, service }: { data: Data; service: strin
                 </svg>
               </button>
               <p id={`${id}-note`} className={styles.note} data-error={Boolean(error) || undefined}>
-                {error ?? data.consent}
+                {error ?? <ConsentNote />}
               </p>
             </div>
           </form>

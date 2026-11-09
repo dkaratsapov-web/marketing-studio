@@ -5,6 +5,7 @@ import { QUIZ } from "@/content/offer";
 import { TELEGRAM } from "@/content/contacts";
 import { submitLead, type LeadResult } from "@/lib/lead";
 import styles from "./Brief.module.css";
+import ConsentNote from "@/components/legal/ConsentNote";
 
 type Answers = Record<string, string>;
 type Props = {
@@ -197,7 +198,7 @@ export default function BriefForm({ idPrefix, service }: Props) {
                   onChange={(e) => setConsent(e.target.checked)}
                 />
                 <span>
-                  Согласен на обработку персональных данных для ответа на заявку
+                  <ConsentNote checkbox />
                 </span>
               </label>
               <span id={`${idPrefix}-consent-error`} className={styles.error}>

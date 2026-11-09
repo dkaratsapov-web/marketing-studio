@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { METRIKA_ID } from "@/lib/seo";
+import { CONSENT_EVENT, metrikaAllowed, type CookieChoice } from "@/lib/consent";
 
 const TAG = "https://mc.yandex.ru/metrika/tag.js";
 
@@ -43,7 +44,40 @@ export default function Metrika() {
   const pathname = usePathname();
   const prev = useRef<string | null>(null);
 
+  const [on, setOn] = useState(false);
+
+  // Посетитель выбрал «Только необходимые» — Метрику не загружаем; передумал — включаем
   useEffect(() => {
+    // localStorage есть только в браузере: читаем выбор сразу после первой отрисовки
+    const first = window.setTimeout(() => setOn(metrikaAllowed()), 0);
+    const onChoice = (e: Event) => {
+      const v = (e as CustomEvent<CookieChoice>).detail;
+      if (v === "all") {
+        // счётчик уже был запущен и отключён на этой странице — запустить заново можно только перезагрузкой
+        if (!window.ym && [...document.scripts].some((s) => s.src === TAG)) return location.reload();
+        return setOn(true);
+      }
+      // отключить уже запущенный счётчик: флаг Метрики, свои вызовы целей и cookie _ym_*
+      (window as unknown as Record<string, unknown>)[`disableYaCounter${METRIKA_ID}`] = true;
+      window.ym = undefined;
+      for (const c of document.cookie.split(";")) {
+        const name = c.split("=")[0].trim();
+        if (name.startsWith("_ym")) {
+          document.cookie = `${name}=; max-age=0; path=/`;
+          document.cookie = `${name}=; max-age=0; path=/; domain=.${location.hostname.replace(/^www\./, "")}`;
+        }
+      }
+      setOn(false);
+    };
+    window.addEventListener(CONSENT_EVENT, onChoice);
+    return () => {
+      window.clearTimeout(first);
+      window.removeEventListener(CONSENT_EVENT, onChoice);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!on) return;
     if (!window.ym) {
       const ym: Ym = (...args: unknown[]) => {
         (ym.a = ym.a || []).push(args);
@@ -66,7 +100,8 @@ export default function Metrika() {
       accurateTrackBounce: true,
       trackLinks: true,
     });
-  }, []);
+    prev.current = null;
+  }, [on]);
 
   // клики по телефонам и мессенджерам в любом месте сайта (и колёсиком мыши — в новой вкладке)
   useEffect(() => {
@@ -85,10 +120,11 @@ export default function Metrika() {
   }, []);
 
   useEffect(() => {
+    if (!on) return;
     const url = location.href;
     window.ym?.(METRIKA_ID, "hit", url, { referer: prev.current ?? document.referrer });
     prev.current = url;
-  }, [pathname]);
+  }, [pathname, on]);
 
   return null;
 }

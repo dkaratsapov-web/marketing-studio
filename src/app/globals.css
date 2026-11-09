@@ -321,3 +321,15 @@ canvas {
     padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* Ссылки на документы в подписях форм: наследуют цвет подписи, подчёркнуты */
+.legal-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.legal-link:hover {
+  color: var(--fg);
+}

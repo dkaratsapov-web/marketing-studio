@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { TELEGRAM } from "@/content/contacts";
 import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type Lead, type LeadResult } from "@/lib/lead";
 import styles from "./HeroLead.module.css";
+import ConsentNote from "@/components/legal/ConsentNote";
 
 type Props = {
   /** Откуда заявка: главная, страница услуги или калькулятор сметы (тогда в Telegram придёт и название услуги) */
@@ -87,7 +88,7 @@ export default function HeroLead({ source = "hero", service, cta = "Получи
         </button>
       </div>
       <p id={`${id}-note`} className={styles.note} data-error={Boolean(error) || undefined}>
-        {error ?? "Нажимая кнопку, вы соглашаетесь на обработку персональных данных"}
+        {error ?? <ConsentNote />}
       </p>
     </form>
   );

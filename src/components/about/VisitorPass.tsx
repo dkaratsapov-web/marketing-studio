@@ -5,6 +5,7 @@ import { HOURS, PHONES, TELEGRAM } from "@/content/contacts";
 import type { ABOUT } from "@/content/about";
 import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type LeadResult } from "@/lib/lead";
 import styles from "./VisitorPass.module.css";
+import ConsentNote from "@/components/legal/ConsentNote";
 
 type Data = (typeof ABOUT)["visit"];
 
@@ -118,7 +119,7 @@ export default function VisitorPass({ data }: { data: Data }) {
                 </svg>
               </button>
               <p id={`${id}-note`} className={styles.note} data-error={Boolean(error) || undefined}>
-                {error ?? data.consent}
+                {error ?? <ConsentNote />}
               </p>
             </div>
           </form>

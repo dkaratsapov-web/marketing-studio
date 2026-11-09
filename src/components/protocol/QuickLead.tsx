@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { TELEGRAM } from "@/content/contacts";
 import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type LeadResult } from "@/lib/lead";
 import styles from "./QuickLead.module.css";
+import ConsentNote from "@/components/legal/ConsentNote";
 
 type Props = {
   /** Форма для кабинета: «Протокол» на главной или запись на аудит с кнопки на телефоне */
@@ -127,7 +128,9 @@ export default function QuickLead({ source = "protocol", bare = false }: Props) 
           onChange={(e) => setConsent(e.target.checked)}
           aria-describedby={`${id}-consent`}
         />
-        <span>Согласен на обработку персональных данных для ответа на заявку</span>
+        <span>
+          <ConsentNote checkbox />
+        </span>
       </label>
       <span id={`${id}-consent`} className={styles.error}>
         {consentError}

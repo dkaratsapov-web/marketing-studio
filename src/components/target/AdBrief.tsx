@@ -6,6 +6,7 @@ import type { TARGET } from "@/content/target";
 import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type LeadResult } from "@/lib/lead";
 import { AvitoMark, TelegramMark, VkMark } from "./Marks";
 import styles from "./AdBrief.module.css";
+import ConsentNote from "@/components/legal/ConsentNote";
 
 type Data = (typeof TARGET)["brief"];
 
@@ -175,7 +176,7 @@ export default function AdBrief({ data, service }: { data: Data; service: string
                 </svg>
               </button>
               <p id={`${id}-note`} className={styles.note} data-error={Boolean(error) || undefined}>
-                {error ?? data.consent}
+                {error ?? <ConsentNote />}
               </p>
             </div>
           </form>

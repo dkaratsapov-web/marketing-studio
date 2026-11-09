@@ -5,6 +5,7 @@ import { TELEGRAM } from "@/content/contacts";
 import type { RESTAURANTS } from "@/content/restaurants";
 import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type LeadResult } from "@/lib/lead";
 import styles from "./ReserveBrief.module.css";
+import ConsentNote from "@/components/legal/ConsentNote";
 
 type Data = (typeof RESTAURANTS)["brief"];
 
@@ -127,7 +128,7 @@ export default function ReserveBrief({ data, service }: { data: Data; service: s
                 </svg>
               </button>
               <p id={`${id}-note`} className={styles.note} data-error={Boolean(error) || undefined}>
-                {error ?? data.consent}
+                {error ?? <ConsentNote />}
               </p>
             </div>
           </form>

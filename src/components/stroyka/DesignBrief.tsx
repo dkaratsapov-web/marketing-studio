@@ -5,6 +5,7 @@ import { TELEGRAM } from "@/content/contacts";
 import type { STROYKA } from "@/content/stroyka";
 import { maskPhone, phoneBlur, phoneFocus, phoneOk, submitLead, type LeadResult } from "@/lib/lead";
 import styles from "./DesignBrief.module.css";
+import ConsentNote from "@/components/legal/ConsentNote";
 
 type Data = (typeof STROYKA)["brief"];
 
@@ -141,7 +142,7 @@ export default function DesignBrief({ data, service }: { data: Data; service: st
                 </svg>
               </button>
               <p id={`${id}-note`} className={styles.note} data-error={Boolean(error) || undefined}>
-                {error ?? data.consent}
+                {error ?? <ConsentNote />}
               </p>
             </div>
           </form>

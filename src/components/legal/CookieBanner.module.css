@@ -1,0 +1,76 @@
+/* Плашка про cookie: слева внизу на компьютере, во всю ширину над кнопками на телефоне */
+.banner {
+  position: fixed;
+  left: var(--gutter);
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  z-index: 80; /* выше плавающих кнопок, ниже окон заявки */
+  display: grid;
+  gap: 0.9rem;
+  width: min(30rem, calc(100% - 2 * var(--gutter)));
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--lime);
+  background: var(--ink-950);
+  color: var(--fg);
+  box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.85);
+  animation: rise 0.45s var(--ease-out);
+}
+
+.text {
+  color: rgb(255 255 255 / 0.78);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.btn {
+  min-height: 2.75rem;
+  padding-inline: 1.1rem;
+  font-size: var(--step--1);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+@media (max-width: 860px) {
+  .banner {
+    left: 0.75rem;
+    right: 0.75rem;
+    width: auto;
+  }
+
+  /* над кнопками MAX и «Аудит» */
+  :global(body:has([data-mobile-bar])) .banner {
+    bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .banner {
+    gap: 0.7rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .actions .btn {
+    justify-content: center;
+    padding-inline: 0.9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner {
+    animation: none;
+  }
+}
