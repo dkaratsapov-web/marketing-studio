@@ -1,0 +1,80 @@
+/* Страница «Спасибо»: крупное слово, три шага и два действия */
+.thanks {
+  min-height: calc(100svh - 5rem);
+  display: flex;
+  align-items: center;
+  padding-block: clamp(7rem, 5rem + 6vw, 11rem) var(--section-y);
+}
+
+.grid {
+  display: grid;
+  gap: clamp(2rem, 1.5rem + 2vw, 3.5rem);
+}
+
+.head {
+  display: grid;
+  gap: 1rem;
+}
+
+.heading {
+  font-size: clamp(4rem, 2rem + 9vw, 11rem);
+  line-height: 0.85;
+  letter-spacing: -0.06em;
+}
+
+.dot {
+  color: var(--lime);
+}
+
+.lead {
+  max-width: 36ch;
+  color: var(--muted);
+  font-size: var(--step-1);
+  line-height: 1.4;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gutter);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.num {
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  color: var(--lime);
+}
+
+.steps b {
+  font-family: var(--ff-display);
+  font-size: var(--step-2);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.steps p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+@media (max-width: 760px) {
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

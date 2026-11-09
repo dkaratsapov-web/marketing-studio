@@ -167,7 +167,8 @@ test('текст заявки для Telegram: ник, метки, номер з
   assert.match(text, /<b>Консультация · первый экран<\/b>/);
   assert.match(text, /Telegram: <a href="https:\/\/t.me\/ivan_petrov">@ivan_petrov<\/a>/);
   assert.match(text, /Метки: utm_campaign=tg/);
-  assert.match(text, /09\.11\.2026 10:30 МСК · заявка №7/);
+  assert.match(text, /09\.11\.2026 10:30 МСК<\/i>$/);
+  assert.doesNotMatch(text, /заявка №/);
 });
 
 test('устройство и источник визита', () => {

@@ -160,7 +160,14 @@ export async function submitLead(lead: Lead, fallbackLines: (string | null | fal
       }),
       signal: ctrl.signal,
     });
-    if (res.ok) return { delivered: true };
+    if (res.ok) {
+      // цель Метрики и страница «Спасибо» (её же можно выбрать целью в рекламе)
+      window.ym?.(METRIKA_ID, "reachGoal", "lead_sent", { form: lead.source });
+      // полная загрузка, а не переход внутри сайта: Метрика гарантированно засчитает визит на /spasibo/
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.assign(`/spasibo/?form=${encodeURIComponent(lead.source)}`);
+      return { delivered: true };
+    }
   } catch {
     // сеть или таймаут: ниже запасной путь
   } finally {

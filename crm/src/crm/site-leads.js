@@ -86,7 +86,7 @@ export function leadMessage(l) {
   const env = [m.tz, m.lang].filter(Boolean).join(' · ');
   if (env) out.push(`🕐 Часовой пояс и язык: ${esc(env)}`);
   if (m.ymClientId) out.push(`🆔 ClientID Метрики: <code>${esc(m.ymClientId)}</code>`);
-  out.push('', `<i>${msk(l.created_at)} МСК · заявка №${l.id} в кабинете</i>`);
+  out.push('', `<i>${msk(l.created_at)} МСК</i>`);
   return out.join('\n');
 }
 
