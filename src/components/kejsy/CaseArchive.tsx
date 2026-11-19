@@ -14,6 +14,15 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const STACK_MQ = "(min-width: 961px) and (min-height: 700px) and (prefers-reduced-motion: no-preference)";
 
+/** 1 дело, 2 дела, 5 дел */
+const plural = (n: number, one: string, few: string, many: string) => {
+  const d = n % 10;
+  const dd = n % 100;
+  if (d === 1 && dd !== 11) return one;
+  if (d >= 2 && d <= 4 && (dd < 12 || dd > 14)) return few;
+  return many;
+};
+
 function Arrow() {
   return (
     <svg className="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -67,7 +76,7 @@ export default function CaseArchive() {
               Кейсы<span className={styles.dot}>.</span>
             </h1>
             <p className={styles.lead}>
-              {CASES.length} дел в архиве: задача, что сделали и результат в цифрах. Номер дела ведёт к его листу.
+              {CASES.length} {plural(CASES.length, "дело", "дела", "дел")} в архиве: задача, что сделали и результат в цифрах. Номер дела ведёт к его листу.
             </p>
           </div>
 
