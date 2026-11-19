@@ -2,7 +2,7 @@
 
 /* Реестр */
 .hero {
-  padding-block: calc(4.5rem + env(safe-area-inset-top, 0px) + clamp(1.5rem, 4vh, 3rem)) clamp(2.5rem, 6vh, 4.5rem);
+  padding-block: calc(4.5rem + env(safe-area-inset-top, 0px) + clamp(1.5rem, 4vh, 3rem)) clamp(1.25rem, 3vh, 2rem);
 }
 
 .crumbs {
@@ -43,64 +43,83 @@
   line-height: 1.5;
 }
 
-/* Номера дел огромным набором: сами номера и есть навигация */
+/* Номера дел строкой плашек: навигация к листам, не отвлекает от самих кейсов */
 .register {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 clamp(1rem, 2.4vw, 2.75rem);
-  margin: clamp(2rem, 5vh, 3.5rem) 0 0;
-  padding: clamp(1rem, 2vh, 1.5rem) 0 0;
-  border-top: 1px solid var(--line);
+  gap: 0.5rem;
+  margin: clamp(1.25rem, 3vh, 2rem) 0 0;
+  padding: 0;
   list-style: none;
 }
 
 .regItem {
-  display: grid;
-  gap: 0.35rem;
-  padding-block: 0.25rem;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  transition:
+    border-color 0.25s var(--ease-out),
+    background-color 0.25s var(--ease-out);
 }
 
 .regMask {
   display: block;
   overflow: hidden;
-  padding-block: 0.06em;
 }
 
 .regCode {
   display: block;
-  font-family: var(--ff-display);
-  font-size: clamp(3.4rem, 1rem + 8.4vw, 10.5rem);
-  font-weight: 650;
-  line-height: 0.86;
-  letter-spacing: -0.06em;
+  font-family: var(--ff-mono);
+  font-size: var(--step--1);
+  font-weight: 500;
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgb(244 244 240 / 0.55);
-  transition:
-    color 0.25s var(--ease-out),
-    -webkit-text-stroke-color 0.25s var(--ease-out);
+  color: var(--lime);
 }
 
 .regSector {
-  color: var(--muted);
+  color: var(--fg);
   font-size: var(--step--1);
-  transition: color 0.25s var(--ease-out);
+  line-height: 1.2;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .regItem:hover .regCode {
-    color: var(--lime);
-    -webkit-text-stroke-color: var(--lime);
-  }
-
-  .regItem:hover .regSector {
-    color: var(--fg);
+  .regItem:hover {
+    border-color: var(--lime);
+    background: rgb(196 245 66 / 0.08);
   }
 }
 
 .regItem:focus-visible {
   outline: 2px solid var(--lime);
   outline-offset: 4px;
+}
+
+/* Телефон: плашки одной строкой с прокруткой вбок, чтобы кейсы начинались сразу */
+@media (max-width: 760px) {
+  .register {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .register::-webkit-scrollbar {
+    display: none;
+  }
+
+  .register li {
+    flex: none;
+  }
+
+  .regItem {
+    white-space: nowrap;
+  }
 }
 
 /* Стол со стопкой листов */
