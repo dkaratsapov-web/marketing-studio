@@ -1,0 +1,143 @@
+/* Контроль качества: поле визуального прогона и отчёт */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  align-items: start;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  margin-top: clamp(2.5rem, 6vw, 5rem);
+}
+
+.board {
+  margin: 0;
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg-raised);
+}
+
+/* 69 столбцов-страниц по 5 ширин: клетки идут колонками сверху вниз */
+.cells {
+  display: grid;
+  grid-template-rows: repeat(5, auto);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 3px;
+}
+
+.cell {
+  aspect-ratio: 1 / 2.4;
+  border-radius: 1.5px;
+  background: rgb(255 255 255 / 0.07);
+  transition: background-color 0.25s linear;
+}
+
+.cell[data-on] {
+  background: var(--lime);
+}
+
+.boardCap {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-top: 1rem;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.8rem;
+}
+
+.done {
+  color: var(--lime);
+  font-size: var(--step-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.side {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.checks {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checks li {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.checks b {
+  font-family: var(--ff-display);
+  font-size: var(--step-2);
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.checks span {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.term {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  background: #000;
+  border: 1px solid var(--line);
+  font-family: var(--ff-mono);
+  font-size: 0.8rem;
+}
+
+.log {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.log li {
+  color: rgb(244 244 240 / 0.25);
+  transition: color 0.3s;
+}
+
+.log li[data-on] {
+  color: var(--fg);
+}
+
+.log li span {
+  color: var(--lime);
+}
+
+.term figcaption {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.stack {
+  margin-top: clamp(2rem, 4vw, 3rem);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.8rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cells {
+    gap: 2px;
+  }
+}

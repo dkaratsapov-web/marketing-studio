@@ -1,0 +1,198 @@
+/* Карта охвата и шаги к заявке */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  gap: clamp(2rem, 5vw, 4.5rem);
+  margin-top: clamp(2.5rem, 6vw, 5rem);
+}
+
+.mapWrap {
+  position: relative;
+  margin: 0;
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background:
+    radial-gradient(60% 60% at 58% 52%, rgb(196 245 66 / 0.07), transparent 70%),
+    var(--bg-raised);
+}
+
+.map {
+  --reach: 215;
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  font-family: var(--ff-body);
+}
+
+/* Кольцо проявляется, когда до него дошёл радиус охвата */
+.ring circle {
+  fill: none;
+  stroke: rgb(196 245 66 / 0.35);
+  stroke-width: 0.6;
+  stroke-dasharray: 2 3;
+  opacity: clamp(0, calc((var(--reach) - var(--r) + 25) / 25), 1);
+  transform: scale(clamp(0.6, calc(var(--reach) / var(--r)), 1));
+  transition: opacity 0.2s linear;
+}
+
+.ring text {
+  fill: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 6px;
+  opacity: clamp(0, calc((var(--reach) - var(--r)) / 20), 0.8);
+}
+
+.link {
+  stroke: var(--lime);
+  stroke-width: 0.8;
+  stroke-dasharray: 3 2;
+}
+
+.city {
+  cursor: pointer;
+  opacity: 0.12;
+  transition: opacity 0.35s var(--ease-out);
+  outline: none;
+}
+
+.city[data-lit] {
+  opacity: 1;
+}
+
+.hit {
+  fill: transparent;
+}
+
+.pin {
+  fill: var(--fg);
+  transition: fill 0.2s;
+}
+
+.city text {
+  fill: rgb(244 244 240 / 0.75);
+  font-size: 7px;
+  transition: fill 0.2s;
+}
+
+.city:hover text,
+.city:focus-visible text,
+.city[data-pick] text {
+  fill: var(--lime);
+}
+
+.city:hover .pin,
+.city:focus-visible .pin,
+.city[data-pick] .pin {
+  fill: var(--lime);
+}
+
+.city:focus-visible .hit {
+  stroke: var(--lime);
+  stroke-width: 0.8;
+}
+
+.home circle {
+  fill: #c58a22;
+}
+
+.home text {
+  fill: #e8b45a;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.card {
+  position: absolute;
+  right: clamp(0.75rem, 2vw, 1.5rem);
+  bottom: clamp(0.75rem, 2vw, 1.5rem);
+  display: grid;
+  gap: 0.25rem;
+  min-width: 11rem;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  background: rgb(5 5 5 / 0.85);
+  border: 1px solid var(--line);
+}
+
+.card b {
+  font-family: var(--ff-display);
+  font-size: var(--step-2);
+  letter-spacing: -0.03em;
+}
+
+.card span:last-child {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.side {
+  display: grid;
+  align-content: start;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.steps {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.n {
+  color: var(--lime);
+  font-family: var(--ff-mono);
+  font-size: 0.85rem;
+}
+
+.steps b {
+  font-family: var(--ff-display);
+  font-size: var(--step-1);
+  letter-spacing: -0.02em;
+}
+
+.steps p {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.shots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .card {
+    position: static;
+    margin-top: 0.75rem;
+  }
+
+  .city text {
+    font-size: 9px;
+  }
+}

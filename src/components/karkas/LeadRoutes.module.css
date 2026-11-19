@@ -1,0 +1,144 @@
+/* Схема маршрута заявки и стопка снимков админки */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  margin-top: clamp(2.5rem, 6vw, 5rem);
+}
+
+.scheme {
+  --draw: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: var(--ff-body);
+}
+
+.wire {
+  fill: none;
+  stroke: rgb(196 245 66 / 0.35);
+  stroke-width: 1.2;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--draw));
+}
+
+/* Заявки бегут по проводам короткими штрихами */
+.flow {
+  fill: none;
+  stroke: var(--lime);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-dasharray: 6 60;
+  opacity: calc(var(--draw) * var(--draw));
+  animation: flow 2.4s linear infinite;
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -132;
+  }
+}
+
+.node rect {
+  fill: var(--bg-raised);
+  stroke: var(--line);
+}
+
+.node text {
+  fill: var(--fg);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.node circle {
+  fill: var(--lime);
+}
+
+.hub rect {
+  fill: var(--lime);
+  stroke: none;
+}
+
+.hub text {
+  fill: var(--ink-950);
+  font-weight: 700;
+}
+
+.admin {
+  display: grid;
+  gap: 0;
+  margin: clamp(1.5rem, 3vw, 2.5rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin li {
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--line);
+  line-height: 1.45;
+}
+
+.deckWrap {
+  margin: 0;
+}
+
+.deck {
+  position: relative;
+  display: grid;
+  padding: 2rem 2.5rem 3rem;
+}
+
+.sheet {
+  grid-area: 1 / 1;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.8);
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+
+.img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tag {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  background: var(--ink-950);
+  color: var(--fg);
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+}
+
+.cap {
+  margin-top: 0.5rem;
+  text-align: center;
+  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .deck {
+    padding: 1rem 1.25rem 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow {
+    animation: none;
+  }
+}

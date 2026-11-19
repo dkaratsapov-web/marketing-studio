@@ -9,6 +9,7 @@ import sferaPhone from "@/assets/cases/sfera/glavnaya-phone.webp";
 import { DIAUTO } from "@/content/diauto";
 import { IPAPA } from "@/content/ipapa";
 import { SARA } from "@/content/sara";
+import { KARKAS } from "@/content/karkas";
 
 export type Metric = {
   /** Число для отсчёта; знак и единицы задаются через prefix/suffix */
@@ -38,6 +39,23 @@ export type Case = {
 };
 
 export const CASES: Case[] = [
+  {
+    code: KARKAS.code,
+    sector: KARKAS.sector,
+    client: "«Каркас Комфорт», каркасные дома под ключ, Тверь",
+    services: "Сайт · CRM и админка · Яндекс Директ · Авито Ads · Сбер Ads",
+    title: "Сайт строительной компании заново: 69 страниц, своя CRM и проверка каждой правки",
+    task: "Сайт выглядел как шаблон из нейросети: заглушки вместо домов и цен, мелкий текст, демо-хостинг. Нужно больше заявок, дороже вид и техническое качество.",
+    solution: "Дизайн-система «Чертёж», 8 проектов и 10 объектов со 155 фото, карта охвата и квиз, заявки в почту, Telegram, MAX и CRM, реклама в трёх каналах.",
+    lead: "Даниил",
+    href: "/kejsy/karkas-komfort/",
+    cover: KARKAS.cover,
+    metrics: [
+      { value: 69, label: "страниц на сайте" },
+      { value: 155, label: "фото со сдачи объектов" },
+      { value: 50, label: "сценариев проверки в браузере" },
+    ],
+  },
   {
     code: "004",
     sector: "Проектирование",

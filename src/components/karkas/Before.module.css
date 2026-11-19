@@ -1,0 +1,101 @@
+/* Было и стало: список зачёркивается по скроллу, справа новый сайт поднимается кровлей */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: start;
+  gap: clamp(2rem, 5vw, 5rem);
+  margin-top: clamp(2.5rem, 6vw, 5rem);
+}
+
+.list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  --cut: 1;
+  --now: 1;
+  display: grid;
+  gap: 0.45rem;
+  padding: 1.1rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.was {
+  color: var(--muted);
+  font-size: var(--step-0);
+  line-height: 1.4;
+}
+
+/* Зачёркивание растёт слева направо: розовая линия поверх старого решения */
+.wasText {
+  background: linear-gradient(var(--pink-deep), var(--pink-deep)) no-repeat 0 55% / calc(var(--cut) * 100%) 2px;
+}
+
+.now {
+  font-family: var(--ff-display);
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  opacity: calc(0.15 + var(--now) * 0.85);
+  transform: translateY(calc((1 - var(--now)) * 0.6rem));
+}
+
+.frame {
+  position: sticky;
+  top: 6rem;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #e3e8e2;
+  box-shadow: 0 40px 80px -50px rgb(5 5 5 / 0.45);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid rgb(5 5 5 / 0.08);
+  background: #f4f6f3;
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  color: #5c5c63;
+}
+
+.bar i {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: rgb(5 5 5 / 0.14);
+}
+
+.bar span {
+  margin-left: 0.6rem;
+}
+
+.shot {
+  clip-path: polygon(0% 0%, 50% 0%, 100% 0%, 100% 100%, 0% 100%);
+}
+
+.img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (max-width: 860px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .frame {
+    position: relative;
+    top: auto;
+    order: -1;
+  }
+}

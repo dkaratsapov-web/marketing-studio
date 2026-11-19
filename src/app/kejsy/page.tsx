@@ -8,7 +8,7 @@ import { absoluteUrl, breadcrumbs, pageMeta } from "@/lib/seo";
 
 const TITLE = "Кейсы маркетингового агентства «Корпорация» | Результаты в цифрах";
 const DESCRIPTION =
-  "Архив дел агентства: проектирование, автобизнес, ритейл техники, ИИ-ассистенты и боты. Задача, решение и результат в цифрах по каждому делу.";
+  "Архив дел агентства: строительство, проектирование, автобизнес, ритейл техники, ИИ-ассистенты и боты. Задача, решение и результат в цифрах по каждому делу.";
 const PATH = "/kejsy/";
 
 export const metadata: Metadata = pageMeta({ title: TITLE, description: DESCRIPTION, path: PATH, og: "home" });

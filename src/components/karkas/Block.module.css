@@ -1,0 +1,45 @@
+/* Общая шапка блоков дела «Каркас Комфорт»: заголовок слева, текст справа */
+.section {
+  position: relative;
+  padding-block: var(--section-y);
+  overflow: clip;
+}
+
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  align-items: end;
+  gap: 1.25rem clamp(2rem, 6vw, 6rem);
+}
+
+.title {
+  font-size: clamp(2.4rem, 1.1rem + 4vw, 5.6rem);
+  line-height: 0.94;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.dot {
+  color: var(--lime);
+}
+
+[data-surface="light"] .dot {
+  color: var(--pink-deep);
+}
+
+.lead {
+  max-width: 46ch;
+  color: var(--muted);
+  font-size: var(--step-1);
+  line-height: 1.45;
+}
+
+.label {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 860px) {
+  .head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

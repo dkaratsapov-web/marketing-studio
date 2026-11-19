@@ -1,0 +1,100 @@
+/* Три телефона веером в перспективе и заметки про мобильную версию */
+.stage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(0.75rem, 3vw, 3rem);
+  margin-top: clamp(3rem, 7vw, 6rem);
+  perspective: 1400px;
+  transform-style: preserve-3d;
+}
+
+.phone {
+  flex: none;
+  width: clamp(9rem, 22vw, 18rem);
+  margin: 0;
+  padding: 0.5rem;
+  border-radius: 2.2rem;
+  background: #0b0b0c;
+  box-shadow:
+    0 50px 90px -50px rgb(5 5 5 / 0.6),
+    inset 0 1px 0 rgb(255 255 255 / 0.12);
+  transform: rotateY(var(--ry, 0deg));
+  will-change: transform;
+}
+
+.phone:first-child {
+  --ry: 18deg;
+}
+
+.phone:last-child {
+  --ry: -18deg;
+}
+
+.phone:nth-child(2) {
+  z-index: 1;
+  width: clamp(10rem, 25vw, 20rem);
+}
+
+.screen {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 1.75rem;
+}
+
+.bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  align-items: start;
+  gap: clamp(2rem, 5vw, 4rem);
+  margin-top: clamp(3rem, 6vw, 5rem);
+}
+
+.notes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem var(--gutter);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.note {
+  padding-top: 0.9rem;
+  border-top: 2px solid var(--fg);
+  font-size: var(--step-0);
+  line-height: 1.45;
+}
+
+.more {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.more li {
+  flex: 1;
+  overflow: hidden;
+  border-radius: 0.9rem;
+  border: 1px solid var(--line);
+}
+
+.thumb {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (max-width: 860px) {
+  .bottom,
+  .notes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stage {
+    gap: 0.5rem;
+  }
+}

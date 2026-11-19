@@ -1,0 +1,105 @@
+/* Состав сайта: счётчики и лента снимков страниц */
+.counts {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--gutter);
+  margin: clamp(2.5rem, 6vw, 4.5rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.counts li {
+  display: grid;
+  gap: 0.4rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--fg);
+}
+
+.counts b {
+  font-family: var(--ff-display);
+  font-size: clamp(2.6rem, 1.4rem + 4vw, 5.5rem);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.counts span {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.pin {
+  margin-top: clamp(3rem, 7vw, 6rem);
+  overflow: hidden;
+}
+
+.track {
+  display: flex;
+  gap: var(--gutter);
+  width: max-content;
+  margin: 0;
+  padding: 0 var(--gutter);
+  list-style: none;
+  will-change: transform;
+}
+
+.card {
+  width: min(46vw, 44rem);
+}
+
+.shot {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 30px 60px -40px rgb(5 5 5 / 0.4);
+}
+
+.img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.name {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  font-family: var(--ff-display);
+  font-size: var(--step-1);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.text {
+  margin-top: 0.3rem;
+  color: var(--muted);
+}
+
+/* Телефон и без закрепления: лента листается пальцем */
+@media (max-width: 960px), (max-height: 639px), (prefers-reduced-motion: reduce) {
+  .pin {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .pin::-webkit-scrollbar {
+    display: none;
+  }
+
+  .card {
+    width: min(80vw, 30rem);
+    scroll-snap-align: center;
+  }
+}
+
+@media (max-width: 860px) {
+  .counts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .counts li:last-child {
+    grid-column: 1 / -1;
+  }
+}

@@ -1,0 +1,49 @@
+/* 3D-каркас первого экрана и шкала этапов стройки под ним */
+.host {
+  position: relative;
+  width: min(100%, 46rem);
+  height: clamp(24rem, calc(100svh - 14rem), 42rem);
+}
+
+.canvas {
+  position: absolute !important;
+  inset: 0;
+}
+
+.stages {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+.stage {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: rgb(244 244 240 / 0.32);
+  transition: color 0.35s var(--ease-out);
+}
+
+.stage span {
+  color: inherit;
+}
+
+.stage[data-on] {
+  color: var(--muted);
+}
+
+.stage[data-now] {
+  color: var(--lime);
+}
