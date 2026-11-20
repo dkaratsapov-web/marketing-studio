@@ -12,6 +12,7 @@ import MobileFan from "@/components/karkas/MobileFan";
 import LeadRoutes from "@/components/karkas/LeadRoutes";
 import AdsChannels from "@/components/karkas/AdsChannels";
 import Quality from "@/components/karkas/Quality";
+import Speed from "@/components/karkas/Speed";
 import KarkasFinale from "@/components/karkas/KarkasFinale";
 import { KARKAS } from "@/content/karkas";
 import { absoluteUrl, breadcrumbs, ORG_ID, pageMeta } from "@/lib/seo";
@@ -73,7 +74,9 @@ export default function KarkasCasePage() {
         <AdsChannels data={KARKAS.ads} />
         <Seam from="light" to="dark" label="Качество" />
         <Quality data={KARKAS.quality} />
-        <Seam from="dark" to="light" label="Дальше" />
+        <Seam from="dark" to="light" label="Скорость" />
+        <Speed data={KARKAS.speed} />
+        <Seam from="light" to="light" label="Дальше" />
         <KarkasFinale client={KARKAS.client} others={OTHERS} />
       </main>
       <Footer />

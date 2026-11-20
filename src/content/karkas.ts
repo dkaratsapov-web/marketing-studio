@@ -24,6 +24,8 @@ import crmDeals from "@/assets/cases/karkas/crm-deals.webp";
 import crmDeal from "@/assets/cases/karkas/crm-deal.webp";
 import crmTasks from "@/assets/cases/karkas/crm-tasks.webp";
 import crmRouting from "@/assets/cases/karkas/crm-routing.webp";
+import speedMobile from "@/assets/cases/karkas/speed-mobile.webp";
+import speedDesktop from "@/assets/cases/karkas/speed-desktop.webp";
 
 export const KARKAS = {
   code: "025",
@@ -231,5 +233,42 @@ export const KARKAS = {
     ],
     logNote: "Пример отчёта проверки",
     stack: "HTML, CSS и JavaScript без фреймворков · сборщик на Node.js · React для карты · sharp · PHP · nginx · Let's Encrypt · GitHub Actions · Playwright · Higgsfield",
+  },
+
+  /** Блок 10: замер PageSpeed Insights (Lighthouse) главной страницы. Статусы метрик — как в отчёте */
+  speed: {
+    title: "100 из 100 везде, кроме скорости. Там 93 и 98",
+    lead: "Замер Google PageSpeed Insights главной страницы. Сайт тяжёлый на фото: слайдер реальных объектов, видео и карта, и всё равно быстрый, потому что React грузится только для карты, а ролики — по нажатию.",
+    note: "PageSpeed Insights, главная страница, ноябрь 2026",
+    labels: ["Производительность", "Специальные возможности", "Рекомендации", "Поисковая оптимизация"],
+    agent: { name: "Агентный просмотр", value: "2/2", text: "ИИ-агенты читают сайт без ошибок" },
+    devices: [
+      {
+        key: "mobile",
+        name: "Телефон",
+        scores: [93, 100, 100, 100],
+        metrics: [
+          { name: "First Contentful Paint", ru: "первый контент", value: "1,3 с", ok: "good" },
+          { name: "Largest Contentful Paint", ru: "главный элемент", value: "3,1 с", ok: "mid" },
+          { name: "Total Blocking Time", ru: "блокировка", value: "0 мс", ok: "good" },
+          { name: "Cumulative Layout Shift", ru: "сдвиги вёрстки", value: "0", ok: "good" },
+          { name: "Speed Index", ru: "скорость отрисовки", value: "3,0 с", ok: "good" },
+        ],
+        shot: { img: speedMobile, alt: "Отчёт PageSpeed Insights для телефона: производительность 93, остальные разделы 100" },
+      },
+      {
+        key: "desktop",
+        name: "Компьютер",
+        scores: [98, 100, 100, 100],
+        metrics: [
+          { name: "First Contentful Paint", ru: "первый контент", value: "0,5 с", ok: "good" },
+          { name: "Largest Contentful Paint", ru: "главный элемент", value: "0,8 с", ok: "good" },
+          { name: "Total Blocking Time", ru: "блокировка", value: "0 мс", ok: "good" },
+          { name: "Cumulative Layout Shift", ru: "сдвиги вёрстки", value: "0,04", ok: "good" },
+          { name: "Speed Index", ru: "скорость отрисовки", value: "1,4 с", ok: "mid" },
+        ],
+        shot: { img: speedDesktop, alt: "Отчёт PageSpeed Insights для компьютера: производительность 98, остальные разделы 100" },
+      },
+    ],
   },
 };
