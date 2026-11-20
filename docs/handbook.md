@@ -27,6 +27,19 @@ git push -q -u origin $B && git fetch -q origin main && git checkout -q main \
 gh run list -R dkaratsapov-web/marketing-studio -w vps.yml -L 1   # дождаться success
 ```
 
+### Приватный репозиторий: что важно
+
+- Минуты GitHub Actions у приватного репозитория платные сверх бесплатного лимита аккаунта. Если задачи падают
+  без запуска с сообщением «recent account payments have failed or your spending limit needs to be increased» —
+  выкладки нет, чинится в настройках GitHub: Settings → Billing and plans (способ оплаты или лимит расходов на Actions).
+- Сервер больше не может скачать код с GitHub без ключа. Поэтому `vps.yml` сам отправляет папку `crm/` архивом в
+  `~/korp-cabinet/src.tgz` пользователя деплоя, а `korp-cabinet-update` берёт код оттуда. Новый скрипт обновления
+  деплой кладёт в `~/crm-update.sh`; поставить его под root нужно один раз вручную:
+  `sudo install -m 755 -o root -g root ~deploy/crm-update.sh /usr/local/sbin/korp-cabinet-update`
+  (вместо `deploy` — пользователь из секрета `VPS_USER`). До этого кабинет обновится, только если папка `crm/` не менялась.
+- `deploy/setup-crm.sh` для новой установки скачивает файлы с raw.githubusercontent.com — у приватного репозитория
+  это не сработает, скрипты на сервер надо положить вручную.
+
 Перед выкладкой обязательно: `npm run lint`, `npx tsc --noEmit -p .`, `npm run build`; при правках кабинета —
 `cd crm && npm test` (сейчас 318 тестов).
 

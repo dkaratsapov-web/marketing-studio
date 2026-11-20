@@ -3,7 +3,9 @@
 # Ставится скриптом deploy/setup-crm.sh в /usr/local/sbin/korp-cabinet-update.
 # GitHub при деплое запускает его через sudo от пользователя deploy:
 #   sudo -n /usr/local/sbin/korp-cabinet-update <коммит> [хеш папки crm]
-# Код берётся из публичного репозитория по номеру коммита, .env и data/ на сервере не трогаются.
+# Код кабинета GitHub при деплое кладёт архивом в ~/korp-cabinet/src.tgz пользователя, который вызвал sudo:
+# репозиторий приватный, и скачать его с сервера без ключа нельзя. Если архива нет — старый путь, codeload.
+# .env и data/ на сервере не трогаются.
 # Работает только с /opt/korp-cabinet. Сорока (/opt/kvalificator, soroka-assistant.ru) на этом же сервере не трогается никогда.
 set -euo pipefail
 # Docker не должен читать чужой ввод (скрипт установки приходит через curl | bash)
@@ -40,7 +42,19 @@ fi
 echo "▸ Загружаю код ${REF:0:7}"
 TMP="$(mktemp -d)"
 trap 'rm -rf "${TMP}"' EXIT
-curl -4 -fsSL --connect-timeout 10 -m 300 "https://codeload.github.com/${REPO}/tar.gz/${REF}" -o "${TMP}/src.tgz"
+# Архив от GitHub Actions: обычный файл (не ссылка) в домашней папке того, кто вызвал sudo
+UPLOAD=""
+if [ -n "${SUDO_USER:-}" ] && [ "${SUDO_USER}" != "root" ]; then
+  HOME_DIR="$(getent passwd "${SUDO_USER}" | cut -d: -f6)"
+  [ -n "${HOME_DIR}" ] && UPLOAD="${HOME_DIR}/korp-cabinet/src.tgz"
+fi
+if [ -n "${UPLOAD}" ] && [ -f "${UPLOAD}" ] && [ ! -L "${UPLOAD}" ]; then
+  echo "  из архива, присланного деплоем"
+  cp -- "${UPLOAD}" "${TMP}/src.tgz"
+  rm -f -- "${UPLOAD}"
+else
+  curl -4 -fsSL --connect-timeout 10 -m 300 "https://codeload.github.com/${REPO}/tar.gz/${REF}" -o "${TMP}/src.tgz"
+fi
 tar -xzf "${TMP}/src.tgz" -C "${TMP}" --wildcards '*/crm/*'
 SRC="$(find "${TMP}" -mindepth 2 -maxdepth 2 -type d -name crm | head -n1)"
 [ -n "${SRC}" ] && [ -f "${SRC}/docker-compose.yml" ] || { echo "В архиве нет папки crm/" >&2; exit 1; }

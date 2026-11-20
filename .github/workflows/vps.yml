@@ -88,7 +88,14 @@ jobs:
           VPS_USER: ${{ secrets.VPS_USER }}
         run: |
           SSH="ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes"
+          # Свежий скрипт обновления кабинета кладём в домашнюю папку: под root его ставят один раз вручную
+          # (sudo install -m 755 ~/crm-update.sh /usr/local/sbin/korp-cabinet-update, см. docs/handbook.md)
+          rsync -az -e "$SSH" deploy/crm-update.sh "$VPS_USER@$VPS_HOST:crm-update.sh"
           if $SSH "$VPS_USER@$VPS_HOST" 'test -x /usr/local/sbin/korp-cabinet-update'; then
+            # Репозиторий приватный: сервер не может скачать код сам, поэтому отправляем папку crm/ архивом
+            git archive --format=tar.gz --prefix=marketing-studio/ -o /tmp/korp-cabinet-src.tgz HEAD crm
+            $SSH "$VPS_USER@$VPS_HOST" 'install -d -m 700 ~/korp-cabinet'
+            rsync -az -e "$SSH" /tmp/korp-cabinet-src.tgz "$VPS_USER@$VPS_HOST:korp-cabinet/src.tgz"
             $SSH "$VPS_USER@$VPS_HOST" "sudo -n /usr/local/sbin/korp-cabinet-update $GITHUB_SHA $(git rev-parse HEAD:crm)"
           else
             echo "Кабинет ещё не установлен, пропускаю"
