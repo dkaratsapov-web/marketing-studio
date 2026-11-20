@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geologica, Golos_Text, IBM_Plex_Mono } from "next/font/google";
 import SmoothScroll from "@/components/SmoothScroll";
-import Cursor from "@/components/Cursor";
 import BriefModal from "@/components/brief/BriefModal";
 import MobileBar from "@/components/mobilebar/MobileBar";
 import CookieBanner from "@/components/legal/CookieBanner";
@@ -67,7 +66,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <JsonLd data={[ORGANIZATION, WEBSITE]} />
         <SmoothScroll />
-        <Cursor />
         {children}
         <BriefModal />
         <MobileBar />

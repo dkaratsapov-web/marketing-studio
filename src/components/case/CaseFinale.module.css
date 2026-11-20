@@ -173,10 +173,41 @@
   line-height: 1.45;
 }
 
+/* Что уже сдано: три крупные цифры в ряд */
+.done {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gutter);
+  max-width: 40rem;
+  margin: 0;
+}
+
+.done div {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.35rem;
+  padding-top: 0.9rem;
+  border-top: 2px solid var(--fg);
+}
+
+.done dd {
+  margin: 0;
+  font-family: var(--ff-display);
+  font-size: clamp(2.4rem, 1.4rem + 3vw, 4.2rem);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+}
+
+.done dt {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
 /* Печать: розовая рамка, наклон, умножается на бумагу */
 .stamp {
   justify-self: start;
-  margin-top: 1rem;
+  margin-top: 2.25rem;
   padding: 0.5rem 1.2rem;
   border: 4px solid var(--pink-deep);
   border-radius: 6px;

@@ -177,7 +177,7 @@ export default function CaseArchive() {
                   <h2 id="next-title" className={styles.blankTitle}>
                     Следующее дело ваше<span className={styles.blankDot}>.</span>
                   </h2>
-                  <p className={styles.blankLead}>Оставьте телефон: Максим перезвонит, договоримся о созвоне, а к нему посмотрим вашу рекламу и сайт.</p>
+                  <p className={styles.blankLead}>Оставьте телефон: перезвоним, договоримся о созвоне, а к нему посмотрим вашу рекламу и сайт.</p>
                   <HeroLead source="service" service="Страница кейсов" cta="Открыть дело" />
                 </div>
               </div>

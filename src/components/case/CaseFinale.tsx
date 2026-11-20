@@ -170,6 +170,14 @@ export default function CaseFinale({ data }: Props) {
               <span className={styles.dotPink}>.</span>
             </h2>
             <p className={styles.resultsText}>{results.text}</p>
+            <dl className={styles.done}>
+              {results.done.map((d) => (
+                <div key={d.label}>
+                  <dt>{d.label}</dt>
+                  <dd>{d.value}</dd>
+                </div>
+              ))}
+            </dl>
             <span className={styles.stamp}>{results.stamp}</span>
           </div>
 
