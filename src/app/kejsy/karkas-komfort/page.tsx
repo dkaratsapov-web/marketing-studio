@@ -14,6 +14,7 @@ import AdsChannels from "@/components/karkas/AdsChannels";
 import Quality from "@/components/karkas/Quality";
 import Speed from "@/components/karkas/Speed";
 import KarkasFinale from "@/components/karkas/KarkasFinale";
+import CaseRail from "@/components/karkas/CaseRail";
 import { KARKAS } from "@/content/karkas";
 import { absoluteUrl, breadcrumbs, ORG_ID, pageMeta } from "@/lib/seo";
 
@@ -23,6 +24,21 @@ const DESCRIPTION =
 const PATH = "/kejsy/karkas-komfort/";
 
 export const metadata: Metadata = pageMeta({ title: TITLE, description: DESCRIPTION, path: PATH, og: "karkas", type: "article" });
+
+// Рейка справа: блоки дела и их короткие названия
+const RAIL = [
+  { id: "top", label: "Каркас" },
+  { id: "kk-before", label: "Было и стало" },
+  { id: "kk-system", label: "Чертёж" },
+  { id: "kk-content", label: "Контент" },
+  { id: "kk-path", label: "Путь к заявке" },
+  { id: "kk-mobile", label: "Телефон" },
+  { id: "kk-crm", label: "Заявки и CRM" },
+  { id: "kk-ads", label: "Реклама" },
+  { id: "kk-quality", label: "Качество" },
+  { id: "kk-speed", label: "Скорость" },
+  { id: "kk-finale", label: "Заявка" },
+];
 
 const OTHERS = [
   { href: "/kejsy/sfera/", text: "Дело 004: «Сфера», маркетинг проектной компании" },
@@ -57,6 +73,7 @@ export default function KarkasCasePage() {
       <Header />
       <main>
         <JsonLd data={LD} />
+        <CaseRail items={RAIL} />
         <KarkasHero data={KARKAS} />
         <Seam from="dark" to="light" label="Было" />
         <Before data={KARKAS.before} />

@@ -13,8 +13,9 @@ npm run build   # статика в out/
 
 ## Деплой
 
-Пуш в `main` собирает статику и публикует её на GitHub Pages: https://dkaratsapov-web.github.io/marketing-studio/
-Пуш в рабочую ветку `claude/exciting-noether-voueh3` только прогоняет lint и build (`.github/workflows/pages.yml`). Путь репозитория подставляется через `PAGES_BASE_PATH`.
+Пуш в `main` собирает статику и выкладывает её на https://marketing-studio.pro (`.github/workflows/vps.yml`), там же
+обновляется кабинет crm.marketing-studio.pro. Копия уходит на GitHub Pages (`.github/workflows/pages.yml`).
+Подробно, вместе с проверками и решениями владельца, — `docs/handbook.md`.
 
 ## Структура
 

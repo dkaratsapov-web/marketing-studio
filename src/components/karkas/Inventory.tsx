@@ -40,11 +40,13 @@ export default function Inventory({ data }: { data: typeof KARKAS.content }) {
       const mm = gsap.matchMedia();
       mm.add(`${CINEMATIC_MQ} and (prefers-reduced-motion: no-preference)`, () => {
         const t = track.current!;
-        const dist = () => t.scrollWidth - t.clientWidth;
+        const pin = el.querySelector<HTMLElement>(`.${styles.pin}`)!;
+        // Лента шире окна: едем ровно на разницу между её шириной и шириной контейнера
+        const dist = () => Math.max(0, t.scrollWidth - pin.clientWidth);
         gsap.to(t, {
           x: () => -dist(),
           ease: "none",
-          scrollTrigger: { trigger: el.querySelector(`.${styles.pin}`), start: "top 12%", end: () => `+=${dist()}`, pin: true, scrub: 0.8, invalidateOnRefresh: true },
+          scrollTrigger: { trigger: pin, start: "center 52%", end: () => `+=${dist()}`, pin: true, scrub: 0.8, invalidateOnRefresh: true },
         });
       });
     },
