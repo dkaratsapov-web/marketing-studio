@@ -25,8 +25,9 @@ export default function CaseBrief({ brief, client }: Props) {
       const section = root.current!;
 
       // Перебор объектов: слово уезжает вверх, следующее встаёт снизу
+      // Слово уезжает с запасом: хвосты «р», «у» и надстрочные знаки длиннее строки и иначе видны из-под маски
       const words = gsap.utils.toArray<HTMLElement>(`.${styles.word}`);
-      gsap.set(words, { yPercent: 105 });
+      gsap.set(words, { yPercent: 140 });
       gsap.set(words[0], { yPercent: 0 });
       const loop = gsap.timeline({ repeat: -1, paused: true });
       words.forEach((w, i) => {
@@ -34,12 +35,12 @@ export default function CaseBrief({ brief, client }: Props) {
         loop
           .to(
             w,
-            { yPercent: -105, duration: 0.6, ease: "power3.inOut" },
+            { yPercent: -140, duration: 0.6, ease: "power3.inOut" },
             "+=1.3",
           )
           .fromTo(
             next,
-            { yPercent: 105 },
+            { yPercent: 140 },
             { yPercent: 0, duration: 0.6, ease: "power3.inOut" },
             "<",
           );
