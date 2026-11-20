@@ -69,7 +69,12 @@ function glowTexture() {
 }
 
 /** Псевдослучайный разброс колоды, одинаковый при каждом заходе */
-const JITTER = CARS.map((_, i) => ({ x: Math.sin(i * 12.9) * 0.09, rz: Math.sin(i * 7.3) * 0.07 }));
+// Колода лежит ровно: еле заметный сдвиг краёв, чтобы читалось, что карточек много
+const JITTER = CARS.map((_, i) => ({ x: Math.sin(i * 12.9) * 0.02, rz: Math.sin(i * 7.3) * 0.012 }));
+/** Раздача по одной: карточка летит DEAL прогресса, следующая стартует через GAP — в полёте не больше двух */
+const DEAL = 0.075;
+const GAP = 0.036;
+const DEALT_AT = 0.04 + (N - 1) * GAP + DEAL;
 
 /**
  * Витрина ДиАвто69. Сначала карточки лежат колодой, как посты в канале. По скроллу колода
@@ -141,11 +146,11 @@ function Ring({ still }: { still: boolean }) {
       // Без закрепления: колода раздаётся за пару секунд, дальше кольцо крутится само
       if (s.t0 < 0) s.t0 = time;
       const t = time - s.t0;
-      s.p = clamp(t / 2.2, 0, 1);
-      theta = Math.max(0, t - 2.4) * 0.32;
+      s.p = clamp(t / 3.6, 0, 1);
+      theta = Math.max(0, t - 3.8) * 0.32;
     } else {
       s.p = damp(s.p, ringState.progress, 6, dt);
-      theta = smoothstep(s.p, 0.42, 1) * STEP * (N - 1);
+      theta = smoothstep(s.p, DEALT_AT + 0.02, 1) * STEP * (N - 1);
     }
     s.px = damp(s.px, pointer.current.x, 3, dt);
     s.py = damp(s.py, pointer.current.y, 3, dt);
@@ -165,12 +170,13 @@ function Ring({ still }: { still: boolean }) {
     for (let i = 0; i < N; i++) {
       const c = cards.current[i];
       if (!c) continue;
-      const k = still ? 1 : clamp((s.p - 0.04 - i * 0.026) / 0.2, 0, 1);
+      const k = still ? 1 : clamp((s.p - 0.04 - i * GAP) / DEAL, 0, 1);
       const e = easeInOut(k);
       const target = wrap(i * STEP);
       const ang = lerp(0, target, e);
-      const rad = R + (1 - e) * (0.55 - i * 0.045);
-      c.position.set(Math.sin(ang) * rad + (1 - e) * JITTER[i].x, Math.sin(k * Math.PI) * 0.22, Math.cos(ang) * rad);
+      const rad = R + (1 - e) * (0.55 - i * 0.03);
+      // В колоде карточки чуть приподняты стопкой, в полёте поднимаются дугой
+      c.position.set(Math.sin(ang) * rad + (1 - e) * JITTER[i].x, Math.sin(k * Math.PI) * 0.22 + (1 - e) * (N - 1 - i) * 0.012, Math.cos(ang) * rad);
       c.rotation.set(0, ang, (1 - e) * JITTER[i].rz);
 
       // Ближняя к зрителю карточка ярче и крупнее
@@ -181,7 +187,7 @@ function Ring({ still }: { still: boolean }) {
         best = i;
       }
       const focus = Math.pow(Math.max(0, cos), 6);
-      const dealt = smoothstep(s.p, 0.25, 0.42);
+      const dealt = smoothstep(s.p, DEALT_AT - 0.12, DEALT_AT);
       c.scale.setScalar(1 + focus * 0.1 * dealt);
       const light = lerp(1 - i * 0.04, 0.32 + 0.68 * Math.pow(Math.max(0, (cos + 1) / 2), 2.2), dealt);
       const front = fronts.current[i];
@@ -194,7 +200,7 @@ function Ring({ still }: { still: boolean }) {
     }
 
     // Подпись под сценой: меняем текст только при смене ближней карточки
-    if (best !== s.front && smoothstep(s.p, 0.25, 0.42) > 0.5) {
+    if (best !== s.front && smoothstep(s.p, DEALT_AT - 0.12, DEALT_AT) > 0.5) {
       s.front = best;
       const car = CARS[best];
       const cap = ringState.caption;
