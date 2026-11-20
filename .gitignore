@@ -42,3 +42,4 @@ next-env.d.ts
 
 # Python
 __pycache__/
+kp/**/k-*.png

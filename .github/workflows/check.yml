@@ -1,0 +1,29 @@
+name: Проверка рабочей ветки
+
+# Репозиторий приватный, GitHub Pages для него выключены: копии сайта на Pages больше нет.
+# Рабочая ветка проходит lint, проверку типов и сборку. main собирает и выкладывает vps.yml.
+on:
+  push:
+    branches: [claude/exciting-noether-voueh3]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit -p .
+      - run: npm run build

@@ -14,7 +14,7 @@ npm run build   # статика в out/
 ## Деплой
 
 Пуш в `main` собирает статику и выкладывает её на https://marketing-studio.pro (`.github/workflows/vps.yml`), там же
-обновляется кабинет crm.marketing-studio.pro. Копия уходит на GitHub Pages (`.github/workflows/pages.yml`).
+обновляется кабинет crm.marketing-studio.pro. Рабочая ветка проходит проверку `.github/workflows/check.yml`.
 Подробно, вместе с проверками и решениями владельца, — `docs/handbook.md`.
 
 ## Структура
