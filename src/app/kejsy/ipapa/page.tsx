@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/footer/Footer";
 import Seam from "@/components/seam/Seam";
 import JsonLd from "@/components/JsonLd";
+import CaseRail from "@/components/case/CaseRail";
 import IpapaHero from "@/components/ipapa/IpapaHero";
 import TaskChat from "@/components/ipapa/TaskChat";
 import PriceWatch from "@/components/ipapa/PriceWatch";
@@ -54,6 +55,7 @@ export default function IpapaCasePage() {
     <>
       <Header />
       <main>
+        <CaseRail first="айпапа.рф" variant="dots" />
         <JsonLd data={LD} />
         <IpapaHero data={IPAPA} />
         <Seam from="dark" to="light" label="Задача" />

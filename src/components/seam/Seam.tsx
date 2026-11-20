@@ -46,7 +46,7 @@ export default function Seam({ from, to, label }: { from: Surface; to: Surface; 
   );
 
   return (
-    <div ref={root} className={styles.seam} data-seam data-surface={from} aria-hidden="true">
+    <div ref={root} className={styles.seam} data-seam={label} data-surface={from} aria-hidden="true">
       <div className={styles.panel} data-surface={to}>
         <span ref={text} className={styles.label}>
           → {label}

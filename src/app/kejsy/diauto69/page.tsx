@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/footer/Footer";
 import Seam from "@/components/seam/Seam";
 import JsonLd from "@/components/JsonLd";
+import CaseRail from "@/components/case/CaseRail";
 import DiautoHero from "@/components/diauto/DiautoHero";
 import Stickers from "@/components/diauto/Stickers";
 import ParserBench from "@/components/diauto/ParserBench";
@@ -48,6 +49,7 @@ export default function DiautoCasePage() {
     <>
       <Header />
       <main>
+        <CaseRail first="ДиАвто69" variant="road" />
         <JsonLd data={LD} />
         <DiautoHero data={DIAUTO} />
         <Seam from="dark" to="light" label="Задача" />

@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/footer/Footer";
 import Seam from "@/components/seam/Seam";
 import JsonLd from "@/components/JsonLd";
+import CaseRail from "@/components/case/CaseRail";
 import SaraHero from "@/components/sara/SaraHero";
 import NeedVoice from "@/components/sara/NeedVoice";
 import ParseDemo from "@/components/sara/ParseDemo";
@@ -52,6 +53,7 @@ export default function SaraCasePage() {
     <>
       <Header />
       <main>
+        <CaseRail first="Сара" variant="wave" />
         <JsonLd data={LD} />
         <SaraHero data={SARA} />
         <Seam from="dark" to="light" label="Что было нужно" />

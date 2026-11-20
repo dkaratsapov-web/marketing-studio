@@ -1,0 +1,363 @@
+/* Размерная рейка справа: засечки блоков, мелкие деления, нитка прочитанного */
+.rail {
+  --ink: rgb(244 244 240 / 0.38);
+  --ink-strong: var(--white);
+  --hi: var(--lime);
+  --panel: rgb(5 5 5 / 0.94);
+  --p: 0;
+  position: fixed;
+  top: 50%;
+  right: clamp(0.75rem, 1.6vw, 1.75rem);
+  z-index: 40;
+  transform: translateY(-50%);
+  padding: 0.9rem 0.6rem 0.9rem 0.9rem;
+  border-radius: 12px;
+  transition: background-color 0.3s var(--ease-out);
+  animation: railIn 0.9s var(--ease-out) 0.6s both;
+}
+
+.rail[data-theme="light"] {
+  --ink: rgb(5 5 5 / 0.35);
+  --ink-strong: var(--ink-950);
+  --hi: var(--pink-deep);
+  --panel: rgb(255 255 255 / 0.96);
+}
+
+@keyframes railIn {
+  from {
+    opacity: 0;
+    transform: translate(1rem, -50%);
+  }
+}
+
+/* При наведении рейка подкладывает панель, чтобы подписи читались поверх любой секции */
+.rail:hover,
+.rail:has(:focus-visible) {
+  background: var(--panel);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 20px 50px -25px rgb(0 0 0 / 0.5);
+}
+
+/* Нитка прочитанного: сверху вниз вдоль засечек */
+.thread {
+  position: absolute;
+  top: 0.9rem;
+  bottom: 0.9rem;
+  right: 0.6rem;
+  width: 1px;
+  background: var(--ink);
+  opacity: 0.5;
+}
+
+.thread::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--hi);
+  transform: scaleY(var(--p));
+  transform-origin: 50% 0;
+}
+
+.list {
+  position: relative;
+  display: grid;
+  justify-items: end;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  justify-items: end;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 1.6rem;
+  padding: 0 0 0 0.5rem;
+  border: 0;
+  background: none;
+  color: var(--ink-strong);
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--hi);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Засечка блока: растёт слева направо при загрузке, у текущего блока длиннее и цветная */
+.tick {
+  width: 1.25rem;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--ink);
+  transform-origin: 100% 50%;
+  transition:
+    width 0.35s var(--ease-out),
+    background-color 0.3s var(--ease-out);
+  animation: tickIn 0.6s var(--ease-out) both;
+  animation-delay: calc(0.8s + var(--i) * 0.05s);
+}
+
+@keyframes tickIn {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.item[data-past] .tick {
+  background: var(--ink-strong);
+  opacity: 0.55;
+}
+
+.item[data-on] .tick {
+  width: 2.75rem;
+  background: var(--hi);
+  opacity: 1;
+}
+
+.btn:hover .tick {
+  width: 2.25rem;
+  background: var(--ink-strong);
+}
+
+.item[data-on] .btn:hover .tick {
+  background: var(--hi);
+}
+
+/* Подпись: у текущего блока видна всегда, остальные выезжают при наведении на рейку */
+.label {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(0.5rem);
+  pointer-events: none;
+  transition:
+    opacity 0.25s var(--ease-out),
+    transform 0.3s var(--ease-out);
+}
+
+.num {
+  color: var(--hi);
+}
+
+.item[data-on] .label,
+.rail:hover .label,
+.rail:has(:focus-visible) .label {
+  opacity: 1;
+  transform: none;
+}
+
+.item[data-on] .label {
+  color: var(--ink-strong);
+  font-weight: 600;
+}
+
+/* Мелкие деления между блоками, как миллиметры на линейке */
+.minor {
+  display: grid;
+  justify-items: end;
+  gap: 0.32rem;
+  padding: 0.3rem 0;
+}
+
+.minor i {
+  width: 0.45rem;
+  height: 1px;
+  background: var(--ink);
+}
+
+@media (max-width: 1100px), (max-height: 620px) {
+  .rail {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail,
+  .tick {
+    animation: none;
+  }
+}
+
+/* ── Этажи (дело «Сфера», проектирование): плиты перекрытий под кровлей, текущий этаж светится ── */
+.rail[data-variant="floors"] {
+  --hi: #ff6a2b;
+}
+
+.rail[data-variant="floors"][data-theme="light"] {
+  --hi: #d9501a;
+}
+
+.rail[data-variant="floors"] .thread,
+.rail[data-variant="floors"] .minor {
+  display: none;
+}
+
+.rail[data-variant="floors"] .list {
+  gap: 0.3rem;
+  padding-top: 1.1rem;
+}
+
+/* Кровля над верхним этажом */
+.rail[data-variant="floors"] .list::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -0.15rem;
+  width: 2.3rem;
+  height: 0.85rem;
+  background: var(--ink);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.rail[data-variant="floors"] .tick {
+  width: 2rem;
+  height: 1.15rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  background: transparent;
+}
+
+.rail[data-variant="floors"] .item[data-past] .tick {
+  border-color: var(--ink-strong);
+  background: color-mix(in srgb, var(--ink-strong) 12%, transparent);
+}
+
+.rail[data-variant="floors"] .item[data-on] .tick,
+.rail[data-variant="floors"] .btn:hover .tick {
+  width: 2rem;
+  border-color: var(--hi);
+  background: var(--hi);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--hi) 60%, transparent);
+}
+
+/* ── Дорога (ДиАвто69): полотно с разметкой едет по скроллу, текущий блок — машинка ── */
+.rail[data-variant="road"] .thread {
+  right: 0.35rem;
+  width: 0.55rem;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(to bottom, var(--ink-strong) 0 0.45rem, transparent 0.45rem 0.9rem) 50% calc(var(--p) * 40rem) / 1.5px 100% no-repeat,
+    color-mix(in srgb, var(--ink) 55%, transparent);
+  opacity: 0.7;
+}
+
+.rail[data-variant="road"] .thread::after {
+  display: none;
+}
+
+.rail[data-variant="road"] .minor {
+  display: none;
+}
+
+.rail[data-variant="road"] .list {
+  gap: 0.75rem;
+  padding-right: 0.15rem;
+}
+
+.rail[data-variant="road"] .tick {
+  width: 0.7rem;
+}
+
+.rail[data-variant="road"] .item[data-on] .tick {
+  width: 1.5rem;
+  height: 0.8rem;
+  border-radius: 0.4rem 0.4rem 0.25rem 0.25rem;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--hi) 55%, transparent);
+}
+
+/* ── Точки iOS (айпапа.рф): кружки, текущий блок — вытянутая капсула, стеклянная панель ── */
+.rail[data-variant="dots"] {
+  --hi: #ff3b3b;
+  border-radius: 22px;
+}
+
+.rail[data-variant="dots"][data-theme="light"] {
+  --hi: #d62828;
+}
+
+.rail[data-variant="dots"] .thread,
+.rail[data-variant="dots"] .minor {
+  display: none;
+}
+
+.rail[data-variant="dots"] .list {
+  gap: 0.55rem;
+}
+
+.rail[data-variant="dots"] .tick {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  transition:
+    height 0.35s var(--ease-out),
+    background-color 0.3s var(--ease-out);
+}
+
+.rail[data-variant="dots"] .item[data-on] .tick {
+  width: 0.5rem;
+  height: 1.6rem;
+  border-radius: 0.25rem;
+}
+
+.rail[data-variant="dots"] .btn:hover .tick {
+  width: 0.5rem;
+}
+
+/* ── Звуковая волна (Сара): засечки разной длины, текущая пульсирует, как голос ── */
+.rail[data-variant="wave"] .thread {
+  display: none;
+}
+
+.rail[data-variant="wave"] .tick {
+  width: var(--w);
+  height: 3px;
+  border-radius: 2px;
+}
+
+.rail[data-variant="wave"] .item[data-on] .tick {
+  width: calc(var(--w) + 1.2rem);
+  animation: voice 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes voice {
+  from {
+    transform: scaleX(0.55);
+  }
+}
+
+.rail[data-variant="wave"] .minor i {
+  height: 2px;
+  border-radius: 1px;
+}
+
+.rail[data-variant="wave"] .minor i:nth-child(1) {
+  width: calc(var(--w) * 0.45);
+}
+
+.rail[data-variant="wave"] .minor i:nth-child(2) {
+  width: calc(var(--w) * 0.8);
+}
+
+.rail[data-variant="wave"] .minor i:nth-child(3) {
+  width: calc(var(--w) * 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail[data-variant="wave"] .item[data-on] .tick {
+    animation: none;
+  }
+}

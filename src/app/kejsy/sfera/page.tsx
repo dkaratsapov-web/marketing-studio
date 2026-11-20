@@ -14,6 +14,7 @@ import BotsSeeding from "@/components/case/BotsSeeding";
 import CaseFinale from "@/components/case/CaseFinale";
 import { SFERA } from "@/content/sfera";
 import JsonLd from "@/components/JsonLd";
+import CaseRail from "@/components/case/CaseRail";
 import { absoluteUrl, breadcrumbs, ORG_ID, pageMeta } from "@/lib/seo";
 
 const TITLE =
@@ -50,6 +51,7 @@ export default function SferaCasePage() {
     <>
       <Header />
       <main>
+        <CaseRail first="Сфера" variant="floors" />
         <JsonLd data={LD} />
         <CaseHero data={SFERA} />
         <Seam from="dark" to="light" label="Клиент" />
